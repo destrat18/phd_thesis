@@ -1,0 +1,433 @@
+% For better font rendering
+% \usepackage{lmodern}
+% For citations and references (adjust style as needed)
+%HS: Add following for fullcite
+%\usepackage[backend=biber, style=authoryear]{biblatex}
+%\addbibresource{refs.bib} % Replace with your .bib file name
+%\usepackage{natbib}
+% make references clickable 
+% \usepackage{unicode-math}
+% \setmathfont{Latin Modern Math} % or another math font if you prefer
+
+\usepackage[cal=cm,bb=ams,scr=boondoxo]{mathalfa} % One family for various math families
+\usepackage{bibentry}
+\usepackage[hidelinks, pdfpagelabels]{hyperref}
+\usepackage{makecell}
+\usepackage{rotating}
+\usepackage{mathtools}
+% \usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{amscd}
+\usepackage{amsthm}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\usetikzlibrary{calc, matrix, shapes, arrows, positioning, decorations.pathreplacing, backgrounds}
+\usetikzlibrary{shapes.geometric, fit}
+\usepackage[many]{tcolorbox}
+\usepackage{color,colortbl}
+\usepackage{adjustbox}
+\usepackage{framed}
+\tikzstyle{box_nofill}=[rectangle,draw]
+\tikzstyle{box_fill1}=[rectangle,draw,fill=asparagus!50,minimum size=1.4em]
+\tikzstyle{box_fill2}=[rectangle,draw,fill=babyblueeyes!50,minimum size=1.4em]
+% \usepackage{subcaption}
+% \usepackage{pgfplots}
+% \usepackage{thmtools}
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{xspace}
+
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{etoolbox}
+\usepackage{bm}
+\usepackage{cite}
+\usepackage{textcomp}
+\usepackage{tabto}
+\usepackage{thm-restate}
+\usepackage{blkarray}
+\usepackage{refcount}
+
+% \usepackage{lineno}
+% \linenumbers
+
+\usepackage{caption}
+
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+
+\usepackage{svg}
+
+% \usepackage{algpseudocode}
+% \usepackage[ruled,linesnumbered]{algorithm2e}
+
+\definecolor{gray}{rgb}{0.3, 0.3, 0.3}
+
+% \SetCommentSty{\textcolor{gray}{\#}} % Gray color for comments
+% \SetKwComment{tcp}{\color{gray}$\blacktriangleright$ }{}
+
+% % Redefine comment style
+% \SetCommentSty{textit} % Italicize comment
+% \SetCommentSty{color{gray}} % Set color to gray
+% \SetKwComment{Comment}{$\blacktriangleright$\ }{} % Use black triangle
+
+
+
+% \usepackage{setspace}
+\usepackage{listings}
+\usepackage{pgf}
+\usepackage{graphicx}
+% \usepackage{subfig}
+\usepackage{dashbox}
+\usepackage{float}
+\usepackage{syntax}
+% \usepackage{hyperref}
+\usepackage{hhline, booktabs}
+\usepackage{array,multirow}	
+\usepackage{tablefootnote}
+% \usepackage{subcaption}
+% \usepackage{longtable} % For long tables
+\usepackage{cleveref}
+% \usepackage{mathrsfs}
+\usepackage{subcaption} 
+
+
+
+
+\setlength{\fboxsep}{1pt}
+\setlength{\dashlength}{4pt}
+\newcommand{\codetemplate}[1]{\dbox{$#1$}}
+\newcommand{\Hole}[1]{\dbox{$#1$}}
+\newcommand{\errorRejected}{\textit{Failed}}
+\newcommand{\errorRose}{\textit{Failed}}
+\newcommand{\errorUnsat}{\textit{Unsat}}
+\newcommand{\errorTimeout}{\textit{Timed out}}
+\usepackage{paralist}
+\usepackage{lscape}
+
+\newcommand{\hit}[1]{\textcolor{red}{\textbf{Hitarth: }\textit{#1}}}
+
+\usepackage{amsmath}
+% \usepackage{thmtools}
+
+\usepackage{thmtools}
+\usepackage{thm-restate}
+
+
+\theoremstyle{plain}
+% \newtheorem{example}{Example}
+% \newtheorem{definition}{Definition}
+\newtheorem{namedtheorem}{Theorem}
+\newtheorem{namedlemma}{Lemma}
+
+\newtheoremstyle{noparens}% cf. p. 10 of user guide of 'amsthm' package
+    {}{}{\itshape}{}%
+    {\bfseries}{.}{ }%
+    {\thmname{#1}\thmnumber{ #2}\thmnote{ {\mdseries #3}}}
+
+\theoremstyle{noparens}
+\newtheorem{theorem}[namedtheorem]{Theorem}
+\newtheorem{open}{Open problem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem*{fact*}{Fact}
+\newtheorem{excont}{Example}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newtheorem*{remark*}{Remark}
+
+
+\renewcommand{\theexcont}{\theexample}
+% \let\example\relax
+% \declaretheorem[style=remark]{Example}
+
+% \renewcommand{\paragraph}[1]{\smallskip\noindent\textbf{\emph{#1}}} % Redefine paragraph to be bold and italicized
+
+% \renewcommand{\paragraph}[1]{\smallskip\noindent\textbf{\emph{#1}}} % Redefine paragraph to be bold and italicized
+
+\lstset
+{ %Formatting for code in appendix
+    numbers=left,
+    stepnumber=1,
+    showstringspaces=false,
+    tabsize=1,
+    breaklines=true,
+    breakatwhitespace=false,
+}
+
+
+\usepackage{listings}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{gruen}{rgb}{0.0, 0.5, 0.0}
+\definecolor{rot}{rgb}{1.0, 0.13, 0.32}
+
+% \lstdefinestyle{C}{
+% morekeywords={then}
+% }
+
+% \lstset{
+%     keywords={then},
+%     keywordstyle=\color{red}
+% }    
+
+\lstset{
+basicstyle=\ttfamily,columns=flexible,frame=single,framerule=0pt,%
+	%backgroundcolor=\color{gray!20},%
+	xleftmargin=\fboxsep,%
+	xrightmargin=\fboxsep,
+	language=[LaTeX]TeX,%
+	numbers=left,
+	keywordstyle=\color{blue},%
+	texcsstyle=*\color{red}\bfseries,%
+	texcs={end,begin,documentclass,graphicspath},%
+	mathescape=false,escapechar=|,%
+	literate={<B>}{\textcolor{blue}{\string\usepackage}}1
+	{\{ }{\textcolor{blue}{\{}}1
+	{\}}{\textcolor{blue}{\}}}1
+	{[}{\textcolor{blue}{[}}1     
+	{]}{\textcolor{blue}{]}}1
+        {then}{\textcolor{blue}{then }}1
+}
+\lstset{emph={%  
+		@prog, @real, @pre, @post, @invariant, @macro, @var, @recurrence, %
+	},emphstyle={\color{red}\bfseries}%
+}%
+
+% \usepackage{xcolor}
+
+
+\usepackage{enumitem}
+\newlist{mycompactitem}{itemize}{3} % 3 is max-depth
+\setlist[mycompactitem]{leftmargin=0em,label=\textbullet, nosep}
+\newlist{mycompactenum}{enumerate}{3} % 3 is max-depth
+\setlist[mycompactenum]{leftmargin=.6em,label=\textnormal{(\arabic*)},nosep}
+
+\newcommand{\aoverb}[2]{$\substack{\text{#1} \\ \text{#2}}$}
+
+
+% \lstset{basicstyle=\footnotesize\ttfamily,columns=flexible,frame=single,framerule=0pt,%
+% 	%backgroundcolor=\color{gray!20},%
+% 	xleftmargin=\fboxsep,%
+% 	xrightmargin=\fboxsep,
+% 	language=[LaTeX]TeX,%
+% 	numbers=left,
+% 	keywordstyle=\color{blue},%
+% 	texcsstyle=*\color{red}\bfseries,%
+% 	texcs={end,begin,documentclass,graphicspath},%
+% 	mathescape=false,escapechar=|,%
+% 	literate={<B>}{\textcolor{blue}{\string\usepackage}}1
+% 	{\{ }{\textcolor{blue}{\{}}1
+% 	{\}}{\textcolor{blue}{\}}}1
+% 	{[}{\textcolor{blue}{[}}1     
+% 	{]}{\textcolor{blue}{]}}1
+% }
+% \lstset{emph={%  
+% 		@prog, @real, @pre, @post, @invariant, @macro%
+% 	},emphstyle={\color{red}\bfseries}%
+% }%
+
+
+\usepackage{pdfrender}
+\newcommand*{\boldcheckmark}{%
+	\textpdfrender{
+		TextRenderingMode=FillStroke,
+		LineWidth=1pt, % half of the line width is outside the normal glyph
+	}{\checkmark}%
+}
+
+
+
+
+\lstdefinestyle{smtlib-style}
+{
+  language=Lisp,
+  frame=single,
+  % basicstyle=\ttfamily,
+  keywordstyle = [1]{\color{Gray}},
+  keywordstyle = [2]{\color{Blue}},
+  otherkeywords = {;,<<,>>,++},
+  morekeywords = [1]{;},
+  keywords = [2]{define-fun, define-literal, define-let, define, declare-sort, declare-fun, LINE, (, )},
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=5pt,
+  xleftmargin=10pt,
+  framexleftmargin=10pt,
+  escapechar=|!,
+}
+
+\definecolor{keywordcolor}{rgb}{0.7, 0.1, 0.1}   %
+\definecolor{tacticcolor}{rgb}{0.0, 0.1, 0.6}    %
+\definecolor{commentcolor}{rgb}{0.4, 0.4, 0.4}   %
+\definecolor{symbolcolor}{rgb}{0.0, 0.1, 0.6}    %
+\definecolor{sortcolor}{rgb}{0.1, 0.5, 0.1}      %
+\definecolor{attributecolor}{rgb}{0.7, 0.1, 0.1} %
+
+
+\lstdefinelanguage{lean}{
+  morekeywords={def,theorem,example,axiom,constant,inductive,structure,namespace,variable,universe,forall,exists},
+  sensitive=true,
+  morecomment=[l]{--},
+  morestring=[b]{"},
+  escapeinside={<@}{@>},
+}
+
+\lstdefinestyle{leanstyle}{
+  language=lean,
+  % basicstyle=\ttfamily,
+  mathescape=true,
+  commentstyle=\color{green!50!black},
+  keywordstyle=\color{blue},
+  stringstyle=\color{orange},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=5pt,
+  xleftmargin=10pt,
+  framexleftmargin=10pt,
+}
+
+
+
+% Commands for notation
+
+%left-right bracket 
+\newcommand{\lr}[1]{\left( #1 \right)}
+%letf-right curly bracket 
+\newcommand{\lrcb}[1]{\left\{ #1 \right\}}
+
+\newcommand{\bigO}{\mathcal{O}}
+\newcommand{\para}[1]{\smallskip\noindent\textbf{{\textsc{#1.}}}}
+\newcommand{\dom}{\textup{\textbf{dom}}}
+
+% special letters for reals, rationals, integrals 
+\newcommand{\RP}{\mathbb{R^+}}
+\newcommand{\nn}{\mathbf{n}}
+\newcommand{\mm}{\mathbf{m}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\ttt}{\mathcal{T}}
+\newcommand{\ifthen}{\textcolor{blue}{\texttt{if-then}}}
+\newcommand{\rex}{\mathcal{R}\texttt{-expression}}
+\newcommand{\mex}{\mathcal{M}\texttt{-monomial}}
+\newcommand{\QPoly}{Q\text{-Polynomial}}
+\newcommand{\mtrans}{M\text{-Transformation}}
+
+% From: https://tex.stackexchange.com/questions/323297/typing-block-matrices-with-zero-blocks-and-seperators
+% \newcommand{\bigmat}[1]{\mbox{\normalfont\bfseries #1}}
+% \newcommand{\rvline}{\hspace*{-\arraycolsep}\vline\hspace*{-\arraycolsep}}
+
+
+\newcommand{\SAT}[1]{\textit{SAT}(#1)}
+\newcommand{\monoid}{\text{monoid}}
+\newcommand{\degree}{\textit{degree}}
+\renewcommand\thmcontinues[1]{Continued}
+
+\newcommand{\ifthenblock}[2]{\textcolor{blue}{\texttt{if}} \; (\textcolor{red}{#1}) \; \textcolor{blue}{\texttt{then}} \; \textcolor{green!50!black}{#2}}
+
+
+% \newcommand{\todo}[1]{\textcolor{red}{\textbf{TODO #1}}}
+
+\newcommand{\Rstep}{\underset{R}{\rightarrow}}
+\newcommand{\Rstepstar}{\underset{R}{\overset{*}{\rightarrow}}} 
+
+% for cells in the experimental section 
+% \newcommand{\success}{\textcolor{green!50!black}{\textbf{+}}}
+\newcommand{\fail}{\textcolor{red}{\textbf{-}}}
+\newcommand{\missed}{\textcolor{blue}{\textbf{missed}}}
+\newcommand{\success}{\textcolor{gruen}{\textbf{\boldcheckmark}}}
+\newcommand{\unsat}{\textcolor{rot}{\textbf{UNSAT}}}
+\newcommand{\tl}{\textcolor{rot}{\textbf{TL}}}
+\newcommand{\wa}{\textcolor{rot}{\textbf{WA}}}
+\newcommand{\ns}{\textcolor{rot}{\textbf{NS}}}
+\newcommand{\unknown}{\textcolor{rot}{\textbf{NS}}}
+\newcommand{\outofmem}{\textcolor{rot}{\textbf{ML}}}
+\newcommand{\sat}{\textsl{SAT}}
+
+\newcommand{\valuation}{val}
+\newcommand{\val}{\valuation}
+\newcommand{\vars}{\mathbb{V}}
+\newcommand{\tvars}{{\mathbb{T}}}
+\newcommand{\tval}{\valuation_\tvars}
+\newcommand{\locs}{\mathbb{L}}
+\newcommand{\loc}{\ell}
+\newcommand{\transitions}{\mathcal{T}}
+\newcommand{\transition}{\tau}
+\newcommand{\invariant}{\mathbb{I}}
+\newcommand{\cutset}{\mathcal{C}}
+\newcommand{\state}{\sigma}
+
+\newcommand{\linearexample}{\textit{VotingContract }}
+\newcommand{\nonlinearexample}{\textit{NestedLoop }}
+
+
+\newcommand{\qflra}{\text{QF\_LRA}\xspace}
+\newcommand{\qfuf}{\text{QF\_UF}\xspace}
+
+\newcommand{\edrat}{\textit{e}\text{DRAT}\xspace}
+\newcommand{\drat}{\text{DRAT}\xspace}
+\newcommand{\dimacs}{\text{DIMACS}\xspace}
+\newcommand{\prop}[0]{\mathcal{P}\xspace}
+\newcommand{\cvcv}{\textsc{cvc5}\xspace}
+\newcommand{\tick}{\textcolor{green!50!black}{\checkmark}\xspace}
+\newcommand{\noresult}{\textcolor{red!80!blue}{NA}}
+
+\newcommand{\red}[1]{\textcolor{red!80!blue}{#1}}
+\newcommand{\green}[1]{\textcolor{Green}{#1}}
+\newcommand{\Gray}[1]{\textcolor{Gray}{#1}}
+
+\newcommand{\Sat}[0]{\text{SAT}\xspace}
+\newcommand{\leanvalido}[0]{\textsc{LeanValido}\xspace}
+\newcommand{\valido}[0]{\textsc{Valido}\xspace}
+
+\newcommand{\drattrim}{\texttt{DRAT-trim}}
+
+
+
+\newcommand{\algovar}[1]{\textit{#1}}
+\newcommand{\funcname}[1]{\textcolor{Blue}{\text{#1}}}
+\newcommand{\toolname}[1]{\textcolor{Blue}{\text{#1}}}
+\newcommand{\funcnamelean}[1]{\textcolor{Blue}{\texttt{#1}}}
+\newcommand{\intextfunc}[1]{\texttt{#1}}
+
+\newcommand{\lstcomment}[1]{\hfill \textcolor{Gray}{\textit{#1}}}
+
+
+% For introduction of thesis
+
+\tcbuselibrary{skins, breakable}
+
+\newtcolorbox{doublebox}{
+  enhanced,
+  % breakable,
+  colback=lightgray!10,     % light gray background
+  % colframe=black,           % black border
+  % boxrule=0.5pt,            % border thickness
+  % frame style={double},     % double outer lines
+  % sharp corners,
+  % left=6pt, right=6pt, top=6pt, bottom=6pt,
+}
+

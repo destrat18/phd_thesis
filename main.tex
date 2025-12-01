@@ -1,0 +1,247 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                       %
+% ustthesis_test.tex: A template file for usage with ustthesis.cls      %
+%                                                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[a4paper, dvipsnames]{ustthesis}
+\usepackage[square,numbers]{natbib}
+% \usepackage{xeCJK}
+\usepackage[T1]{fontenc}
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+% \usepackage{longtable}
+% \usepackage{url}
+% \usepackage{multirow}
+% \usepackage{graphics}
+% \usepackage{graphicx}
+% \usepackage{amsmath}
+% \usepackage{cases}
+% \usepackage{colortbl}
+% \usepackage{xcolor}
+% \usepackage{times}
+% \usepackage{array}
+%\usepackage{hyperref}
+% \usepackage{pdflscape}
+
+% Source: https://tex.stackexchange.com/questions/45159/table-of-contents-section-titles-ragged-right
+% This is for avoiding hyphenation in TOC
+% \usepackage{etoolbox}
+% \makeatletter
+% \patchcmd{\@dottedtocline}
+%   {\rightskip\@tocrmarg}
+%   {\rightskip\@tocrmarg plus 4em \hyphenpenalty\@M}
+%   {}{}
+% \makeatother
+
+
+\usepackage{fancyhdr}
+\usepackage{setspace}
+% \usepackage{latexsym}
+    % Use the "latexsym" package when encountering the following error:
+    %   ! LaTeX Error: Command \??? not provided in base LaTeX2e.
+% \usepackage{epsf}
+    % Use the "epsf" package for including EPS files.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                       %
+% Preambles. DO NOT ERASE THEM. Change to suite your particular purpose.%
+%                                                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{titlesec}
+
+
+% Surrounds all chapter titles by lines (see screenshot),
+% which includes the titles in the TOC and list of figures and tables
+\titleformat{\chapter}[display]
+{\bfseries\Huge\raggedright}
+{\LARGE\chaptertitlename~\thechapter}
+{2ex}
+{}
+[] 
+
+% % % % The following code removes the lines (that are added above)
+% % % % from the TOC and list of figures and tables
+\titleformat{name=\chapter, numberless}[block]
+{\centering\bfseries\huge}
+{}
+{0pt}
+{}
+
+
+% \usepackage{sectsty}
+% \partfont{\centering}
+% \chapterfont{\raggedright}
+% \allsectionsfont{\raggedright}
+% \partfont{commands}
+
+
+\title{Advances in Static Analysis and Formal Verification of Smart Contracts}  % Title of the thesis.
+\author{Soroush Farokhnia}     % Author of the thesis.
+\degree{\PhD}             % Degree for which the thesis is. Options: \AM \MSc \MPhil \PhD
+\stage{\Thesis}              % Stage of PhD document; use \Thesis for all other degree. Options: \PQE \Proposal \Thesis
+\subject{Computer Science} % Subject of the Degree.
+\department{Department of Computer Science}       % Department to which the thesis is submitted.
+\advisor{Amir Goharshady}     % Supervisor. Additional co-supervisor can be added using \member
+\member{Jiasi Shen, Thesis Supervisor}
+%\acting      % Uncomment for Accting department head
+\depthead{Xiaofang Zhou}     % department head.
+\defencedate{2026}{01}{16}     % \defencedate{year}{month}{day}.
+
+
+
+% Custom page numbering
+% \usepackage{fancyhdr}
+
+
+\input{macros-hkust.tex}
+% \input{macros-ilep-hkust.tex}
+\input{colors-hkust.tex}
+
+%FONT
+\usepackage{lmodern}
+
+% NOTE:
+%   According to the sample shown in the guidelines, page number is
+%   placed below the bottom margin.  However, if the author prefers
+%   the page number to be printed above the bottom margin, please
+%   activate the following command.
+
+%\PNumberAboveBottomMargin
+
+
+
+% Hitarth: I don't want the spacing from ustthesis.cls as I am
+% manually handling it
+\let\textspace\relax
+\let\textspaceundo\relax
+
+%Hitarth: 
+\setcounter{tocdepth}{1}
+\begin{document}
+\maketitle
+% \listoftables
+
+\singlespacing
+\abstract
+\input{abstract.tex}
+\endabstract
+\doublespacing
+\authorise
+
+\onehalfspacing
+\dedication
+% This is an optional section.
+\input{dedication.tex}
+\enddedication
+\newpage
+
+\acknowledgments
+\input{acknowledgments.tex}
+\endacknowledgments
+\newpage
+
+\singlespacing
+% Hitarth: Single spacing for TOC and Abstract
+\tableofcontents
+%Hitarth: Rest of the thesis in one-half spacing
+\onehalfspacing
+
+% \listoffigures
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                       %
+%     8) The Actual Contents                                            %
+%                                                                       %
+% The command \chapters MUST BE USED to ensure that the entire content  %
+% of the Thesis is double-spaced (in version 1.0).                      %
+%                                                                       %
+% However, in version 2.0, \chapters will be automatically added in     %
+% the beginning of the first chapter.                                   %
+%                                                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%\chapters         % Not necessary with ustthesis.cls (v2.0).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                       %
+% Each chapter is defined via the \chapter command. The usual sectional %
+% commands of LaTeX are also available.                                 %
+%                                                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% % % Chapters
+
+% \part*{}
+% \include{chapter-conclusion/base}\label{part:i}
+
+
+% \chapter{Introduction}
+% \label{chp_intro}
+% \input{01_introduction.tex}
+% \newpage
+
+% \chapter{Guidelines on Thesis Preparation}
+% \label{chp_background}
+% \input{02_guidelines.tex}
+% \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                       %
+%      9) BIBLIOGRAPHY                                                  %
+%                                                                       %
+% This example uses bibtex to generate the required Bibliography. Refer %
+% to the % the file ustthesis_test.bib for the entries of the           %
+% Bibliography. Note that only the cited entries are printed.           %
+%                                                                       %
+% If BibTeX is not used to typeset the bibliography, replace the        %
+% following line with the \begin{thebibliography} and \end{bibliography}%
+% commands (the "thebibliography" environment) to process the           %
+% Bibliography.                                                         %
+%                                                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                       %
+% The recommended bibliography style is the IEEE bibliography style.    %
+% "ustbib" defines the IEEE bibliography standard with the added        %
+% ability of sorting the items by name of author.                       %
+%                                                                       %
+% If you are not using BibTeX to process your Bibliography, comment out %
+% the following line.                                                   %
+%                                                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{IEEEtran}
+% References
+% \bibliographystyle{plain} % Adjust citation style as needed
+\bibliography{refs.bib} % Replace with your .bib file name
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                       %
+%     10) APPENDIX (If Any)                                              %
+%                                                                       %
+% \appendix command marks the beginning of the APPENDIX part of the     %
+% Thesis. The usual \chapter command is used for the different chapters %
+% of the Appendix.                                                      %
+%                                                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \appendix
+% \chapter{Tips on HKUST thesis preparation}
+% \label{chp_tips}
+% \input{A_tips.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                       %
+%     11) BIOGRAPHY (optional)                                          %
+%                                                                       %
+% \biography and \endbiography are used to define the optional          %
+% Biography of the author of the Thesis.                                %
+%                                                                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}

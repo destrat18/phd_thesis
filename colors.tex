@@ -1,0 +1,82 @@
+\definecolor{asparagus}{rgb}{0.53, 0.66, 0.42}
+\definecolor{babyblueeyes}{rgb}{0.63, 0.79, 0.95}
+
+
+% \usepackage[TS1,T1]{fontenc}
+\usepackage{fourier, heuristica}
+\usepackage{array, booktabs}
+%\usepackage{graphicx}
+%\usepackage[x11names]{xcolor}
+%\usepackage{colortbl}
+\usepackage{caption}
+\DeclareCaptionFont{blue}{\color{LightSteelBlue3}}
+
+\newcommand{\foo}{\color{LightSteelBlue3}\makebox[0pt]{\textbullet}\hskip-0.5pt\vrule width 1pt\hspace{\labelsep}}
+
+\usetikzlibrary {shapes.callouts}
+\newcommand{\speechthis}[2]{
+        \tikz[remember picture,baseline]{
+        \node[overlay,ellipse callout,fill=blue!50, above=of #1] 
+         {#2};}%
+    }%
+
+
+\newtcolorbox{GreenBox}[2][]{%
+    enhanced,
+    colback = asparagus!5!white,
+    colframe = asparagus!75!black, 
+    arc = 2mm, outer arc = 1mm, 
+    fonttitle = \large\textbf, 
+    title = #2,
+    #1}
+
+\newtcolorbox{BlueBox}[2][]{%
+    enhanced,
+    colback = blue!5!white,
+    colframe = babyblueeyes!75!black, 
+    arc = 2mm, outer arc = 1mm, 
+    fonttitle = \large\textbf, 
+    title = #2,
+    #1}
+
+
+\lstset{emph={%  
+    then, if, else, while, or, invariant, int, assume, assert, and, real%
+    },emphstyle={\color{red}\bfseries}%
+}%
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    % basicstyle=\footnotesize\ttfamily,
+    columns=flexible,frame=single,framerule=0pt,%
+	%backgroundcolor=\color{gray!20},%
+	xleftmargin=\fboxsep,%
+	xrightmargin=\fboxsep,
+	language=[LaTeX]TeX,%
+	% numbers=left,
+	keywordstyle=\color{blue},%
+	texcsstyle=*\color{red}\bfseries,%
+	texcs={end,begin,documentclass,graphicspath},%
+	mathescape=false,escapechar=|,%
+	literate={<B>}{\textcolor{blue}{\string\usepackage}}1
+	{\{ }{\textcolor{blue}{\{}}1
+	{\}}{\textcolor{blue}{\}}}1
+	{[}{\textcolor{blue}{[}}1     
+	{]}{\textcolor{blue}{]}}1
+}
+\lstset{emph={%  
+		@prog, @real, @pre, @post, @invariant, @macro,%
+        then, if, else, while, or, invariant, int, assume, assert, and, real%
+	},emphstyle={\color{red}\bfseries}%
+}%
+
+
+\usepackage{dashbox}
+\setlength{\fboxsep}{1pt}
+\setlength{\dashlength}{4pt}
+\usepackage{paralist}
+\usepackage{lscape}

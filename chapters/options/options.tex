@@ -1,0 +1,22 @@
+\chapter{Options and Futures Imperil Bitcoin's Security}
+\label{chp:options}
+This chapter originally appeard in the following publication:
+
+\begin{itemize}
+     \item S. Farokhnia, A.K. Goharshady, \underline{Options and Futures Imperil Bitcoin’s Security}, IEEE International Conference on Blockchain, Blockchain 2024
+\end{itemize}
+
+\newpage
+
+\para{background} A fundamental security assumption behind Bitcoin and all proof-of-work cryptocurrencies is that a majority of the mining power or hash rate is controlled by honest unknown2023bitcoin. It is well-known that if an adversary controls a majority of the mining power, they can perform a wide variety of malicious actions which are often called 51\% attacks. Specifically, they can fork the blockchain and create a new longest chain that erases as many blocks as they wish from the current consensus chain, thus enabling double-spending. 
+The conventional wisdom in the blockchain community is to assume that (i)~having a majority of the hash power is a prerequisite for a successful attack, (ii)~a majority attack is prohibitively expensive, and (iii)~there is no real-world incentive for such an attack, i.e.~even if a few mining pools have the majority hash rate, any such attack would effectively crash Bitcoin's price which would cause huge losses in revenue for the attacking unknown2023bitcoin. As such, it is widely believed that proof-of-work cryptocurrencies, and specifically Bitcoin, are immune to such attacks.
+	
+	
+
+\para{Our Results} In this chapter, we refute all three of these assumptions: (i)~We show that an adversary with a small percentage of the hash power can still reliably create forks that are six blocks deep, thus fracturing the public's trust in Bitcoin and most probably causing a crash in its price; (ii) We show that a majority attack on Bitcoin would cost only 6.77 billion USD, which is much lower than the community's expectation and only 0.48 percent of Bitcoin's market cap at the time of writing. Additionally, and more worryingly, an attack with only 30\% of the total hash power, which would cost a mere 2.9 billion USD, will succeed with a probability of more than 95\% within 34 days. Thus, such attacks are much more affordable than expected; (iii)~Finally, and most importantly, we show that it is possible for an attacker to actually benefit from the resulting crash in the value of Bitcoin, due to the vast derivatives (options and futures) market that is currently in existence. Put simply, an attacker can first short Bitcoin using widely-available derivative contracts and then intentionally perform an attack to crash the price and profit. Thus, there are real-world incentives for such attacks.
+
+
+\input{chapters/options/intro.tex}
+% \input{chapters/options/markov}
+% \input{chapters/options/cost}
+\input{chapters/options/future}

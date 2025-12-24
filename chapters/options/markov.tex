@@ -1,0 +1,66 @@
+\section{Block-reverting as a Minority Miner} \label{sec:markov}
+
+\paragraph{Setting} In this section, we consider a malicious miner who wishes to intentionally create a fork that is $6$ blocks deep, thus reverting $6$ blocks of the previously-established consensus chain, in order to diminish the public's trust in Bitcoin and crash its price. Note that there is nothing special about the number $6$ other than the fact that it is often used as a rule-of-thumb by the community. Our analysis below can be trivially extended to any number of blocks.
+We suppose that the attacker has a portion $0 < q < 1$ of the total hash power on the network. The problem is trivial if $q \geq 0.5$ since an attacker with a majority of the hash power is guaranteed to succeed in reverting any number of blocks. Thus, we focus on the case where the attacker is a minority miner, i.e.~$q < 0.5.$
+
+\paragraph{The Attack} The attack begins in the following blockchain state, where the green squares denote the current (honest) consensus chain and the dots show where the attacker is trying to add a new block to create a fork. In this state, the attacker's fork is $6$ blocks behind the honest chain. Thus, we call this a $-6$ state. 
+\begin{center}
+\includegraphics[width=.9\linewidth]{start.pdf}
+\end{center}
+As the attack progresses, there is a probability $q$ that the attacker succeeds first in adding a new block, thus taking us to the $-5$ state below, where the attacker's chain is only $5$ blocks behind the consensus chain.  
+\begin{center}
+	\includegraphics[width=.9\linewidth]{minus5.pdf}
+\end{center}
+On the other hand, with probability $1-q,$ the honest unknown2023bitcoin will form a new block. However, in this case, the attacker will simply abandon the previous fork and attempt a new fork that is $6$ blocks deep, so we will remain at a $-6$ state.
+\begin{center}
+	\includegraphics[width=.9\linewidth]{abandon.pdf}
+\end{center}
+
+
+\paragraph{Markov Chain} In general, let us model the attack by creating a Markov chain with states $\{-6, -5, -4, -3, -2, -1, 0, 1\},$ where a state $-i$ denotes that the attacker's fork is $i$ blocks behind the consensus chain. An edge from the state $i$ to the state $j$ is labeled by the probability of going \emph{directly} from $i$ to $j.$ The analysis above shows that the state $-6$ should have a transition to $-5$ with probability $q$ and another transition to itself with probability $1-q.$ Similarly, it is easy to see that $-5$ should have a transition to $-4$ with probability $q,$ corresponding to the case where the attacker finds the next block and reduces the distance between the two chains, and another transition to $-6$ with probability $1-q$ corresponding to the case where the honest unknown2023bitcoin mine a new block. 
+
+\paragraph{Variant A} We consider two variants of the attack. In variant A, the attacker only publishes her chain when it becomes strictly longer than the consensus chain, i.e.~when the Markov chain reaches state $1.$ At this point, the attack is successful. Thus, this variant can be modeled by the Markov chain in Figure~\ref{fig:vA}. From each state, there is a probability $q$ that the attacker finds the new block and thus we move one step right in the Markov chain and a probability $1-q$ that the honest unknown2023bitcoin add a new block and thus we move one step left. The only exceptions are states $-6$ and $1.$ As shown above, at state $-6,$ we will remain at the same state even if the honest unknown2023bitcoin find a new block since the attacker would simply restart the attack at a new forking point. At state $1,$ the attacker succeeds and thus there is no need to continue the analysis. Hence, we assume the Markov chain never leaves state $1$ after reaching it. Note that each step in the Markov chain models a single change in the state of the attack, i.e.~how many blocks the attacker is behind in comparison to the honest chain, and the probability of traversing a path in the Markov chain is simply the product of probabilities assigned to its edges. Our goal is to compute the probability that the Markov chain reaches state $1$ in a fixed number $k$ of steps. This is the same as the probability of the attacker's success in reverting a continuous sequence of $6$ blocks if she performs the attack for $k$ blocks' time, i.e.~in approximately $10\cdot k$ minutes.
+
+\begin{figure*}
+	\includegraphics[width=\linewidth]{variantA.pdf}
+	\caption{The Markov chain modeling variant A of the attack.}
+	\label{fig:vA}
+\end{figure*}
+
+We note that our Markov chain is similar to the one in~\cite{rosenfeld2014analysis} but not identical to it. The difference is that the attacker modeled in~\cite{rosenfeld2014analysis} aims to perform a successful double-spending so she has to revert a particular block. In contrast, our attacker is only interested in reverting $6$ consecutive blocks and does not care which $6$ blocks are reverted.
+
+\paragraph{Variant B} The attacker does not necessarily need to wait until her chain becomes strictly longer (state $1$). She can already publish her chain when it has the same length as the other (honest) chain, which corresponds to state $0$. At this point, since there are two chains of the same length, the honest unknown2023bitcoin are free to choose which chain to extend. Assuming they have no bias, half of the honest mining power will then be used in extending the attackers chain. This variant of the attack can be modeled by the Markov chain in Figure~\ref{fig:vB} and is slightly more likely to succeed. 
+
+\begin{figure*}
+	\includegraphics[width=\linewidth]{variantB.pdf}
+	\caption{The Markov chain modeling variant B of the attack.}
+	\label{fig:vB}
+\end{figure*} 
+
+\paragraph{Value Iteration~\cite{bellman1957markovian}} In both variants of the attack, our goal is to find the probability that starting at vertex $-6$ and taking $k$ steps, we end up in state $1.$ This is the same as the attacker's success probability if she continues the attack for $k$ blocks' time. This probability can be computed exactly using a classical value iteration algorithm, with no need to perform simulations. Let $p[u, k]$ be the probability of being at state $u$ after $k$ steps. We have $p[-6, 0]=1$ and $p[u, 0] = 0$ for all $u \neq -6.$ Let $v_1, v_2, \ldots, v_r$ be the predecessors of $u$ in the Markov chain and the edge from $v_j$ to $u$ have probability $\pi(v_j, u).$ It is easy to see that for all $k \geq 1,$ we have $$p[u, k] = \sum_{j=1}^r p[v_j, k-1] \cdot \pi(v_j, u).$$ Intuitively, if we want to be at state $u$ after $k$ steps, we have to first get to one of its successors $v_j$ in $k-1$ steps and then take the edge from $v_j$ to $u.$ 
+
+\paragraph{Success Probabilities in Bitcoin} We consider attackers with between $10\%$ and $45\%$ of the hash power in $5\%$ increments. In Bitcoin, a block is mined roughly every $10$ minutes. Figure~\ref{fig:attackA} shows the attacker's success probability if she employs variant A and Figure~\ref{fig:attackB} provides the same results for variant B. Specifically, an attacker who has only $30\%$ of the hash power will have a success probability of more than $95\%$ using variant A if she persists on the attack for 33.7 days. The attack duration to obtain a $95\%$ success rate is reduced to 4.1 days for an attacker with $40\%$ of the hash power and 1.9 days for one with $45\%.$ 
+
+The attack duration can be further improved with variant~B. Specifically, with regards to a situation where the attack controls $30\%$, $40\%$, and $45\%$ of the total hash power, the attack duration would be reduced to 18.7, 2.97, and 1.5 days, respectively.
+
+\begin{figure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/variantA50.pdf}
+        \vfill
+        \includegraphics[width=\textwidth]{figures/variantA365.pdf}
+    \end{subfigure}
+    \caption{Attacker's success probability for variant A within 50 days (top) and a year (bottom). Each line corresponds to a different portion $q$ of the hash power controlled by the attacker. The computed probabilities are exact and obtained by value iteration, not simulations.}
+    \label{fig:attackA}
+\end{figure}
+
+\begin{figure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/variantB50.pdf}
+        \vfill
+        \includegraphics[width=\textwidth]{figures/variantB365.pdf}
+    \end{subfigure}
+    \caption{Attacker's success probability for variant B within 50 days (top) and a year (bottom). Each line corresponds to a different portion $q$ of the hash power controlled by the attacker. The computed probabilities are exact and obtained by value iteration, not simulations.}
+    \label{fig:attackB}
+\end{figure}

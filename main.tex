@@ -81,9 +81,9 @@
 \author{Soroush Farokhnia}     % Author of the thesis.
 \degree{\PhD}             % Degree for which the thesis is. Options: \AM \MSc \MPhil \PhD
 \stage{\Thesis}              % Stage of PhD document; use \Thesis for all other degree. Options: \PQE \Proposal \Thesis
-\subject{Computer Science} % Subject of the Degree.
-\department{Department of Computer Science}       % Department to which the thesis is submitted.
-\advisor{Amir Goharshady}     % Supervisor. Additional co-supervisor can be added using \member
+\subject{Computer Science and Engineering} % Subject of the Degree.
+\department{Department of Computer Science and Engineering}       % Department to which the thesis is submitted.
+\advisor{Amir Kafshdar Goharshady}     % Supervisor. Additional co-supervisor can be added using \member
 \member{Jiasi Shen, Thesis Supervisor}
 %\acting      % Uncomment for Accting department head
 \depthead{Xiaofang Zhou}     % department head.
@@ -101,7 +101,17 @@
 
 %FONT
 \usepackage{lmodern}
-
+ 
+% Fix: prevent hyperref warnings about `Token not allowed in a PDF string` for
+% the plain-TeX font switch `\nbi` defined in `ustthesis.cls`.  Make `\nbi`
+% expand to nothing when hyperref converts text to PDF strings (bookmarks,
+% TOC entries, etc.).  Use AtBeginDocument so this runs after packages are
+% loaded.
+\AtBeginDocument{%
+    \pdfstringdefDisableCommands{%
+        \def\nbi{}%
+    }%
+}
 % NOTE:
 %   According to the sample shown in the guidelines, page number is
 %   placed below the bottom margin.  However, if the author prefers
@@ -178,10 +188,10 @@
 % \include{chapter-conclusion/base}\label{part:i}
 
 
-% \chapter{Introduction}
-% \label{chp_intro}
-% \input{01_introduction.tex}
-% \newpage
+\chapter{Introduction}
+\label{chp:intro}
+\input{chapters/introduction.tex}
+\newpage
 
 % \chapter{Guidelines on Thesis Preparation}
 % \label{chp_background}

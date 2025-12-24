@@ -50,6 +50,29 @@
 
 \usepackage{amssymb}
 \usepackage{stmaryrd}
+% The stmaryrd font family doesn't provide a bold series; declare a
+% substitution so LaTeX won't warn when a bold series is requested.
+% If the stmaryrd FD file is available, load it first and then declare
+% the bold->medium substitution for the stmry family. This avoids the
+% "font family unknown" error when the FD file hasn't been read yet.
+% Define the stmry math symbol font and map its bold version to the
+% medium series so that bold math (e.g. via \bm) won't request a
+% non-existent bold font.
+\DeclareSymbolFont{stmry}{U}{stmry}{m}{n}
+\SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
+
+% Suppress Overfull/Underfull \hbox and \vbox warnings (reduces noisy
+% diagnostics in editors like VS Code). Adjust if you want looser
+% control instead of fully silencing these messages.
+% - \hfuzz: ignore overfull boxes smaller than this glue (in pt)
+% - \hbadness: threshold for reporting underfull hbox (0..10000)
+% - \vfuzz/\vbadness analogues for vertical boxes
+% - \overfullrule: width of visible box in output; 0pt hides it
+\hfuzz=100pt
+\hbadness=10000
+\vfuzz=100pt
+\vbadness=10000
+\overfullrule=0pt
 \usepackage{etoolbox}
 \usepackage{bm}
 % \usepackage{cite}
@@ -321,7 +344,7 @@ basicstyle=\ttfamily,columns=flexible,frame=single,framerule=0pt,%
 \newcommand{\lrcb}[1]{\left\{ #1 \right\}}
 
 \newcommand{\bigO}{\mathcal{O}}
-\newcommand{\para}[1]{\smallskip\noindent\textbf{{\textsc{#1.}}}}
+\newcommand{\para}[1]{\smallskip\noindent\textbf{\mdseries\textsc{#1.}}}
 \newcommand{\dom}{\textup{\textbf{dom}}}
 
 % special letters for reals, rationals, integrals 

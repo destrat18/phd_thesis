@@ -1,0 +1,25 @@
+\chapter{Finding the Optimal Block}
+\label{chp:mining}
+This chapter originally appeard in the following publication:
+
+\begin{itemize}
+
+    \item T. Barakbayeva, S. Farokhnia, A.K. Goharshady, S. Novozhilov, \underline{Boosting Gas Revenues of Ethereum Miners}, IEEE/ACM International Conference on Software Engineering, ICSE 2026
+    \item T. Barakbayeva, S. Farokhnia, A.K. Goharshady, M. Gufler, S. Novozhilov, \underline{Pixiu: Optimal Block Production Revenues on Cardano}, IEEE International Conference on Blockchain, Blockchain 2024
+\end{itemize}
+
+
+\newpage
+
+\para{background} In modern cryptocurrencies, a blockchain is a linked-list of blocks, which in turn contain a sequence of transactions. Anyone on the network can create and broadcast a transaction, but the transaction is only considered finalized when it is added to the blockchain. The blockchain is subject to consensus, i.e.~all nodes on the network will eventually agree on its contents. The consensus mechanism varies by cryptocurrency. For example, Bitcoin uses proof of work, whereas Ethereum runs on proof of stake. Irrespective of this, all modern cryptocurrencies heavily rely on miners. These are nodes who actively partake in running the consensus mechanism and extending the blockchain by adding new blocks. To incentivize the miners to add new transactions to the blockchain, each transaction includes a fee, which is paid to the miner who includes it in her block. This setting creates a natural optimization problem from the point-of-view of miners: Given a set of new transactions which are not yet added to the blockchain, how can we form an optimal block that maximizes the fees and thus the miner's revenue?
+% TOOD: Add Cardano paper
+% This problem has previously been studied for the so-called UTXO blockchains. 
+% In the UTXO model, which is adopted by Bitcoin and Cardano, each transaction's fee is a fixed amount and does not depend on the order of transactions.
+Furthermore, we also focus on Ethereum, which is currently world's largest programmable blockchain by market cap. On Ethereum, the fees depend on the execution costs of the transaction. Given that Ethereum supports arbitrary smart contracts in a Turing-complete language, the fee paid by a transaction can depend on the context in which it is executed, which is determined by the set of transactions that precede it on the blockchain. Thus, the problem becomes considerably more challenging. An Ethereum miner who wishes to maximize her revenue has to choose not only a subset of transactions to include in her block, but also their exact order. Moreover, each permutation of the same transactions might change the amount of fee paid by each transaction. 
+This causes a combinatorial explosion.
+		
+	
+
+\para{Our Results} 	In this chapter, we present a randomized framework to increase the transaction-fee revenues of Ethereum miners. 
+Our approach is based on testing, decision trees, integer linear programming and localization techniques to ameliorate the combinatorial explosion. 
+Our experimental results demonstrate significant gains in revenues: Our method outperforms real-world Ethereum miners by an average of 73.45 percent per block, which corresponds to roughly 63 million USD per annum.

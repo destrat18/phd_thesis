@@ -1,4 +1,12 @@
-[] Add dedication
-[] Add Acknowledgment
-[] Add options
-
+- [x] Add dedication
+- [ ] Add Acknowledgment
+- [ ] Complete introduction
+    - [ ] Add Algebra-Geomatics paragraph
+    - [ ] Add awards
+    - [ ] Add Outline
+    - [ ] Add Summary of contributions
+- [ ] Fix chapter titles
+- [x] Add options
+- [ ] Add mining section
+    - [ ] Add Ethereum
+    - [ ] Add Cardano

@@ -1,4 +1,4 @@
-\section{Cost of the Attack} \label{sec:cost}
+\section{Cost of the Attack} \label{sec:options-cost}
 
 In the previous section, we showed that an attacker with a minority of the hash power can still succeed in reverting $6$ blocks with high probability. Of course, an attacker who has a majority of the hash power will succeed in reverting any number of blocks with probability $1.$ In this section, we consider the costs of a block reverting attack. Specifically, we ask the following question: \emph{How much does it cost to obtain a portion $q$ of the hash power?} Our goal is not to obtain an exact number, but a ballpark estimate and upper-bound on the cost. Thus, we make the following simplifying assumptions:
 \begin{itemize}
@@ -7,32 +7,28 @@ In the previous section, we showed that an attacker with a minority of the hash 
 \end{itemize}
 The justification for the first assumption is that it keeps our analysis sound, i.e.~we can only over-approximate the cost by making this assumption. As for the second assumption, we note that electricity costs are often negligible in comparison to hardware costs and that our main argument, i.e.~the vulnerability of Bitcoin to majority attacks and block-reverting attacks, remains intact even if the estimates we obtain here are doubled. Indeed, as we will soon see, the trade volume of Bitcoin derivatives is more than three orders of magnitude larger than the numbers obtained here.
 
-At the time of writing, the total hash rate of the Bitcoin network is 566.12 EH/s\cite{\url{https:TotalHashRate}. 
-Furthermore, \cite{\url{https:BitcoinAsicPrice} categorized Bitcoin mining ASICs into three efficiency tiers based on their energy consumption: Under 25 J/TH, 25-38 J/TH, and Above 38 J/TH. Figure~\ref{fig:asicPrice} shows the historical prices in USD per TH/s for each tier. To ensure the soundness of our analysis, we have estimated attack costs using the most expensive efficiency tier, i.e. Under 25 J/TH. This tier incorporates the most advanced generation of unknownnoyearasic hardware that consumes the least amount of electricity. Table~\ref{table:cost} summarizes the costs of obtaining various portions $q$ of the total hash power at the time of writing. Note that if the current hash power is $x,$ it is not enough for the attacker to purchase a hash power of $q \cdot x,$ since her hash power will also be added to the network's total. Instead, she should buy $y$ units of hash power where $\frac{y}{y+x}=q$ or equivalently $y = -\frac{q \cdot x}{q-1}.$ 
-Moreover, Figure~\ref{fig:costHistorical} shows the historical price of obtaining various portions $q$ of the total hash power based on the data from~\cite{\url{https:BitcoinAsicPrice, \url{https:TotalHashRate, unknownnoyearcryptocurrency}. As Table~\ref{table:cost} and Figure~\ref{fig:costHistorical} show, it is easy to obtain a majority of the hash power, or a sizable minority that allows an attack as per the previous section, using an investment that is a tiny percentage of the Bitcoin's current market cap and, as we will see, three orders of magnitude smaller than the annual trade volume of Bitcoin derivatives.
+At the time of writing, the total hash rate of the Bitcoin network is 566.12 EH/s\cite{BlockchainComTotalHashRate}. 
+Furthermore, \cite{DataHashrateindexComBitcoinAsicPrice} categorized Bitcoin mining ASICs into three efficiency tiers based on their energy consumption: Under 25 J/TH, 25-38 J/TH, and Above 38 J/TH. Figure~\ref{fig:options-asicPrice} shows the historical prices in USD per TH/s for each tier. To ensure the soundness of our analysis, we have estimated attack costs using the most expensive efficiency tier, i.e. Under 25 J/TH. This tier incorporates the most advanced generation of mining hardware that consumes the least amount of electricity. Table~\ref{table:options-cost} summarizes the costs of obtaining various portions $q$ of the total hash power at the time of writing. Note that if the current hash power is $x,$ it is not enough for the attacker to purchase a hash power of $q \cdot x,$ since her hash power will also be added to the network's total. Instead, she should buy $y$ units of hash power where $\frac{y}{y+x}=q$ or equivalently $y = -\frac{q \cdot x}{q-1}.$ 
+Moreover, Figure~\ref{fig:opions-costHistorical} shows the historical price of obtaining various portions $q$ of the total hash power based on the data from~\cite{BlockchainComTotalHashRate,DataHashrateindexComBitcoinAsicPrice,coinmarketcap2024cryptocurrency}. As Table~\ref{table:options-cost} and Figure~\ref{fig:opions-costHistorical} show, it is easy to obtain a majority of the hash power, or a sizable minority that allows an attack as per the previous section, using an investment that is a tiny percentage of the Bitcoin's current market cap and, as we will see, three orders of magnitude smaller than the annual trade volume of Bitcoin derivatives.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.48\textwidth]{figures/asicPriceJTH.pdf}
+    \includegraphics[width=\textwidth]{chapters/options/figures/asicPriceJTH.pdf}
     \caption{Historical prices for one TH/s of different Bitcoin mining ASICs grouped by four efficiency tiers.}
-    \label{fig:asicPrice}
+    \label{fig:options-asicPrice}
 \end{figure}
 
-% \tododone{add table. Note that when you buy $x$ units of hash, the total hash power of the network also increases by $x$. Take this into account. You should have $q = x / (x+ \text{current hash power of Bitcoin}).$ Add the table for $q = 0.1, 0.15, 0.2, \ldots, 0.5.$ The table should have the following columns: $q$, required TH/s, cost, (cost/current Bitcoin market cap)}
 
 \begin{table}
 	\centering
-	\input{tables/qcost.tex}
+	\input{chapters/options/tables/qcost.tex}
 	\caption{The required hash power and hardware cost for an attacker who wishes to control a portion $q$ of the total hash power.}
-	\label{table:cost}
+	\label{table:options-cost}
 \end{table}
-
-
-
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.48\textwidth]{figures/costHistorical.pdf}
+    \includegraphics[width=\textwidth]{chapters/options/figures/costHistorical.pdf}
     \caption{The historical cost of obtaining a portion $q$ of the hash power for various values of $q$.}
-    \label{fig:costHistorical}
+    \label{fig:opions-costHistorical}
 \end{figure}

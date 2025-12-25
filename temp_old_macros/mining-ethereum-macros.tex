@@ -1,0 +1,466 @@
+% use tikz 
+\usepackage{tikz,forest}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{calc}
+
+\usepackage{xcolor}
+\usepackage{xparse}
+\usepackage{pgfplots}
+\usepackage{multirow}
+\usepackage{xparse}
+\usepackage{bbding} 
+\usepackage{todonotes}
+\usepackage{xspace}
+\usepackage{cleveref}
+\usepackage{tcolorbox}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{makecell}
+\usepackage{mathtools}
+
+\renewcommand{\paragraph}[1]{\smallskip\noindent\textbf{\textsc{#1.}}}
+
+\newcommand{\ilp}[1]{\llbracket #1 \rrbracket}
+
+\usetikzlibrary{arrows.meta}
+
+% \forestset{
+% default preamble={
+% before typesetting nodes={
+%   !r.replace by={[, coordinate, append]}
+% },  
+% where n children=0{
+%   tier=word,
+% }{  
+%   %diamond, aspect=2,
+% },  
+% where level=0{
+%   s sep'-=0.3cm,
+% }{
+%   if n=1{
+%     edge label={node[pos=.3, above] {Y}},
+%   }{  
+%     edge label={node[pos=.3, above] {N}},
+%   }   
+% },  
+% for tree={
+%   edge+={thick, -Latex},
+%   s sep'+=0.6cm,
+%   draw,
+%   thick,
+%   edge path'={ (!u) -| (.parent)},
+%   align=center,
+% }   
+% }
+% }
+
+
+\forestset{
+default preamble={
+where n children=0{
+  tier=word,
+}{  
+  diamond, aspect=3.5,
+},
+where level=0{}{if n=1{
+edge label={node[pos=.5, above=0.1, left] {y}},
+}{  
+edge label={node[pos=.5, above=0.1, right] {n}},
+}
+},
+% for tree={
+%   % edge+={thick, -Latex},
+%   s sep'+=0.3cm,
+%   draw,
+%   thin,
+%   edge path'={ (!u) - (.parent)},
+%   % align=center,  
+% }
+}
+}
+
+% \forestset{
+% default preamble={
+% before typesetting nodes={
+%   !r.replace by={[, coordinate, append]}
+% },  
+% where n children=0{
+%   tier=word,
+% }{  
+%   %diamond, aspect=2,
+% },  
+% where level=0{
+%   s sep'-=0.3cm,
+% }{
+%   if n=1{
+%     edge label={node[pos=.3, above] {Y}},
+%   }{  
+%     edge label={node[pos=.3, above] {N}},
+%   }   
+% },  
+% for tree={
+%   edge+={thick, -Latex},
+%   s sep'+=0.6cm,
+%   draw,
+%   thick,
+%   edge path'={ (!u) -| (.parent)},
+%   align=center,
+% }   
+% }
+% }
+
+
+\lstdefinelanguage{Solidity}{
+	keywords=[1]{anonymous, assembly, assert, balance, break, call, callcode, case, catch, class, constant, continue, constructor, contract, debugger, default, delegatecall, delete, do, else, emit, event, experimental, export, external, false, finally, for, function, gas, if, implements, import, in, indexed, instanceof, interface, internal, is, length, library, log0, log1, log2, log3, log4, memory, modifier, new, payable, pragma, private, protected, public, pure, push, require, return, returns, revert, selfdestruct, send, solidity, storage, struct, suicide, super, switch, then, this, throw, transfer, true, try, typeof, using, value, view, while, with, addmod, ecrecover, keccak256, mulmod, ripemd160, sha256, sha3}, % generic keywords including crypto operations
+	keywordstyle=[1]\color{blue}\bfseries,
+	keywords=[2]{address, bool, byte, bytes, bytes1, bytes2, bytes3, bytes4, bytes5, bytes6, bytes7, bytes8, bytes9, bytes10, bytes11, bytes12, bytes13, bytes14, bytes15, bytes16, bytes17, bytes18, bytes19, bytes20, bytes21, bytes22, bytes23, bytes24, bytes25, bytes26, bytes27, bytes28, bytes29, bytes30, bytes31, bytes32, enum, int, int8, int16, int24, int32, int40, int48, int56, int64, int72, int80, int88, int96, int104, int112, int120, int128, int136, int144, int152, int160, int168, int176, int184, int192, int200, int208, int216, int224, int232, int240, int248, int256, mapping, string, uint, uint8, uint16, uint24, uint32, uint40, uint48, uint56, uint64, uint72, uint80, uint88, uint96, uint104, uint112, uint120, uint128, uint136, uint144, uint152, uint160, uint168, uint176, uint184, uint192, uint200, uint208, uint216, uint224, uint232, uint240, uint248, uint256, var, void, ether, finney, szabo, wei, days, hours, minutes, seconds, weeks, years},	% types; money and time units
+	keywordstyle=[2]\color{teal}\bfseries,
+	keywords=[3]{block, blockhash, coinbase, difficulty, gaslimit, number, timestamp, msg, data, gas, sender, sig, value, now, tx, gasprice, origin},	% environment variables
+	keywordstyle=[3]\color{violet}\bfseries,
+	identifierstyle=\color{black},
+	sensitive=true,
+	comment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	commentstyle=\color{gray}\ttfamily,
+	stringstyle=\color{red}\ttfamily,
+	morestring=[b]',
+	morestring=[b]"
+}
+
+% algo2e 
+\usepackage[ruled,vlined]{algorithm2e}
+% \usepackage{algorithm}
+% \usepackage{algorithmic}
+
+\newcommand{\before}{\prec}
+\newcommand{\has}{\diamondsuit}
+\newcommand{\atleast}{\texttt{atleast}}
+
+\theoremstyle{plain}%
+% \newtheorem{theorem}{Theorem}%  meant for continuous numbers
+% \newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
+% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
+% \newtheorem{proposition}[theorem]{Proposition}
+
+% \newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
+% \newtheorem{lemma}[theorem]{Lemma}
+
+\theoremstyle{thmstyletwo}%
+% \newtheorem{example}{Example}%
+% \newtheorem{remark}{Remark}%
+
+\newtheorem{notation}[theorem]{Notation}%
+
+% \theoremstyle{thmstylethree}%
+% \newtheorem{definition}{Definition}%
+
+
+% \newcommand{\fixme}[1]{{\textbf{\color{red}(fixme: #1)}}}
+
+\newcommand{\tx}{\ensuremath{\textup{tx}}\xspace}
+\newcommand{\nonce}{\ensuremath{\textup{nonce}}\xspace}
+\newcommand{\addr}{\ensuremath{\textup{addr}}\xspace}
+\newcommand{\hash}{\ensuremath{\textup{hash}}\xspace}
+\newcommand{\txaddr}[1]{\ensuremath\tx(\text{#1})\xspace}
+\newcommand{\nbhd}{\ensuremath{\textup{nbhd}}\xspace}
+\newcommand{\compat}{\leftrightarrows}
+\newcommand{\incompat}{\not\leftrightarrows}
+\newcommand{\incompatSet}{\ensuremath{\textup{Incompat}}\xspace}
+\newcommand{\feat}{\ensuremath{\textup{feat}}\xspace}
+\newcommand{\resp}{\ensuremath{\textup{resp}}\xspace}
+\newcommand{\subseq}{\preceq}
+\newcommand{\Var}{\ensuremath{\textup{Var}}\xspace}
+
+
+% % this allows to overload the \patch command to use \patch, \patch[\tx] and \patch[\tx][1]
+
+
+% Command for half circle
+\newcommand*\halfcirc[1][1ex]{%
+  \begin{tikzpicture}
+  \draw[fill] (0,0)-- (90:#1) arc (90:270:#1) -- cycle ;
+  \draw (0,0) circle (#1);
+  \end{tikzpicture}}
+
+% Command for full circle
+\newcommand*\fullcirc[1][1ex]{%
+  \begin{tikzpicture}
+  \draw[fill] (0,0) circle (#1);
+  \end{tikzpicture}}
+
+% Command for empty circle
+\newcommand*\emptycirc[1][1ex]{%
+  \begin{tikzpicture}
+  \draw (0,0) circle (#1);
+  \end{tikzpicture}}
+
+% Just patch 
+\newcommand{\mixedType}{\halfcirc[0.06]}
+\NewDocumentCommand{\patch}{o o}{%
+  \ensuremath{p^{\mixedType}%
+  \IfValueT{#1}{_{#1\IfValueT{#2}{, #2}}}\xspace}}
+
+% Strict patch with full circle
+\newcommand{\strictType}{\fullcirc[0.06]}
+\NewDocumentCommand{\patchS}{o o}{%
+  \ensuremath{p^{\strictType}%
+  \IfValueT{#1}{_{#1\IfValueT{#2}{, #2}}}\xspace}}
+
+% Relaxed patch with empty circle
+\newcommand{\relaxedType}{\emptycirc[0.06]}
+\NewDocumentCommand{\patchR}{o o}{%
+  \ensuremath{p^{\relaxedType}%
+  \IfValueT{#1}{_{#1\IfValueT{#2}{, #2}}}\xspace}}
+
+% Full set of just patches 
+\NewDocumentCommand{\patchFull}{o o}{%
+  \ensuremath{\textbf{P}^{\,\mixedType}%
+  \IfValueT{#1}{_{#1\IfValueT{#2}{, #2}}}\xspace}}
+
+% Strict patch with full circle
+\NewDocumentCommand{\patchSFull}{o o}{%
+  \ensuremath{\textbf{P}^{\,\strictType}%
+  \IfValueT{#1}{_{#1\IfValueT{#2}{, #2}}}\xspace}}
+
+% Relaxed patch with empty circle
+\NewDocumentCommand{\patchRFull}{o o}{%
+  \ensuremath{\textbf{P}^{\,\relaxedType}%
+  \IfValueT{#1}{_{#1\IfValueT{#2}{, #2}}}\xspace}}
+
+
+
+\newcommand\restr[2]{{% we make the whole thing an ordinary symbol
+\left.\kern-\nulldelimiterspace % automatically resize the bar with \right
+#1 % the function
+\vphantom{\big|} % pretend it's a little taller at normal size
+\right|_{#2} % this is the delimiter
+}}
+
+\newcommand{\gr}{\ensuremath{G}\xspace}
+
+\newcommand{\patchnbhd}{\ensuremath{p}\xspace}
+\newcommand{\tail}{\ensuremath{\textup{tail}}\xspace}
+\newcommand{\head}{\ensuremath{\textup{head}}\xspace}
+\newcommand{\core}{\ensuremath{\textup{core}}\xspace}
+
+% for application of \forall and \exists
+\newcommand{\dotapp}{\mathbf{\,.\,}}
+
+
+
+\newcommand{\EE}[1]{\mathbb{E}\left[#1\right]}
+\newcommand{\EEs}[2]{\mathbb{E}_{#1}\left[#2\right]}
+\newcommand{\PP}[1]{\mathbb{P}\left[#1\right]}
+\newcommand{\PPs}[2]{\mathbb{P}_{#1}\left[#2\right]}
+\newcommand{\bigO}{\mathcal{O}}
+\newcommand{\uniform}{\mathcal{U}}
+
+
+\newcommand{\pool}{\ensuremath{{\textsf{Pool}}}\xspace}
+\newcommand{\block}{\ensuremath{\textbf{\textup{block}}}\xspace}
+\newcommand{\blocks}{\ensuremath{\textbf{\textup{Blocks}}}\xspace}
+\newcommand{\blockopt}{\ensuremath{\textbf{\textup{block}}_{\textup{opt}}}\xspace}
+\newcommand{\fee}{\ensuremath{\textup{fee}}\xspace}
+\newcommand{\tip}{\ensuremath{\textup{tip}}\xspace}
+\newcommand{\gas}{\ensuremath{\textsf{gas}}\xspace}
+\newcommand{\feePerGas}{\ensuremath{\textup{fee/gas}}\xspace}
+\newcommand{\tipPerGas}{\ensuremath{\tip/\gas}\xspace}
+
+
+\newcommand{\dataset}{\ensuremath{\textup{Dataset}}\xspace}
+
+\newcommand{\dpt}{\textup{dp}}
+\newcommand{\pma}{\textup{PerfMatch}}
+\newcommand{\RP}{\mathcal{RP}}
+\newcommand{\pw}{\textup{pw}}
+\newcommand{\twi}{\textup{tw}}
+\newcommand{\poly}{\textup{poly}}
+\newcommand{\ma}{\textup{Match}}
+\newcommand{\RM}{\mathcal{RM}}
+\newcommand{\RI}{\mathcal{RI}}
+\newcommand{\ind}{\textup{Ind}}
+\newcommand{\SSt}{\textup{SStrees}}
+\newcommand{\JoinN}{\textup{JoinNodes}}
+\newcommand{\Schild}{\textup{SmallestChild}}
+
+% \renewcommand{\printatom}[1]{%
+% \fontsize{8pt}{10pt}\selectfont{\ensuremath{\mathsf{#1}}}}
+% % reduce bond dimensions to match smaller fonts
+% \setchemfig{
+%   cram rectangle=false,
+%   cram width=2.5pt,
+%   cram dash width=0.4pt,
+%   cram dash sep=1pt,
+% atom sep=16pt,
+%   bond offset=1pt,
+%   double bond sep=2pt
+% }
+
+
+
+\newcommand{\ethsym}{%
+  \!\raisebox{-0.7ex}{%
+    \includegraphics[height=1.1em, trim={97 0 97 0}, clip]{figures/ethereum.pdf}%
+  }%
+}
+
+
+
+% tikz block things 
+% Define box dimensions as lengths
+\newlength{\txBoxWidth}
+\newlength{\txRowHeight}
+\newlength{\txTotalHeight}
+\setlength{\txBoxWidth}{0.55cm}
+\setlength{\txRowHeight}{0.4cm}
+\setlength{\txTotalHeight}{1.2cm}
+
+\newcommand{\txBox}[7][.]{%
+    % Parameters:
+    % [#1]: border color (optional, defaults to black with '.')
+    % #2: gas
+    % #3: fee
+    % #4: hash
+    % #5: color
+    % #6: column number (0-based)
+    % #7: row number (0-based)
+    \begin{scope}[shift={({\txBoxWidth*1.1*#6},{-\txTotalHeight*1.2*#7})}]
+        % Main box with background color
+        \fill[#5!15] (0,0) rectangle (\txBoxWidth,-\txTotalHeight);
+        \draw[color=\ifx.#1black\else#1\fi] (0,0) rectangle (\txBoxWidth,-\txTotalHeight);
+        
+        % Horizontal lines for rows
+        \draw[color=\ifx.#1black\else#1\fi] (0,-\txRowHeight) -- (\txBoxWidth,-\txRowHeight);
+        \draw[color=\ifx.#1black\else#1\fi] (0,-2*\txRowHeight) -- (\txBoxWidth,-2*\txRowHeight);
+        
+        % Text content - left aligned values
+        \node[anchor=west] at (-0.1,-0.5*\txRowHeight) {\scriptsize #2};
+        \node[anchor=west] at (-0.1,-1.5*\txRowHeight) {\scriptsize #3};
+        \node[anchor=west] at (-0.1,-2.5*\txRowHeight) {\scriptsize #4};
+    \end{scope}
+}
+\newcommand{\txOutBoxOverlay}[4]{%
+    % Parameters:
+    % #1: color for the outer box
+    % #2: dilation distance
+    % #3: column number (0-based)
+    % #4: row number (0-based)
+    \begin{scope}[shift={({\txBoxWidth*1.1*#3-#2},{-\txTotalHeight*1.2*#4+#2})}]
+        % Draw the overlay box with explicit width and height calculations
+        \draw[color=#1, line width=1.5pt] 
+            (0,0) rectangle (\txBoxWidth+2*#2,-\txTotalHeight-2*#2);
+    \end{scope}
+}
+
+
+% Helper functions to define named coordinates for each box
+\newcommand{\txDefineCorners}[2]{
+    % #1: dx (column number), #2: dy (row number)
+    % Upper row points (u)
+    \coordinate (tx-#1-#2-ul) at (\txBoxWidth*1.1*#1, -\txTotalHeight*1.2*#2);
+    \coordinate (tx-#1-#2-um) at (\txBoxWidth*1.1*#1 + 0.5*\txBoxWidth, -\txTotalHeight*1.2*#2);
+    \coordinate (tx-#1-#2-ur) at (\txBoxWidth*1.1*#1 + \txBoxWidth, -\txTotalHeight*1.2*#2);
+    
+    % Middle row points (m)
+    \coordinate (tx-#1-#2-ml) at (\txBoxWidth*1.1*#1, -\txTotalHeight*1.2*#2 - 0.5*\txTotalHeight);
+    \coordinate (tx-#1-#2-mm) at (\txBoxWidth*1.1*#1 + 0.5*\txBoxWidth, -\txTotalHeight*1.2*#2 - 0.5*\txTotalHeight);
+    \coordinate (tx-#1-#2-mr) at (\txBoxWidth*1.1*#1 + \txBoxWidth, -\txTotalHeight*1.2*#2 - 0.5*\txTotalHeight);
+    
+    % Lower row points (l)
+    \coordinate (tx-#1-#2-ll) at (\txBoxWidth*1.1*#1, -\txTotalHeight*1.2*#2 - \txTotalHeight);
+    \coordinate (tx-#1-#2-lm) at (\txBoxWidth*1.1*#1 + 0.5*\txBoxWidth, -\txTotalHeight*1.2*#2 - \txTotalHeight);
+    \coordinate (tx-#1-#2-lr) at (\txBoxWidth*1.1*#1 + \txBoxWidth, -\txTotalHeight*1.2*#2 - \txTotalHeight);
+}
+
+
+
+% running example variavles 
+
+\definecolor{cbUltra}{RGB}{81,81,255}      % Ultramarine Blue
+\definecolor{cbMagenta}{RGB}{255,81,255}   % Magenta
+\definecolor{cbCyan}{RGB}{81,255,255}      % Cyan
+\definecolor{cbGreen}{RGB}{81,255,81}      % Green
+\definecolor{cbYellow}{RGB}{255,255,81}    % Yellow
+\definecolor{cbRed}{RGB}{255,81,81}        % Red
+% disabled gray color
+\definecolor{cbGrayFill}{RGB}{200,200,200}     % Gray
+\definecolor{cbGrayOutline}{RGB}{230,230,230}     % Gray
+% for disabled text color
+\definecolor{cbGrayText}{RGB}{100,100,100}     % Gray
+
+
+% Define transaction variables
+\newcommand{\txheader}[2]{\txBox[white]{}{Gas $\gamma_i$}{Tip $\tau_i$}{white}{#1}{#2}}
+\newcommand{\txa}[4]{\txBox{$\tx_1$}{#1}{#2}{cbUltra}{#3}{#4}}
+\newcommand{\txb}[4]{\txBox{$\tx_2$}{#1}{#2}{cbMagenta}{#3}{#4}}
+\newcommand{\txc}[4]{\txBox{$\tx_3$}{#1}{#2}{cbCyan}{#3}{#4}}
+\newcommand{\txd}[4]{\txBox{$\tx_4$}{#1}{#2}{cbGreen}{#3}{#4}}
+\newcommand{\txe}[4]{\txBox{$\tx_5$}{#1}{#2}{cbYellow}{#3}{#4}}
+\newcommand{\txf}[4]{\txBox{$\tx_6$}{#1}{#2}{cbRed}{#3}{#4}}
+\newcommand{\txres}[5]{\txBox[white]{$\pi_{#1}$}{$\Sigma\!\!:\,$#2}{$\Sigma\!\!:\,$#3}{white}{#4}{#5}}
+
+% define important neighbors
+\newcommand{\txaN}[4]{\txBox{$\tx_1$}{}{}{cbUltra}{#3}{#4}}
+\newcommand{\txbN}[4]{\txBox{$\tx_2$}{}{}{cbMagenta}{#3}{#4}}
+\newcommand{\txcN}[4]{\txBox{$\tx_3$}{}{}{cbCyan}{#3}{#4}}
+\newcommand{\txdN}[4]{\txBox{$\tx_4$}{}{}{cbGreen}{#3}{#4}}
+\newcommand{\txeN}[4]{\txBox{$\tx_5$}{}{}{cbYellow}{#3}{#4}}
+\newcommand{\txfN}[4]{\txBox{$\tx_6$}{}{}{cbRed}{#3}{#4}}
+
+% define off 
+\newcommand{\txaOff}[4]{\txBox[cbGrayOutline]{\textcolor{gray}{$\tx_1$}}{}{}{cbGrayFill}{#3}{#4}}
+\newcommand{\txbOff}[4]{\txBox[cbGrayOutline]{\textcolor{gray}{$\tx_2$}}{}{}{cbGrayFill}{#3}{#4}}
+\newcommand{\txcOff}[4]{\txBox[cbGrayOutline]{\textcolor{gray}{$\tx_3$}}{}{}{cbGrayFill}{#3}{#4}}
+\newcommand{\txdOff}[4]{\txBox[cbGrayOutline]{\textcolor{gray}{$\tx_4$}}{}{}{cbGrayFill}{#3}{#4}}
+\newcommand{\txeOff}[4]{\txBox[cbGrayOutline]{\textcolor{gray}{$\tx_5$}}{}{}{cbGrayFill}{#3}{#4}}
+\newcommand{\txfOff}[4]{\txBox[cbGrayOutline]{\textcolor{gray}{$\tx_6$}}{}{}{cbGrayFill}{#3}{#4}}
+
+
+
+% define main transactions
+\newcommand{\onDilatation}{0.4}
+\newcommand{\txaOn}[4]{\txOutBoxOverlay{cbUltra}{\onDilatation}{#3}{#4}\txa{#1}{#2}{#3}{#4}}
+\newcommand{\txbOn}[4]{\txOutBoxOverlay{cbMagenta}{\onDilatation}{#3}{#4}\txb{#1}{#2}{#3}{#4}}
+\newcommand{\txcOn}[4]{\txOutBoxOverlay{cbCyan}{\onDilatation}{#3}{#4}\txc{#1}{#2}{#3}{#4}}
+\newcommand{\txdOn}[4]{\txOutBoxOverlay{cbGreen}{\onDilatation}{#3}{#4}\txd{#1}{#2}{#3}{#4}}
+\newcommand{\txeOn}[4]{\txOutBoxOverlay{cbYellow}{\onDilatation}{#3}{#4}\txe{#1}{#2}{#3}{#4}}
+\newcommand{\txfOn}[4]{\txOutBoxOverlay{cbRed}{\onDilatation}{#3}{#4}\txf{#1}{#2}{#3}{#4}}
+
+\newcommand{\expgas}{\ensuremath{\textsf{expected-gas}}\xspace}
+
+
+
+\newif\ifisFullPaper
+\isFullPaperfalse
+% \isFullPapertrue
+
+% Macro to choose between full and short versions
+\newcommand{\fullOrShort}[2]{\ifisFullPaper#1\else#2\fi}
+
+
+
+% Revision highlighting macros
+% \newcommand{\added}[1]{{\textcolor{blue!80!black}{#1}}}
+% \newcommand{\removed}[1]{\textcolor{red!80!black}{\sout{#1}}}
+
+
+\newif\ifaddedhighlight
+\addedhighlighttrue 
+\ifaddedhighlight
+  \newcommand{\added}[1]{{\leavevmode\color{green!40!black}#1}}
+\else
+  \newcommand{\added}[1]{#1}
+\fi
+
+\newif\ifremovedhighlight
+\removedhighlighttrue
+\ifremovedhighlight
+  % \newcommand{\removed}[1]{{\leavevmode\color{red}{#1}}}
+  \newcommand{\removed}[1]{}
+  \else
+  \newcommand{\removed}[1]{#1}
+\fi
+
+
+\newcommand{\mayberemoved}[1]{}

@@ -1,0 +1,35 @@
+\section{Problem of Ethereum Block Production}\label{sec/mining-ethereum-problem} 
+
+Our goal in this section is to develop an optimization approach to increase the transaction-fee (gas) revenues of Ethereum miners. Although we focus on Ethereum, our techniques are general in nature and can be applied to other programmable blockchains as well. There are two reasons for the emphasis on Ethereum: First, Ethereum is currently the world's second largest cryptocurrency by market cap, behind only Bitcoin. At the time of writing, it has a total value of around 250 billion USD~\cite{coinmarketcap2024cryptocurrency}. 
+It is also by far the largest programmable cryptocurrency, with support for arbitrary smart contracts written in a Turing-complete language~\cite{wood2014ethereum}. Second, Ethereum has an account-based execution model which is significantly different than the UTXO (Unspent Transaction Output) model of Bitcoin. Thus, there is a research gap as the techniques developed for Bitcoin and other UTXO miners, such as Section~\ref{sec:mining-cardano-problem}, are not applicable in our context. 
+
+
+\subsection{Problem Definition} \label{sec:def}
+
+\paragraph{Our Focus} In this section, we address the problem of maximizing the total transaction fee revenue of an honest miner, i.e.~a miner who does not perform attacks or seek revenue from non-transaction-fee sources such as smart contract interactions. Such a miner listens for newly-broadcast transactions not yet added to the blockchain and selects an ordered subset to form her block. The goal is to maximize the sum of tips paid by the transactions.
+
+\paragraph{Formal Definition of the Problem} Suppose that the miner intends to add the $k$-th block to the blockchain. Let $\pool$ be the set of new valid transactions known to the miner which are not yet added on thse blockchain. A block is a sequence $B = \langle \tx_1, \tx_2, \ldots, \tx_n \rangle$ of transactions from $\pool$ such that for every $i < j,$ if $\tx_i$ and $\tx_j$ belong to the same user $a$, then $\tx_i$'s nonce is smaller than $\tx_j$'s nonce. Moreover, if there is a transaction from $a$ with nonce $\nu \geq 1,$ then there should be a previous transaction from the same user $a$ with nonce $\nu-1$ either in the same block or in previous blocks that are already added to the blockchain. This ensures that every transaction is added at most once and that the transactions by the same user cannot be reordered. Denote the world state at the end of the previous block ($k-1$) by $s_0 \in S.$ For all $1 \leq i \leq n,$ define 
+$$s_i = \delta_{\tx_i}(s_{i-1}) \quad\quad\quad \gamma_i = \gas_{\tx_i}(s_{i-1}) \quad\quad\quad \tau_i = \tip_{\tx_i}(s_{i-1}).$$
+Intuitively, assuming that the miner appends $B$ to the blockchain, $s_i$ is the world state after $\tx_i$ has finished running, $\gamma_i$ is the gas usage of $\tx_i$ and $\tau_i$ is the total tip paid by $\tx_i$ to the miner 
+(formal definitions and details can be found in Section~\ref{sec:prelim}).
+The miner aims to maximize the tips, while not exceeding the block gas limit $L$. Thus, the optimization problem is to find a valid block $B$ so as to:
+$$
+\begin{matrix}
+	\textbf{max} & \displaystyle \sum_{i=1}^n \tau_i & \quad & \textbf{s.t.} & \displaystyle \sum_{i=1}^n \gamma_i \leq L
+\end{matrix}
+$$
+
+
+
+\paragraph{Our Algorithmic Contribution} In Section~\ref{sec:algo}, we design and present a randomized algorithm that combines testing, decision trees, localization techniques and integer linear programming (ILP) to handle the optimization problem above. We start by executing several test cases, i.e.~random permutations of the transactions in our $\pool,$ and profiling their gas usage. Then, using decision trees, for every transaction $\tx \in \pool,$ we find a set of other transactions that can affect its gas usage. We call this the neighborhood of $\tx$ and denote it as $\nbhd(\tx).$ Intuitively, we expect the neighborhood of every vertex to be small since, in real-world instances, most transactions are completely independent of each other. For example, a pair of transactions that do not access the same smart contracts cannot affect each other's gas usage, either. We provide a probabilistic argument showing that with high probability our testing covers every possible permutation of each neighborhood. Thus, we can cut, mix and glue together parts of our test cases in order to create a block that maximizes the miner's total tip revenue. This part is modeled as an integer linear programming instance and solved by an external optimization suite. All steps of our algorithm are parallelizable and, except for the ILP solver, run in polynomial time. Due to its reliance on randomized sampling and ILP-solvers, our algorithm is not guaranteed to always produce an optimal result.
+
+\paragraph{Our Practical Contribution} We implemented our algorithm and performed extensive experimental results on 50,000 Ethereum blocks. For each block, we gathered real-world transaction pool data and executed our algorithm. We then compared the tip revenues obtained by our framework and those of real-world miners. Our approach increased tip revenues by a significant margin of 73.45 percent on average per block, corresponding to roughly 24.1 USD per block and 63,357,892 USD per year at current exchange rates. We also compared our tool against the default Ethereum implementation and found that our approach increased tip revenues by 18.56 percent on average per block, corresponding to roughly 17.3 USD per block and 45,416,764 USD per year. Our tool is free, open-source and dedicated to the public domain with a perpetual copyright waiver. It is accessible at \url{https://anonymous.4open.science/r/boosting_gas_revenues_of_ethereum_miners/}.
+
+
+\subsection{Ethereum Architecture}
+\label{sec:mining-ethereum-prelim}
+
+For our purposes, the consensus layer can be treated as a black box, as our problem and algorithms are independent of it.
+
+
+\paragraph{Details of Transaction Fees~\cite{ethereumgasfees,dameron2018beigepaper}} When creating a transaction, the user should set a maximum amount $m$ of gas that the transaction is allowed to consume. They should also set a price $p$ that they are willing to pay per unit of gas. Right before the transaction's execution, a deposit of $m \cdot p$ is taken from the user's account. If the transaction uses $g \leq m$ units of gas in its execution, then the transaction fee will be $g \cdot p$ and the user receives a refund of $(m-g) \cdot p.$ Otherwise, if $g > m,$ an out-of-gas error is raised. This sets $g=m.$ When running out of gas, all effects of the transaction are reverted. However, the deposit is not refunded and the entire $m \cdot p$ is taken as a transaction fee. 

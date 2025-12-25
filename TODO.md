@@ -10,3 +10,6 @@
 - [ ] Add mining section
     - [ ] Add Ethereum
     - [ ] Add Cardano
+
+- [ ] Update tool link for the Ethereum mining paper
+- [ ] Add intro for the prelim chapeter

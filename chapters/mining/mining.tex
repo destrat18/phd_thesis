@@ -24,9 +24,7 @@ In this chapter, we address this optimization problem for two mainstream cryptoc
   		
 	
 
-\para{Our Results} 
-
-This chapter provides algorithms and empirical results for optimal block production on Cardano and Ethereum.
+\para{Our Contributions} This chapter provides algorithms and empirical results for optimal block production on Cardano and Ethereum:
 
 \begin{enumerate}
     \item \textbf{Cardano.} In Section~\ref{sec:mining-cardano-problem}, we formalized the block production problem on Cardano. Then, in Section~\ref{sec:mining-cardano-algorithm}, we show that by exploiting the sparsity of interrelations between transactions, i.e.~the small treedepth of dependency-conflict graphs, it is possible to obtain a polynomial-time algorithm that outputs optimal blocks. In Section~\ref{sec:mining-cardano-experiments}, we implemented our algorithm in a free and open-source tool called Pixiu. Using Pixiu, we provide extensive experimental results over real-world transaction data on the Cardano blockchain, demonstrating that our approach increases the block producers' revenue by almost 1,357.82 USD/day (= 495,604.3 USD/year).

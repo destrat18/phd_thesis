@@ -1,4 +1,4 @@
-\section{Our Mining Framework for Ethereum}\label{sec/mining-ethereum-algorithm} 
+\section{Our Mining Framework for Ethereum}\label{sec:mining-ethereum-algorithm} 
 
 We start this section with a high-level overview of our algorithm and then provide the details of each step. The fundamental idea behind our approach is a simple observation: in real-world instances of the problem, each transaction interacts with only a few other transactions, which we call its neighborhood. Thus, when forming a block, we do not need to search over all possible permutations of transactions, but can instead find rules that encode the gas usage of each transaction based on the portion of its neighborhood that precedes it in the block.
 

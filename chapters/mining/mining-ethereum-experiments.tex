@@ -1,0 +1,238 @@
+\section{Experimental Results}{\label{sec:mining-ethereum-experiments}}
+
+\paragraph{Implementation}
+We implemented our approach in Python 3 and Rust. Our tool is available at~\url{https://anonymous.4open.science/r/boosting_gas_revenues_of_ethereum_miners/}. We used Anvil~\cite{anvil} and Erigon~\cite{erigon} to execute Ethereum transactions in our samples and obtain their gas usage. Moreover, we used  Linfa~\cite{linfa} to generate decision trees and relied on SCIP~\cite{BolusaniEtal2024OO} for solving Integer Linear Programming (ILP) instances.
+
+
+\paragraph{Machine} All experimental results were obtained on an Intel Xeon Gold 5115 Machine (2.40GHz, 16 cores) with 64 GB of RAM, running Ubuntu 22.04.
+
+\paragraph{Benchmarks}
+As our benchmark suite, we collected a dataset of real-world mempools, i.e.~ unmined transactions, that were available on the Ethereum network before each block. Our data spans 50,000 blocks, numbered 21800000 to 21849999, corresponding to approximately one week of activity on Ethereum in the period from February 8, 2025, 06:27:11 (UTC) to February 15, 2025, 06:18:35 (UTC). This data was gathered from Blocknative~\cite{blocknativeMempoolArchive}. 
+
+\paragraph{Samples and Runtime} For each of the 50,000 blocks, we generated 300 sample permutations and limited our solver's execution time to 12 seconds, i.e.~Ethereum's block time. We note that the results were obtained on a relatively modest machine. The testing and decision-tree generation steps of our algorithm are parallelized, thus increasing the computational power would allow one to cover more samples for each block. We expect real-world miners to have much higher computational power than us.
+
+\paragraph{Baselines} For each block, we compare the total tip revenue obtained by our approach with the real-world block that was mined and added to the Ethereum blockchain. In the experiments, we observed that some Ethereum miners routinely miss lucrative transactions when forming their blocks. This might be due to a suboptimal block formation strategy or network connectivity issues that prevented the miner from seeing the transactions, e.g.~due to the censorship of the Ethereum network in some countries. Thus, it is conceivable that the miner might not have the same mempool as us. We believe this does not affect the fairness of the comparison since the onus is on the miners to ensure they have reliable connectivity to the network. However, to demonstrate that our improvements are not merely due to better connectivity, as a second baseline, we used Ethereum's reference implementation and applied it to the exact same mempools as our algorithm. The reference implementation sorts transactions greedily based on their effective gas tip value, prioritizing transactions with higher tips for miners and ordering same-sender transactions by nonce~\cite{anvil, geth}.
+
+
+
+
+\begin{table}[!htbp]
+\centering
+\caption{Improvements obtained by our approach compared to real-world miners and the Ethereum reference implementation.}
+\label{table:mining-ethereum-comparisonBaseline}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{0.32\textwidth}|>{\raggedright\arraybackslash}p{0.32\textwidth}|>{\raggedright\arraybackslash}p{0.32\textwidth}|}
+\hline
+\textbf{Metric} & Improvement compared to Real-World Miners & Improvement compared to Reference Implementation \\
+\hline\hline
+Number of improved blocks & 45{,}609 (91.22\%) & 38{,}505 (77.01\%) \\ \hline
+Total increase in tip revenue over 50{,}000 blocks & 1{,}204{,}475 USD & 863{,}385 USD \\ \hline
+Annualized increase in tip revenue & 63{,}357{,}892 USD & 45{,}416{,}764 USD \\ \hline
+Average earning increase per block & 24.1 USD & 17.3 USD \\ \hline
+Average improvement percentage per block & 73.45\% & 18.56\% \\ 
+\hline
+\end{tabular}
+\renewcommand{\arraystretch}{1}
+\end{table}
+
+% Question why going from 18 percent to 73 percent does not make a huge different in USD?
+
+\paragraph{Revenue Gains}
+ The revenue gains obtained by our algorithm are summarized in Table~\ref{table:mining-ethereum-comparisonBaseline} and Figure~\ref{fig:mining-ethereum-revenueComparisionWReal}. Our approach outperformed real-world miners in 45,609 of the 50,000 blocks (91\% of the cases), increasing the total revenue over all blocks by \textbf{1,204,475 USD}\footnote{We used the ETH/USD conversion rates provided by~\cite{coinmarketcap}.}. On average, this represents an increase of nearly 24.1 USD per block, which translates to an annualized improvement of around \textbf{63 million USD} . Our approach obtained significant gains compared to the Ethereum reference implementation, as well. It outperformed the reference implementation in 38,505 blocks (77\% of the cases), yielding an additional revenue of \textbf{863,385 USD} over our 50,000 benchmark blocks. This translates to approximately \textbf{45 million USD} annually. On average, our algorithm earned almost 17.3 USD more per block. The data in Table~\ref{table:mining-ethereum-comparisonBaseline} should be taken with the usual grains of salt: (i)~Ether's value and its exchange rate to USD are highly volatile and unpredictable, and (ii)~the reported numbers are the sums of improvements over individual blocks. Figures~\ref{fig:mining-ethereum-revenueIncreaseReal} and~\ref{fig:mining-ethereum-revenueIncreaseGreedy} and provide histograms of the gained revenues in USD.  Figures~\ref{fig:mining-ethereum-percentageImprovementOverReal} and~\ref{fig:mining-ethereum-percentageImprovementOverGreedy} show similar histograms based on the percentage of improvement obtained in each block.
+
+
+
+ \begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.6\columnwidth]{chapters/mining/mining-ethereum-figures/revenueComparisionWReal.pdf}
+	\caption{
+		Comparison of the tip revenues obtained by our algorithm (x-axis) and the real-world blocks added to the Ethereum blockchain (y-axis). Each point corresponds to one block. Green points (91.22\%) are the blocks on which our algorithm obtained a higher revenue than real-world miners. For clarity, we excluded 265 data points.} 
+	\label{fig:mining-ethereum-revenueComparisionWReal}
+\end{figure}
+
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{chapters/mining/mining-ethereum-figures/revenueImprovementReal.pdf}
+	\caption{Histogram of the transaction fee improvements obtained over each block compared to real-world miners (in USD). The y-axis is in logarithmic scale. For clarity, 411 data points outside the range are omitted.}
+	\label{fig:mining-ethereum-revenueIncreaseReal}
+\end{figure}
+
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{chapters/mining/mining-ethereum-figures/revenueImprovementGreedy.pdf}
+    \caption{Histogram of the transaction fee improvements obtained over each block compared to the Ethereum reference implementation (in USD). The y-axis is in logarithmic scale. For readability, 868 blocks with improvements over 150 USD are omitted from the plot.}
+    \label{fig:mining-ethereum-revenueIncreaseGreedy}
+\end{figure}
+
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{chapters/mining/mining-ethereum-figures/percentageImprovementOverReal.pdf}
+	\caption{Histogram of the transaction fee improvements obtained over each block compared to real-world miners (in percentages). 608 points outside the range omitted for clarity.}
+	\label{fig:mining-ethereum-percentageImprovementOverReal}
+\end{figure}
+
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{chapters/mining/mining-ethereum-figures/percentageImprovementOverGreedy.pdf}
+    \caption{Histogram of the transaction fee improvements obtained over each block compared to the Ethereum reference implementation (in percentages). The y-axis is in logarithmic scale. 2021 points outside the range omitted for clarity.}
+    \label{fig:mining-ethereum-percentageImprovementOverGreedy}
+\end{figure}
+
+
+
+\paragraph{Sample Size Sensitivity} To investigate the effect of sample size on our approach, we reran our experiments with sample sizes of $50$, $100$, $200$, and $300$. The improvement in revenue slows as sample size increases. We observed that the marginal gain from $200$ to $300$ samples is less pronounced. See Table~\ref{table:mining-ethereum-parametersensitivity} for details. Moreover, the average neighborhood size is $1.21$, which, according to Theorem~\ref{thm:mining-ethereum-sufficient-samples}, indicates that relatively small sample sizes suffice.
+
+\begin{table}
+\centering
+
+\caption{Pairwise differences in annualized revenue across sample sizes of 50, 100, 200, and 300 in thousands of USD.}
+
+\label{table:mining-ethereum-parametersensitivity}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\makecell{\textbf{Sample Size}} & \makecell{\textbf{50}} & \makecell{\textbf{100}} & \makecell{\textbf{200}} & \makecell{\textbf{300}} \\
+\hline\hline
+50 & 0 & -1457.53 & -2910.24 & -3253.29 \\
+\hline
+100 & 1457.53 & 0 & -1452.71 & -1795.76 \\
+\hline
+200 & 2910.24 & 1452.71 & 0 & -343.047 \\
+\hline
+300 & 3253.29 & 1795.76 & 343.047 & 0 \\
+\hline
+\end{tabular}
+
+\end{table}
+
+
+
+\paragraph{Runtime Performance} In practice, executing one block sample took 2.42 seconds on average. The end-to-end processing took an average of 5.7 seconds (without parallelization). Moreover, the pure ILP solving time (Step 5) was only 0.4 seconds.
+Refer to Figures~\ref{fig:mining-ethereum-HistogramIlpOnEndToEndOverlay} for details.
+We emphasize that steps 2-4 can be parallelized, allowing for runtime reduction with additional computational power. The ILP performance depends primarily on instance sparsity rather than mempool size. We observed that increasing the number of transactions in the mempool leads to ILP instances that are easier and faster to solve. See Figure~\ref{fig:mining-ethereum-ScatterIlpTimeTxCountSampleSize300} for details.
+
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{chapters/mining/mining-ethereum-figures/HistogramIlpOnEndToEndOverlay.pdf}
+	\caption{Histogram of the end-to-end (green) and ILP solver (blue) processing times per block. The y-axis is in logarithmic scale.}
+	\label{fig:mining-ethereum-HistogramIlpOnEndToEndOverlay}
+\end{figure}
+
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\columnwidth]{chapters/mining/mining-ethereum-figures/ScatterIlpTimeTxCountSampleSize300.pdf}
+	\caption{Scatter of ILP solver time (seconds) versus number of transactions per mempool, with sample size fixed at 300.}
+	\label{fig:mining-ethereum-ScatterIlpTimeTxCountSampleSize300}
+\end{figure}
+
+
+% \begin{figure}[h]
+% 	\centering
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/ScatterIlpTimeTxCountSampleSize50.pdf}
+% 		\subcaption{Sample size 50}
+% 		\label{fig:ScatterIlpTimeTxCountSampleSize50}
+% 	\end{subfigure}
+% 	\hfill
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/ScatterIlpTimeTxCountSampleSize100.pdf}
+% 		\subcaption{Sample size 100}
+% 		\label{fig:ScatterIlpTimeTxCountSampleSize100}
+% 	\end{subfigure}
+	
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/ScatterIlpTimeTxCountSampleSize200.pdf}
+% 		\subcaption{Sample size 200}
+% 		\label{fig:ScatterIlpTimeTxCountSampleSize200}
+% 	\end{subfigure}
+% 	\hfill
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/ScatterIlpTimeTxCountSampleSize300.pdf}
+% 		\subcaption{Sample size 300}
+% 		\label{fig:ScatterIlpTimeTxCountSampleSize300A}
+% 	\end{subfigure}
+	
+% 	\caption{\added{Scatter of ILP solver time (seconds) versus number of transactions per mempool for different sample sizes.}}
+% 	\label{fig:ScatterIlpTimeTxCount}
+% \end{figure}
+
+% \clearpage
+% \begin{figure}[h]
+% 	\centering
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/ScatterIlpTimeByAvgNeighborhoodSampleSize50.pdf}
+% 		\subcaption{Sample size 50}
+% 		\label{fig:ScatterIlpTimeByAvgNeighborhoodSampleSize50A}
+% 	\end{subfigure}
+% 	\hfill
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/ScatterIlpTimeByAvgNeighborhoodSampleSize100.pdf}
+% 		\subcaption{Sample size 100}
+% 		\label{fig:ScatterIlpTimeByAvgNeighborhoodSampleSize100A}
+% 	\end{subfigure}
+	
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/ScatterIlpTimeByAvgNeighborhoodSampleSize200.pdf}
+% 		\subcaption{Sample size 200}
+% 		\label{fig:ScatterIlpTimeByAvgNeighborhoodSampleSize200A}
+% 	\end{subfigure}
+% 	\hfill
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/ScatterIlpTimeByAvgNeighborhoodSampleSize300.pdf}
+% 		\subcaption{Sample size 300}
+% 		\label{fig:ScatterIlpTimeByAvgNeighborhoodSampleSize300A}
+% 	\end{subfigure}
+	
+% 	\caption{\added{Scatter of ILP solver time (seconds) versus average neighborhood size per block for different sample sizes.}}
+% 	\label{fig:ScatterIlpTimeByAvgNeighborhood}
+% \end{figure}
+
+% \begin{figure}[h]
+% 	\centering
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/HistogramNeighborhoodSizeSampleSize50.pdf}
+% 		\subcaption{Sample size 50}
+% 		\label{fig:HistogramNeighborhoodSizeSampleSize50A}
+% 	\end{subfigure}
+% 	\hfill
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/HistogramNeighborhoodSizeSampleSize100.pdf}
+% 		\subcaption{Sample size 100}
+% 		\label{fig:HistogramNeighborhoodSizeSampleSize100A}
+% 	\end{subfigure}
+	
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/HistogramNeighborhoodSizeSampleSize200.pdf}
+% 		\subcaption{Sample size 200}
+% 		\label{fig:HistogramNeighborhoodSizeSampleSize200A}
+% 	\end{subfigure}
+% 	\hfill
+% 	\begin{subfigure}[b]{0.48\textwidth}
+% 		\centering
+% 		\includegraphics[width=\textwidth]{chapters/mining/mining-ethereum-figures/HistogramNeighborhoodSizeSampleSize300.pdf}
+% 		\subcaption{Sample size 300}
+% 		\label{fig:HistogramNeighborhoodSizeSampleSize300A}
+% 	\end{subfigure}
+	
+% 	\caption{\added{Histogram of neighborhood size per block for different sample sizes.}}
+% 	\label{fig:HistogramNeighborhoodSize}
+% \end{figure}

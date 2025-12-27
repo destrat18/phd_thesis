@@ -18,3 +18,5 @@
 - [ ] Fix codes
 - [ ] Fix chapter titles
 - [ ] All use example tags
+- [ ] Add more plots to the experiment section of ethereum
+- [ ] Should I add discussions?

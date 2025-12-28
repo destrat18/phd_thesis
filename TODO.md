@@ -20,3 +20,6 @@
 - [ ] All use example tags
 - [ ] Add more plots to the experiment section of ethereum
 - [ ] Should I add discussions?
+- [ ] Fix para and paragraph
+- [ ] Replace \fee with cfee in cardano paper
+- [ ] Remove in our work

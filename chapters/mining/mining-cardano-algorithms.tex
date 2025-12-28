@@ -1,1 +1,79 @@
 \section{Problem of Cardano Block Production}\label{sec:mining-cardano-algorithm} 
+
+In this section, we present our algorithm for finding an optimal Cardano block that maximizes the total transaction fee revenue of the block producers. Our algorithm is a dynamic programming approach based on the treedepth decomposition of the conflict-dependency graph of our unmined transactions.
+
+\para{Input} Suppose that we are given an optimal block production instance, consisting of the block size limit $k \in \mathbb N$ and a set $\txs$ of $n$ unmined Cardano transactions as input. Each transaction $t \in \txs$ has a fee of $\cfee(t)$ and a size of $\sz(t).$ Additionally, we have the dependency-conflict graph $G = (\txs, E_C \cup E_D)$ and a treedepth decomposition $T = (\txs, E_T)$ of $G$ with depth $d.$ Our goal is to solve the optimal block production problem.
+
+\para{Canonical Subgraphs} We define $n$ canonical subgraphs of our DCG $G.$ The $i$-th canonical subgraph $G_i$ consists of the first $i$ transactions, as well as any conflicts and dependencies between them. Formally, we let
+$$
+V_i = \{1, 2, \dots, i\}
+$$
+and
+$$
+G_i = G[V_i].
+$$
+Recall that the transactions are numbered by a pre-order traversal of $T.$ We consider subproblems on each $G_i = (V_i, E_i)$ and show how to combine the results on these subproblems to find an optimal block for the entire DCG $G.$ See Figure~\ref{fig:mining-cardano-cano}.
+
+\begin{figure*}
+	\centering
+	\includegraphics[width=\linewidth]{chapters/mining/mining-cardano-figures/canon.pdf}
+	\medskip
+	\caption{Canonical subgraphs of the graph $G$ of Figure~\ref{fig:mining-cardano-dcg} based on the treedepth decomposition of Figure~\ref{fig:mining-cardano-deco}. In each $G_i,$ the set $A_i$ of ancestors of vertex $i$ is shown in blue.}
+	\label{fig:mining-cardano-cano}
+\end{figure*}
+
+\para{Dynamic Programming Table} For every $1 \leq i \leq n,$ every partial capacity $0 \leq c \leq k$ and every subset $S \subseteq A_i,$ we define a subproblem and a dynamic programming variable as follows:
+$$
+\hspace{-1em}\begin{array}{rl}
+\dpt[i, S, c] := & \text{The maximum total fees } \Sigma_{t \in \txs^\ast} \cfee(t)\\
+& \text{ of a set } \txs^\ast \subseteq V_i \text{ of transactions in } G_i\\
+& \text{ such that } \txs^\ast \cap A_i = S\\
+& \text{ and } \Sigma_{t \in \txs^\ast} \sz(t) \leq c\\
+& \text{ and } \txs^\ast \text{ satisfies dependencies/conflicts in } E_i.
+\end{array}
+$$
+Intuitively, we are considering subproblems in which we have only the first $i$ vertices/transactions and their dependencies/conflicts, but we also consider the case where our capacity is $c \leq k,$ i.e.~part of the block is already filled and we only have $c$ bytes of free space remaining. Finally, the set $S$ tells us exactly which ancestors of transaction $i$ should be taken into the solution.
+
+\para{Computing Values for $G_1$} The subgraph $G_1$ consists only of the root vertex $1$ and has no edges. Thus, we have 
+$$
+\dpt[1, \emptyset, c] = 0,
+$$
+and
+$$
+\dpt[1, \{1\}, c] = \left\{\begin{matrix}
+	\cfee(1) & \sz(1) \leq c \\
+	-\infty & \sz(1) > c \\
+\end{matrix}\right. .
+$$
+We use $-\infty$ to show an impossible situation, i.e.~when no possible set $\txs^\ast$ satisfying the requirements can be found.
+
+\para{Computing Values for Other $G_i$'s} Suppose $i > 1$ and we intend to compute $\dpt[i, S, c].$ Moreover, assume that the $\dpt[j, \cdot, \cdot]$ values are already computed for all $j < i.$
+\begin{itemize}
+	\item We first check if $S$ violates any of the dependency and conflict requirements in the set $A_i,$ i.e.~between the ancestors of vertex $i.$ Specifically, for any two vertices $u, v \in A_i,$ if $\{u, v\} \in E_C$ and also $u, v \in S,$ then they are in conflict but both taken in $S$ and so we have to set $\dpt[i, S, c] = -\infty$ since the requirements are impossible to satisfy. Similarly, if $(u, v) \in E_D$ and $v \in S$ but $u \not\in S,$ then the dependency requirement is violated and we set $\dpt[i, S, c] = -\infty.$ For example, in Figure~\ref{fig:mining-cardano-cano} we set $\dpt[4, \{4\}, 10]$ to $-\infty$ since $4$ is included and depends on $2,$ which is not included. Similarly, $\dpt[3, \{1, 2, 3\}, 10] = -\infty$ since $1$ and $3$ are in conflict.
+	\item We then check if all the transactions in $S$ can fit into $c$ bytes, i.e.~whether $\sum_{t \in S} \sz(t) \leq c.$ If not, we set  $\dpt[i, S, c] = -\infty.$
+	\item Let $S' \subseteq A_{i-1}$ be a subset of ancestors of vertex $i-1.$ We say that $S'$ is \emph{compatible} with $S$ and write $S' \leftrightarrows S$ if $\forall u \in A_{i-1, i}$ we have $u \in S \Leftrightarrow u \in S'.$ In other words, compatible subsets make the same decisions about the common ancestors of $i$ and $i-1.$ If all the checks above pass, then we consider two cases:
+	\begin{enumerate}[label=(1)]
+		\item If $i \not\in S,$ then we know that our solution $\txs^\ast$ cannot contain the transaction $i.$ Thus, all transactions in the solution are already present in $G_{i-1}$.
+		
+		 Therefore, we set $$\dpt[i, S, c] = \max_{S' \leftrightarrows S} \dpt[i-1, S', c].$$
+		\item If $i \in S,$ then we must put the transaction $i$ into our solution $\txs^\ast.$ This reduces the available space to $c - \sz(i)$ but also gives us a fee of $\cfee(i).$ We should then fill out our block using the previous $i-1$ transactions. Thus, we have
+		$$
+		\dpt[i, S, c] = \cfee(i) + \max_{S' \leftrightarrows S} \dpt[i-1, S', c-\sz(i)].
+		$$
+	\end{enumerate}
+\end{itemize}
+
+\para{Final Solution} Finally, we know that $G= G_n$ by definition. In our optimal solution, we might be taking any subset $S$ of the ancestors of vertex $n.$ Thus, our algorithm outputs
+$$
+\max_{S \subseteq A_n} \dpt[n, S, k]
+$$
+as the maximum possible amount of transaction fees that can be obtained from a subset of $\txs$ that fits into a block of size $k.$ As is standard in dynamic programming approaches, the optimal subset $\txs^\ast$ of transactions can be recovered by retracing the steps of our algorithm and finding out which choices led to the maximum values. 
+
+\begin{theorem}
+	Given a block size limit $k$, a set $\txs$ of $n$ unmined Cardano transactions with dependency-conflict graph $G$ and a treedepth decomposition $T$ of $G$ with depth $d,$ our algorithm solves the Optimal Block Production problem in time $O(n \cdot k \cdot 2^d \cdot d^2).$
+\end{theorem}
+\begin{proof}
+	Correctness was argued in the discussion above. Note that we always find a valid solution $\txs^\ast$ since the dependency/conflict requirements between any vertex $i$ and its ancestors are enforced when we are computing $\dpt[i, \cdot, \cdot].$ To bound the runtime, note that we define a total of $n \cdot k \cdot 2^d$ dynamic programming variables. For each of them, we check dependency and conflict requirements between elements of a set $A_i$ which has a size of at most $d$ since they are all ancestors of a single vertex $i$ in $T.$ Therefore, the total runtime for the initial checks is $O(n \cdot k \cdot 2^d \cdot d^2).$ Now consider the sums computed in parts (1) and (2) above. Consider any fixed $S' \subseteq A_{i-1}.$ Based on the way we numbered our vertices in pre-order, every ancestor of vertex $i,$ except $i$ itself, is also an ancestor of vertex $i-1.$ Formally, $A_{i, i-1} = A_i \setminus \{i\}.$ Thus, each $S'$ may contribute to the sums for at most two different compatible $S \subseteq A_i$ sets. Therefore, the total runtime of all sums in (1) and (2) is $O(n \cdot k \cdot 2^d).$ The runtime is polynomial in $n$ and $k$ when $d$ is a constant.
+\end{proof}
+
+\para{Parallelization} We remark that the computation of $\dpt[i, \cdot, \cdot]$ in our algorithm only depends on $\dpt[i-1, \cdot, \cdot]$ values. Thus, for every $i,$ we can perfectly parallelize the computation of all $\dpt[i, \cdot, \cdot]$ entries. In other words, if we have $p < k \cdot 2^d$ parallel cores, our runtime will be $O\left(\frac{n \cdot k \cdot 2^d \cdot d^2}{p}\right).$ Therefore, one can reduce the runtime of our algorithm arbitrarily by simply adding more computational power. In Section~\ref{sec:mining-cardano-experiments} we do not use parallelization but our runtimes are still much less than one second, enabling the direct application of our approach to Cardano.

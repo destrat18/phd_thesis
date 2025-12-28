@@ -1,7 +1,7 @@
 \chapter{Preliminaries}
 \label{chp:prelim}
 
-\section{Blockchain} \label{sec:prelim-blockchain}
+\section{Blockchain and Smart Contracts} \label{sec:prelim-blockchain}
 \paragraph{Blockchain} As pioneered by Bitcoin~\cite{nakamoto2008bitcoin}, most modern cryptocurrencies use a blockchain protocol. There are three fundamental objects: transactions, blocks, and the blockchain. Transactions are the basic units of record keeping, defining the cryptocurrency's history and order. In Bitcoin, transactions transfer money in the underlying cryptocurrency. Anyone can create and broadcast transactions, which must be validated, e.g.~by checking digital signatures to prove ownership. Valid transactions are spread across the network using a peer-to-peer gossip protocol. Valid transactions are grouped into blocks of fixed maximum size, and each block contains a hash pointer to the previous block, forming a singly-linked list called the blockchain. Each node maintains a local copy of the blockchain, so its history consists of all transactions in its chain, which also provides their ordering.
 
 \paragraph{Smart Contracts} 
@@ -15,7 +15,11 @@ Bitcoin supports a limited scripting language for specifying conditions to spend
 \paragraph{Consensus mechanism} To ensure consensus and prevent double-spending, not every propagated transaction is finalized immediately; a consensus mechanism is required to make all nodes eventually agree on the blockchain's contents. Its purpose is to make adding new blocks subject to rules that prevent attackers from creating competing branches, or forks, which represent incompatible transaction histories. There are many consensus protocols~\cite{xu2023survey, dziembowski2015proofs, chatterjee2019hybrid, ball2017proofs, yin2019hotstuff}, with the most prominent being proof of work, used by Bitcoin~\cite{nakamoto2008bitcoin} and Ethereum Classic, and proof of stake~\cite{king2012ppcoin, kiayias2017ouroboros}, used by Ethereum~\cite{wood2014ethereum}, Cardano~\cite{david2018ouroboros}, and Algorand~\cite{chen2019algorand1}. In practice, different terms are used for miners; for example, Ethereum and most proof-of-stake currencies use \emph{validators} or \emph{block builders} to indicate they do not use proof of work. In this paper, we use the term \emph{miner} for all consensus mechanisms.
 
 % TODO: Add definition for mining and miner
-\paragraph{Mining} In proof of work, a node must solve a computational puzzle, such as partially inverting a hash function in Bitcoin, to add a new block. The chance of success is proportional to the computational power invested. This process is called \emph{mining}, and the nodes are called \emph{miners}. In proof-of-stake blockchains, a miner's chance of adding the next block is proportional to their stake, i.e., the number of coins they hold, and a random procedure selects a miner for each slot. The chosen miner decides the block's contents.
+\paragraph{Mining} Every blockchain protocol requires a process to extend the chain by adding new blocks. This process is often called \emph{mining} in proof-of-work blockchains such as Bitcoin~\cite{nakamoto2008bitcoin} and entails finding a solution to a proof-of-work puzzle which is often based on inverting hash functions. While proof-of-stake blockchains~\cite{king2012ppcoin,kiayias2017ouroboros} and other alternative consensus mechanisms such as proof-of-space~\cite{park2018spacemint} do not require the expensive step of solving a hash puzzle, they nevertheless need rules for extending the chain. The nodes that take part in chain extension are known by various names such as validators, farmers or producers. For simplicity, in this thesis, we simply use the words \emph{miner} and \emph{producer} to refer to any node on the network who tries to add a new block to the blockchain according to the underlying consensus protocol. 
+
+\paragraph{Mining Steps} A miner has to first form a block by choosing a set of unmined transactions. Following Bitcoin~\cite{nakamoto2008bitcoin}, most blockchain protocols have a maximum size limit on the blocks, thus the miner has to strategically pick the transactions that are included in her block. The miner then proposes the block by publicly announcing it. The proposed block may or may not be adopted by the network, based on its rules of consensus. For example, in a proof-of-work cryptocurrency, only blocks that contain a valid solution to the hash puzzle may be accepted by the network.
+
+% Add paragraph about block rewards
 
 \paragraph{Transaction Fees} Given that consensus heavily relies on miners and that mining is often costly, especially in proof-of-work settings, the protocol must provide rewards to incentivize mining. The miners are paid a fixed reward for every block they add to the blockchain. This is also how new units of currency are created. Additionally, to incentivize the miners to create non-empty blocks, a user who creates a transaction can decide on a transaction fee, which will be paid to the miner who adds it to the blockchain. It is well-known in the community that transactions with low fees are often ignored by the miners.
 
@@ -42,6 +46,7 @@ Figure~\ref{fig:options-bitcoin} shows an overview of this process. In this figu
 
 Since mining is an expensive activity, due to both hardware and electricity costs, the miner should be financially incentivized to perform it. Bitcoin creates two incentives for the miner~\cite{meybodi2022optimal, nakamoto2008bitcoin, barakbayeva2024blockchain}: (a)~a block reward (currently 6.25 BTC $\approx$ 445,835 USD, expected to halve in almost three weeks from now) is paid to each miner who successfully adds a new block, and (b)~each transaction contains a transaction fee that is paid to the miner who adds it to the consensus chain.
 
+\paragraph{UTXO} In Bitcoin~\cite{nakamoto2008bitcoin}, each transaction has multiple inputs and outputs: inputs are coins entering the transaction, outputs are coins leaving. Each input must reference an output from a previous transaction, ensuring only previously received coins can be spent. To prevent double-spending, each output can be spent only once. Spendable coins are called Unspent Transaction Outputs (UTXOs). Although UTXOs can be reconstructed from history, Bitcoin nodes maintain a current UTXO set for efficient transaction and block validation. Since transactions cannot create new coins, the sum of outputs must be less than the sum of inputs; the difference is paid to the miner as a transaction fee. Thus, each transaction has a fixed, known fee independent of other transactions. 
 
 \paragraph{Longest Chain Rule~\cite{nakamoto2008bitcoin, blum2020combinatorics}} In the  event that two miner find a valid block at approximately the same time, a temporary \emph{fork} happens in which there are two valid blockchains known to the network. In such a scenario, the Bitcoin protocol allows miner to try to extend either branch. However, as soon as a branch becomes longer than the other(s), the shorter branch(es) are dropped by everyone who honestly follows the protocol. Thus, the protocol mandates that the longest chain is always the consensus chain and that every node on the network must always consider the longest chain known to them as the authoritative blockchain\footnote{In practice, the length of a chain is not just the number of blocks in it, but rather the total difficulty of mining these blocks. However, this minor detail does not change any of the analyses in this work.}. This is illustrated in Figure~\ref{fig:options-longest}. As long as a majority of the computational power on the network follows the protocol honestly, all honest participants are guaranteed to eventually reach a consensus about the blockchain.
 
@@ -59,7 +64,49 @@ Suppose $\alice$ is selling an item to $\bob$ and $\bob$ is paying the price by 
 \section{Cardano}
 \label{sec:prelim-cardano}
 
-\paragraph{UTXO} In Bitcoin~\cite{nakamoto2008bitcoin}, each transaction has multiple inputs and outputs: inputs are coins entering the transaction, outputs are coins leaving. Each input must reference an output from a previous transaction, ensuring only previously received coins can be spent. To prevent double-spending, each output can be spent only once. Spendable coins are called Unspent Transaction Outputs (UTXOs). Although UTXOs can be reconstructed from history, Bitcoin nodes maintain a current UTXO set for efficient transaction and block validation. Since transactions cannot create new coins, the sum of outputs must be less than the sum of inputs; the difference is paid to the miner as a transaction fee. Thus, each transaction has a fixed, known fee independent of other transactions. This property also holds in other UTXO-based currencies like Cardano.
+\para{Cardano~\cite{cardano}} Cardano is an open and decentralized blockchain platform that supports many cryptocurrencies and tokens. Its main currency, Ada, is currently one of the top 10 cryptocurrencies in terms of market cap and has a value of more than 16 billion USD~\cite{coinmarketcap}. Similar to Bitcoin, Cardano follows the (extended) UTXO model~\cite{eutxo}, in which every transaction has a set of inputs and outputs. Each input to a transaction should be an output of a previous transaction and no output may be spent (used as input) twice. It has two major advantages over Bitcoin: (i)~support for arbitrarily complex smart contracts, i.e.~transactions can invoke executions of programs in an expressive programming language, and (ii)~a proof-of-stake consensus protocol, namely Ouroboros Praos~\cite{david2018ouroboros}, which avoids the costly mining process of Bitcoin's proof-of-work. In this work, we consider a simplified model of a Cardano transaction that precisely captures those aspects which are important to our problem, while ignoring other details which do not affect the problem at hand. For a more thorough treatment, see~\cite{cardano} or~\cite{brunjes2020utxo}.
+
+\para{EUTXO} Most modern blockchains either follow the Unspent Transaction Output (UTXO) model, as in Bitcoin~\cite{nakamoto2008bitcoin}, or the account model, as in Ethereum~\cite{wood2014ethereum}. To take advantage of the benefits of both models, Cardano proposes the Extended~UTXO (EUTXO) model that allows having more expressive programs than simple scripts without adopting the account model. In UTXO, a transaction has a set of inputs and outputs. An input points to an output of a prior transaction that provides funds to be spent by this transaction. Moreover, every output can be used by at most one input. EUTXO follows the same policies except that there is one more output field called ``datum'' that carries contract-specific data. In addition, EUTXO allows the inclusion of arbitrary logic as scripts and the use of the data fields to decide if the transaction output can be spent. See~\cite{eutxo,brunjes2020utxo} for a more detailed treatment. 
+
+\para{Proof-of-Stake~\cite{pos,king2012ppcoin,kiayias2017ouroboros}} In proof-of-stake protocols, a miner is randomly chosen to add the next block. Each miner's probability of being chosen is proportional to her stake in the currency, i.e.~the number of coins she holds. Specifically, in Cardano's implementation of Ouroboros Praos~\cite{david2018ouroboros}, time is divided into epochs, each consisting of 432,000 slots. Each slot corresponds to one second. Thus, each epoch lasts for five days. In each slot, some miners/producers are randomly selected to propose blocks of transactions~\cite{slep}.  
+
+\para{Stake Pools and Delegation~\cite{pools}} Any user who holds Ada can take part in mining (block production) on Cardano. Users can also delegate their mining rights (stakes) to others, leading to stake pools which, as the name suggests, pool together stakes from many different users. The pool operator can then mine on behalf of all of its users and the probability that the pool is selected in each slot is proportional to the total stake of the members. The vast majority of Cardano blocks are produced by stake pools rather than individual stake holders. 
+
+\para{Rewards} Producing blocks is a costly process. This is of course evident in proof-of-work blockchains, in which the miners have to solve hash puzzles requiring vast computational resources and electricity usage. Thus, Bitcoin rewards miners for every new block that they successfully add to the blockchain and also pays them transaction fees~\cite{nakamoto2008bitcoin}. Even in proof-of-stake blockchains, there are costs associated with block production, e.g.~the miner has to keep track of the whole history of the chain, constantly listen for new transactions, hold stake or convince others to delegate stakes to her, form valid blocks of transactions and announce/propose them on time. Therefore, it is necessary to incentivize block production by rewarding the miners. In Cardano, the block producers are rewarded in two ways~\cite{rew}:
+\begin{enumerate}
+	\item \emph{Transaction Fees:} Every transaction contains a fixed fee. After each epoch, the fees of all transactions mined in that epoch are divided among the block producers.
+	\item \emph{Monetary Expansion:} For each epoch, a fixed percentage of the remaining reserve of Ada is paid to all block producers of the epoch. 
+\end{enumerate}
+
+\para{Block Constraints} 
+In Cardano's EUTXO model, a block contains a sequence of valid transactions. The transactions in each block must satisfy the following requirements, otherwise the block is considered invalid and will be discarded by all nodes of the network. 
+
+\begin{itemize}
+\item \textit{Transaction Dependencies.}
+If a transaction $t_2$ uses an output of another transaction $t_1$ as one of its inputs, then $t_2$ depends on $t_1.$ If the block producer decides to include $t_2$ in her new block, then she must also add $t_1$ in the same block and before $t_2$. See Figure~\ref{fig:prelim-cardano-dep} as an example.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.75]{chapters/mining/mining-cardano-figures/dependency.pdf}
+	\caption{Alice pays 15 Ada to Bob in $t_1$. In $t_2$ Bob uses the same funds to pay 10 Ada to Carol and 5 Ada back to himself. The transaction $t_2$ has an input that is using an output of $t_1.$ Thus, $t_1$ is a dependency of $t_2.$}
+	\label{fig:prelim-cardano-dep}
+\end{figure}
+
+\item \textit{Transaction Conflicts.} 
+If two transactions $t_2$ and $t_3$ both spend the same output of a transaction $t_1$, since every output may be spent at most once, only one of the conflicting transactions may be selected and included in the new block. Thus, the block producer has a choice to include $t_2, t_3$ or neither in the new block, but she cannot include both. See Figure~\ref{fig:prelim-cardano-conf} as an example.
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.65]{chapters/mining/mining-cardano-figures/conflict.pdf}
+	\caption{In an auction contract, Alice has bid 5 Ada in $t_1$. Both Bob and Carol are trying to bid right after Alice, hence using $t_1$'s datum output as input to their transactions $t_2$ and $t_3$. Since every output can be used only once, $t_2$ and $t_3$ are in conflict.}
+	\label{fig:prelim-cardano-conf}
+\end{figure}
+ 
+
+\item \textit{Block Size Limit.}
+Cardano imposes a block size limit, i.e.~the total size of all transactions included in a new block must not exceed 90112 bytes = 88 kilobytes. This is to ensure that the blocks are small enough to be efficiently propagated within the network with minimal latency. The block size limit may change in each epoch, but in practice it has been consistently kept at 88 kilobytes.
+\end{itemize}
+
 
 
 \section{Ethereum}

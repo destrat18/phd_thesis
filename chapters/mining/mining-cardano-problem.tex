@@ -1,1 +1,50 @@
 \section{Problem of Cardano Block Production}\label{sec:mining-cardano-problem} 
+
+
+In general, block producers in Cardano have no control over the monetary expansion component of the protocol rewards. However, they can choose which transactions to include in their blocks, thereby exercising some control over transaction fees. Block producers are collectively incentivized to maximize the total amount of transaction fees in their epoch and thus in their block. See Section~\ref{sec:prelim-cardano} for a comprehensive overview of Cardano's architecture.
+In this section, we focus on solving the problem of forming an optimal block on the Cardano blockchain. Specifically, given a set of unmined transactions, i.e.~transactions that are not yet added to the blockchain, our goal is to create a valid Cardano block with the maximum possible amount of transaction fees, thus maximizing the total revenue of block producers.
+
+
+
+\para{Optimal Block Production} Given a block size limit $k \in \mathbb N,$ a finite set $\txs$ of $n$ unmined Cardano transactions in which every transaction $t \in \txs$ has a set of inputs, a set of outputs, a fee $\fee(t) \in [0, \infty)$ and a size $\sz(t) \in \mathbb{N},$ find a subset $\txs^\ast \subseteq \txs$ of transactions such that:
+\begin{itemize}
+	\item $\txs^\ast$ satisfies all the dependency and conflict requirements as above;
+	\item $\sum_{t \in \txs^\ast} \sz(t) \leq k,$ i.e.~all the chosen transactions fit into the block size limit; and
+	\item $\sum_{t \in \txs^\ast} \cfee(t)$ is maximized, i.e.~the block consisting of the transactions in $\txs^\ast$ yields the maximum possible total transaction fee.
+\end{itemize}
+In practice, we always have $k=90112.$
+
+\para{Dependency-Conflict Graphs (DCGs)~\cite{meybodi2022optimal}} Given an instance of the optimal block production problem above, we create a graph $G = (\txs, E_C \cup E_D)$ in which there is a vertex corresponding to every transaction in $\txs$ and an undirected edge $\{t_1, t_2\} \in E_C$ whenever the transactions $t_1$ and $t_2$ are in conflict, as well as a directed edge $(t_1, t_2) \in E_D$ when transaction $t_2$ depends on transaction $t_1.$ See Figure~\ref{fig:mining-cardano-dcg}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.65]{chapters/mining/mining-cardano-figures/tdpGraph.pdf}
+	\caption{An example dependency-conflict graph. Dependency edges are shown in blue and conflict edges in red.}
+	\label{fig:mining-cardano-dcg}
+\end{figure}
+
+The work~\cite{meybodi2022optimal} (IEEE Blockchain 2022) considered DCGs in the context of Bitcoin mining. It showed that if the DCGs are sparse and path-like, then the optimal block production problem for Bitcoin is efficiently solvable. The approach in~\cite{meybodi2022optimal} depends on the concepts of pathwidth and path decompositions. Intuitively, it first computes a decomposition of the DCG into a path and then uses a dynamic programming algorithm to obtain the optimal block. Unfortunately, such an approach is too slow and not applicable to our use-case in Cardano. This is because in Cardano, a new block has to be produced every second,  whereas computing the decomposition notion used in~\cite{meybodi2022optimal} takes minutes. This was not a problem in Bitcoin, where a new block is added every 10 minutes, but is not scalable enough for Cardano. Therefore, in this work, we consider a stronger notion of decomposition, namely the treedepth decomposition, and provide an algorithm based on treedepth to solve the optimal block production problem in Cardano. As we will see in Section~\ref{sec:mining-cardano-experiments}, our algorithm is highly scalable in practice and produces optimal blocks in less than a second, hence enabling its application in Cardano.
+
+
+
+\subsection{Treedepth}
+
+\para{Treedepth Decompositions~\cite{nevsetvril2012bounded,iwata2017power,nevsetvril2015low}} For a graph $G= (V, E),$ a \emph{treedepth decomposition} is a rooted tree $T = (V, E_T)$ on the same set of vertices as $G$ that satisfies the following requirement:
+\begin{itemize}
+	\item For every undirected edge $\{u, v\} \in E$ or directed edge $(u, v) \in E$ of the original graph, either $u$ is an ancestor of $v$ in $T$ or $v$ is an ancestor of $u$ in $T.$
+\end{itemize}
+We say that a treedepth decomposition $T$ is optimal if it has the smallest possible depth among all decompositions of $G.$ This smallest depth is called the \emph{treedepth} of $G.$ Intuitively, treedepth is a measure of graph sparsity that captures how much a graph resembles a shallow tree. Throughout this work, we always consider the treedepth $d$ of a dependency-conflict graph $G.$ See Figure~\ref{fig:mining-cardano-deco}.
+
+\para{Computing Treedepth} For any small fixed $d,$ there is an algorithm that decides whether an input graph has treedepth $d$ in linear time and if so, outputs an optimal treedepth decomposition~\cite{reidl2014faster}. There are also well-optimized tools and libraries for computing treedepth decompositions~\cite{DBLP:conf/iwpec/Strasser20}. As we will see in Section~\ref{sec:mining-cardano-experiments}, DCGs in Cardano have small treedepth. Thus, in the remainder of this paper we assume, without loss of generality, that we have access to an optimal treedepth decomposition of every DCG. In practice, we use~\cite{DBLP:conf/iwpec/Strasser20} to find such decompositions.
+
+\para{Vertex Numbering} Recall that the vertices in our DCGs are unmined Cardano transactions. We number the vertices by a pre-order (left-to-right) traversal of our treedepth decomposition. See Figure~\ref{fig:mining-cardano-deco} as an example. This is also without loss of generality, but allows us to present our algorithm more concisely. 
+
+\begin{figure}
+	\begin{center}
+		\includegraphics[scale=0.65]{chapters/mining/mining-cardano-figures/tdpDec.pdf}
+	\end{center}
+\caption{A treedepth decomposition of the DCG graph of Figure~\ref{fig:mining-cardano-dcg}. The edges of the decomposition are dashed. Every edge of the original graph (shown in red and blue) goes between a vertex and one of its ancestors. The vertices are numbered in pre-order. This decomposition has a depth of $3,$ since the path from the root $1$ to the farthest leaf $5$ has three edges.}
+\label{fig:mining-cardano-deco}
+\end{figure}
+
+\para{Ancestor Sets} Suppose that our treedepth decomposition $T$ is rooted at vertex $1$. For every vertex $v \in V,$ we denote by $A_v$ the set of ancestors of $v,$ i.e.~the set of vertices that are on the path from the root $1$ to $v$ in $T.$ For two vertices $u, v \in V,$ we define $A_{u, v} := A_u \cap A_v$ as the set of their common ancestors, i.e.~vertices that are ancestors of both $u$ and $v.$ Since we numbered the vertices in pre-order, we have $A_{i, i-1} = A_i \setminus \{i\}$ for every vertex $i.$

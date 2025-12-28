@@ -6,7 +6,7 @@ In this section, we focus on solving the problem of forming an optimal block on 
 
 
 
-\para{Optimal Block Production} Given a block size limit $k \in \mathbb N,$ a finite set $\txs$ of $n$ unmined Cardano transactions in which every transaction $t \in \txs$ has a set of inputs, a set of outputs, a fee $\fee(t) \in [0, \infty)$ and a size $\sz(t) \in \mathbb{N},$ find a subset $\txs^\ast \subseteq \txs$ of transactions such that:
+\para{Optimal Block Production} Given a block size limit $k \in \mathbb N,$ a finite set $\txs$ of $n$ unmined Cardano transactions in which every transaction $t \in \txs$ has a set of inputs, a set of outputs, a fee $\cfee(t) \in [0, \infty)$ and a size $\sz(t) \in \mathbb{N},$ find a subset $\txs^\ast \subseteq \txs$ of transactions such that:
 \begin{itemize}
 	\item $\txs^\ast$ satisfies all the dependency and conflict requirements as above;
 	\item $\sum_{t \in \txs^\ast} \sz(t) \leq k,$ i.e.~all the chosen transactions fit into the block size limit; and
@@ -29,13 +29,13 @@ The work~\cite{meybodi2022optimal} (IEEE Blockchain 2022) considered DCGs in the
 
 \subsection{Treedepth}
 
-\para{Treedepth Decompositions~\cite{nevsetvril2012bounded,iwata2017power,nevsetvril2015low}} For a graph $G= (V, E),$ a \emph{treedepth decomposition} is a rooted tree $T = (V, E_T)$ on the same set of vertices as $G$ that satisfies the following requirement:
+\para{Treedepth Decompositions~\cite{nevs2012bounded, iwata2017power, nevs2015low}} For a graph $G= (V, E),$ a \emph{treedepth decomposition} is a rooted tree $T = (V, E_T)$ on the same set of vertices as $G$ that satisfies the following requirement:
 \begin{itemize}
 	\item For every undirected edge $\{u, v\} \in E$ or directed edge $(u, v) \in E$ of the original graph, either $u$ is an ancestor of $v$ in $T$ or $v$ is an ancestor of $u$ in $T.$
 \end{itemize}
 We say that a treedepth decomposition $T$ is optimal if it has the smallest possible depth among all decompositions of $G.$ This smallest depth is called the \emph{treedepth} of $G.$ Intuitively, treedepth is a measure of graph sparsity that captures how much a graph resembles a shallow tree. Throughout this work, we always consider the treedepth $d$ of a dependency-conflict graph $G.$ See Figure~\ref{fig:mining-cardano-deco}.
 
-\para{Computing Treedepth} For any small fixed $d,$ there is an algorithm that decides whether an input graph has treedepth $d$ in linear time and if so, outputs an optimal treedepth decomposition~\cite{reidl2014faster}. There are also well-optimized tools and libraries for computing treedepth decompositions~\cite{DBLP:conf/iwpec/Strasser20}. As we will see in Section~\ref{sec:mining-cardano-experiments}, DCGs in Cardano have small treedepth. Thus, in the remainder of this paper we assume, without loss of generality, that we have access to an optimal treedepth decomposition of every DCG. In practice, we use~\cite{DBLP:conf/iwpec/Strasser20} to find such decompositions.
+\para{Computing Treedepth} For any small fixed $d,$ there is an algorithm that decides whether an input graph has treedepth $d$ in linear time and if so, outputs an optimal treedepth decomposition~\cite{reidl2014faster}. There are also well-optimized tools and libraries for computing treedepth decompositions~\cite{strasser2020pace}. As we will see in Section~\ref{sec:mining-cardano-experiments}, DCGs in Cardano have small treedepth. Thus, in the remainder of this paper we assume, without loss of generality, that we have access to an optimal treedepth decomposition of every DCG. In practice, we use~\cite{strasser2020pace} to find such decompositions.
 
 \para{Vertex Numbering} Recall that the vertices in our DCGs are unmined Cardano transactions. We number the vertices by a pre-order (left-to-right) traversal of our treedepth decomposition. See Figure~\ref{fig:mining-cardano-deco} as an example. This is also without loss of generality, but allows us to present our algorithm more concisely. 
 

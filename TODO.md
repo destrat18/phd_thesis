@@ -1,5 +1,5 @@
 ## Content:
-- [x] Add dedication
+- [X] Add dedication
 - [ ] Add Acknowledgment
 - [ ] Complete introduction
     - [ ] Add Algebra-Geomatics paragraph
@@ -7,19 +7,21 @@
     - [ ] Add Outline
     - [ ] Add Summary of contributions
 - [x] Add options
-- [ ] Add mining section
-    - [ ] Add Ethereum
-    - [ ] Add Cardano
+- [X] Add mining section
+    - [X] Add Ethereum
+    - [X] Add Cardano
+- [ ] Add the compiler paper
+- [ ] Add Asparagus
 
 
 ## Finalizing:
 - [ ] Update tool link for the Ethereum mining paper
-- [ ] Add intro for the prelim chapeter
+- [ ] Add intro for the prelim chapter
 - [ ] Fix codes
 - [ ] Fix chapter titles
 - [ ] All use example tags
 - [ ] Add more plots to the experiment section of ethereum
 - [ ] Should I add discussions?
 - [ ] Fix para and paragraph
-- [ ] Replace \fee with cfee in cardano paper
+- [X] Replace \fee with cfee in cardano paper
 - [ ] Remove in our work

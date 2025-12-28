@@ -1,1 +1,38 @@
-\section{Experimental of Cardano Block Production}\label{sec:mining-cardano-experiments} 
+\section{Runtime and Revenue Improvements on Real-World Cardano Data}\label{sec:mining-cardano-experiments} 
+
+
+We implemented our algorithm in \texttt{C++} as a tool called Pixiu. Pixiu is free and open-source software donated to the public domain. We used FlowCutter~\cite{DBLP:conf/iwpec/Strasser20} to find treedepth decompositions.
+
+\para{Machine} All experimental results were obtained on an Intel Xeon Gold 5115 CPU (2.40GHz, 16 cores) running Ubuntu 22.04 and 64 GB of RAM. We did not use parallelization in the runtimes reported below.
+
+\para{Benchmarks} With the help of the Cardano Foundation, we gathered the sets of unmined transactions before each of the blocks number 10,044,250 to 10,255,796 of the Cardano blockchain, corresponding to the timeframe of 2024-03-12 00:00:37 UTC to 2024-04-30 23:59:41 UTC (50 days). For each of the 211,547 blocks mined in this period, we ran our algorithm to obtain an optimal selection of transactions and compared the resulting total transaction fees with the fee revenue obtained by the block producers on Cardano. 
+
+\para{Treedepth} We observed that the vast majority of benchmark DCGs had small treedepth. Figure~\ref{ex:mining-cardano-tdp} shows a histogram of the obtained treedepths. The average treedepth was 1.45. Thus, our algorithm is applicable to real-world Cardano block production and runs in polynomial time $O(n \cdot k)$ on these instances.
+
+\begin{figure}
+	\includegraphics[width=\linewidth]{chapters/mining/mining-cardano-figures/tdp.pdf}
+	\caption{Histogram of treedepths of DCGs in real-world Cardano benchmarks. The $y$-axis is in logarithmic scale.}
+	\label{ex:mining-cardano-tdp}
+\end{figure}
+
+
+\para{Increases in Revenue} Limiting the runtime to 1s, our algorithm improved the total transaction fees in 56,053 of the 211,547 blocks considered in our experiment. This suggests that many of the blocks produced on the Cardano blockchain were already optimal. This is not surprising since when the transaction load in the network is low, the miners can often include all the available transactions in their block, which would of course be optimal. Our algorithm's advantage is most pronounced when the number of available unmined transactions is much more than the capacity of a block. Over these 56,053 blocks, the average per-block improvement was 55.68 percent, corresponding to 1.55 Ada and 1.21 USD, whereas the maximum improvement was 66.48 Ada = 51.85 USD. We used the exchange rate 1 Ada = 0.78 USD. The overall improvement over the period of the experiment was 87,040.20 Ada or 67,891.35 USD. Thus, our algorithm obtains transaction fee revenue increases of 1,357.82 USD/day = 495,604.3 USD/year. Therefore, the Cardano miners would benefit immensely from applying our algorithm and ensuring that they will always produce optimal blocks that maximize their transaction fee revenue. Figures~\ref{ex:mining-cardano-per}--\ref{ex:mining-cardano-usd} show the histogram of obtained improvements in percentage, Ada and USD. Our average runtime was 0.31s per block. 
+
+
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{chapters/mining/mining-cardano-figures/incPer.pdf}
+	\caption{Histogram of the transaction fee improvements obtained over each block (in percentages). The $y$-axis is in logarithmic scale.}
+	\label{ex:mining-cardano-per}
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{chapters/mining/mining-cardano-figures/incADA.pdf}
+	\caption{Histogram of the transaction fee improvements obtained over each block (in Ada). The $y$-axis is in logarithmic scale.}
+	\label{ex:mining-cardano-ada}
+\end{figure}
+
+\begin{figure}[H]
+	\includegraphics[width=\linewidth]{chapters/mining/mining-cardano-figures/incUsd.pdf}
+	\caption{Histogram of the transaction fee improvements obtained over each block (in USD). The $y$-axis is in logarithmic scale.}
+	\label{ex:mining-cardano-usd}
+\end{figure}

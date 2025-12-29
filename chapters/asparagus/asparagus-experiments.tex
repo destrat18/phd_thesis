@@ -1,2 +1,73 @@
 \section{Experimental Results}\label{sec:asparagus-experiments} 
 
+\para{Implementation} We implemented our algorithm of Section~\ref{sec:illustration} for Ethereum smart contracts and named our automated tool \emph{\textbf{Asparagus}}\footnote{\underline{A}utomated \underline{s}ynthesis of \underline{para}metric \underline{g}as \underline{u}pper-bounds for \underline{s}mart contracts}. Our implementation is in Python 3 and can obtain linear and polynomial gas usage upper-bounds for public functions of any given contract written in Solidity. We used Slither~\cite{DBLP:conf/icse/FeistGG19} for parsing, \texttt{solc} 0.4.25 for compilation~\cite{solidity}, Z3~\cite{DBLP:conf/tacas/MouraB08} and Mathsat~\cite{mathsat5} to solve the final systems of quadratic constraints, and EthIR~\cite{DBLP:conf/atva/AlbertGLRS18} to generate RBR intermediate representation. The implementation is open-source and dedicated to the public domain with a CC0 (no rights reserved) license. It is available as an archived artifact attached to this article.
+
+
+
+\para{Benchmarks and Experimental Setting}
+We compare Asparagus with GASTAP~\cite{DBLP:journals/jss/AlbertCGRR21}, which is the only previous tool able to generate parametric bounds, as well as the \texttt{solc} compiler's built-in static analyzer~\cite{solidity}. As benchmarks, we took the dataset provided by GASTAP. Since both GASTAP and Asparagus use EthIR in their pipeline, we excluded any benchmark on which EthIR failed to generate RBR. Surprisingly, such benchmarks existed and we could not replicate and verify the experimental claims of GASTAP~\cite{DBLP:journals/jss/AlbertCGRR21}. We suspect this might have to do with EthIR updates that were aimed at supporting newer versions of Solidity, and have likely reduced its applicability significantly in comparison to what GASTAP reports. Irrespective of the cause, our results have significant mismatches with GASTAP's claims. In total, we report experimental results on 24,188 contracts, containing 156,735 functions. Figure~\ref{fig:asparagus-length} shows the distribution of contract lengths in our benchmark suite and Figure~\ref{fig:asparagus-path} reports the number of basic paths in the analyzed functions.
+
+\begin{figure}
+	\includegraphics[keepaspectratio,width=\linewidth]{chapters/asparagus/asparagus-pictures/length.pdf}
+	\caption{Distribution of Contract Lengths among the Benchmarks.}
+	\label{fig:asparagus-length}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[keepaspectratio,width=\linewidth]{chapters/asparagus/asparagus-pictures/path.pdf}
+	\caption{Number of Basic Paths in the Analyzed Functions.}
+	\label{fig:asparagus-path}
+\end{figure}
+
+\para{Machine and Runtimes} All computations were performed on an Intel Xeon Gold 5115 CPU  (2.40GHz, using 16 cores) running Ubuntu 20.04 and 64 GB of RAM. Our average runtime on each function was 5.18 seconds, leading to a total runtime of almost 225.8 hours for 156,735 functions. This demonstrates that our approach is scalable and easily applicable to real-world contracts.
+
+\para{Comparing Bounds} In cases where the bounds are constants, we can simply compare them. We say a parametric bound $A$ is tighter than another bound $B$ if for any initial state $\sigma$ that satisfies the precondition, i.e.~the invariant at the beginning point of the function, we have $A(\sigma) \leq B(\sigma)$ and additionally, $A(\sigma)$ is strictly less in at least one such state. To compare bounds, we again use the theorems of Farkas, Handelman and Putinar to (i)~check whether $ \mathbb{I}(l_0) \Rightarrow A \leq B$ holds, and (ii) synthesize a particular state that satisfies $ \mathbb{I}(l_0)\wedge A < B.$ If this fails, we report that the bounds are incomparable.
+
+\para{Comparison with \texttt{solc}}
+We first compared Asparagus and \texttt{solc} on the entire dataset of 156,735 functions. Our tool successfully synthesized gas usage upper-bounds for \textbf{80.56\%} of the instances compared to a success rate of \textbf{64.15\%} for \texttt{solc}. Note that \texttt{solc} can only synthesize constant bounds and hence fails on all benchmarks that require parametric bounds. Table~\ref{table:asparagus-overall-asparagus-vs-solc} provides a comparison of success rates and coverage of the two tools. In cases where both approaches could successfully find a bound, our bound was better in 81,425 cases. Figure~\ref{fig:asparagus-solc} provides a comparison of the \emph{constant} bounds obtained by the two tools.
+
+\begin{table}[h!]
+    \centering
+    \input{chapters/asparagus/asparagus-tabels/overall\_asparagus\_vs\_solc.tex}
+    \caption{Number and percentage of benchmark functions solved by Asparagus and \texttt{solc} on 156,735 functions.}    
+    \label{table:asparagus-overall-asparagus-vs-solc}
+\end{table}
+
+\begin{figure}
+	\includegraphics[keepaspectratio,width=\linewidth]{chapters/asparagus/asparagus-pictures/comparedSolc.pdf}
+	\caption{Comparsion of the Constant Bounds obtained by Asparagus and \texttt{solc}.}
+	\label{fig:asparagus-solc}
+\end{figure}
+
+
+
+\para{Comparison with GASTAP}
+We also compared Asparagus with GASTAP. 
+Unfortunately, we did not have the desired degree of access to GASTAP in order to perform a complete comparison due to the following reasons:
+\begin{itemize}
+	\item GASTAP did not publish its gas upper-bound results for the dataset.
+	\item GASTAP is a closed-source and proprietary piece of software that can only be accessed by an online web interface\footnote{\url{costa.fdi.ucm.es/gastap}} with no API. To perform the comparison, we had to reverse-engineer their http requests and even then, most of our requests failed, even after sending them a dozen times each. We manually checked some of the failed requests on their online interface, and confirmed that the failures are due to GASTAP.
+\end{itemize}
+
+Due to these limitations, we could successfully run GASTAP on only 1,682 contracts, consisting of 10,186 functions. We thus report a comparison on these 10,186 functions. On these benchmarks, Asparagus successfully synthesized a gas upper-bound for \textbf{86.94\%} of the functions compared to \textbf{58.62\%} for GASTAP and \textbf{61.61\%} for \texttt{solc}, demonstrating Asparagus' effectiveness. Table~\ref{table:asparagus-overall-asparagus-vs-gastap-vs-solc} provides a more detailed comparison and Figure~\ref{fig:asparagus-gastap} compares the \emph{constant} bounds obtained by the two tools.
+
+\begin{table}[h!]
+    \centering
+    \input{chapters/asparagus/asparagus-tabels/overall\_asparagus\_vs\_gastap\_vs\_solc.tex}
+    \caption{Number and percentage of benchmark functions solved by Asparagus, GASTAP and \texttt{solc} on 10,186 functions.}    
+    \label{table:asparagus-overall-asparagus-vs-gastap-vs-solc}
+\end{table}
+
+\begin{figure}
+	\includegraphics[keepaspectratio,width=\linewidth]{chapters/asparagus/asparagus-pictures/ComparedGASTAP.pdf}
+	\caption{Comparsion of the Constant Bounds obtained by Asparagus and GASTAP.}
+	\label{fig:asparagus-gastap}
+\end{figure}
+
+Notably, we compared the bounds in cases where both Asparagus and GASTAP were successful (5,916 functions). Asparagus' synthesized upper-bounds were strictly tighter in 5,789 cases, representing \textbf{97.85\%}. GASTAP provided tighter bounds for only 45 functions, representing \textbf{0.76\%} of the instances. In other cases, the bounds were either equal or incomparable. 
+
+\para{Non-linear Bounds} The vast majority of real-world contracts have constant or linear gas usage. In total, only 653 of our benchmarks required a polynomial bound and an application of the theorems of Handelman and Putinar. The rest of the instances were solved by Farkas' Lemma. Our implementation supports polynomials of any degree. We have experimented with nested loops requiring up to hexic bounds and successfully synthesized results on hand-crafted examples. However, none of the real-world benchmarks in our dataset needed bounds of degree higher than $2$. 
+
+\para{Summary} Asparagus is able to handle significantly more real-world benchmarks than both \texttt{solc} and GASTAP. Since GASTAP was the only previous tool that could generate parametric bounds, Asparagus is now the most widely-applicable tool for such bounds to the best of our knowledge. Moreover, we consistently generate tighter bounds than both GASTAP and \texttt{solc}.  
+
+\para{Contracts beyond Asparagus’ Capability} As mentioned above, Asparagus successfully handled 80.56\% of the cases in our benchmark suite (See Table~\ref{table:asparagus-overall-asparagus-vs-gastap-vs-solc}). This is considerably more than \texttt{solc} and GASTAP. The remaining benchmarks were beyond the capability of our tool, due to non-polynomial operations and bounds. Our PTS formalism can handle polynomial assignments, guards, templates and bounds. Thus, we replace non-polynomial behavior, such as the integer mod operation, with non-determinism, cf.~Steps 1 and 2 of the algorithm. This can lead to failures in synthesizing bounds. Moreover, in some cases, no polynomial bound exists at all. Our completeness result guarantees that our approach will succeed if (i)~the contract can be faithfully modeled as a PTS with polynomial assignments, invariants and templates, and (ii)~the PTS has a polynomial gas usage bound. In practice, all real-world contracts on which Asparagus failed were violating condition (i) and had non-polynomial inherently-integer operations such as gcd or mod.

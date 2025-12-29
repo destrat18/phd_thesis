@@ -113,7 +113,7 @@ Cardano imposes a block size limit, i.e.~the total size of all transactions incl
 \section{Ethereum Architecture}
 \label{sec:prelim-ethereum}
 
-This section provides a quick introduction to Ethereum and its gas model, following~\cite{wood2014ethereum,beigepaper}.
+This section provides a quick introduction to Ethereum and its gas model, following~\cite{wood2014ethereum, dameron2019beige}.
 
 % \para{Architecture (Execution and Consensus)} TODO: Execution layer (EVM/world state) vs consensus layer; mempool; (optional) PBS/MEV context.
 % \para{Consensus Model (Proof-of-Stake)} TODO: Validator roles, fork choice vs finality, and reorg/finality intuition (e.g.~\cite{zhang2025available}).
@@ -146,7 +146,7 @@ The state of an account consists of the following fields:
 
 \para{Smart Contracts} A deployed smart contract has the following data fields: \textit{nonce}, \textit{balance}, \textit{codeHash} and \textit{storageRoot}. The code of the smart contract is stored on the blockchain as bytecode (a sequence of opcodes) and immutable. All participants of Ethereum can interact with smart contracts by calling the public functions in their code. The EVM bytecode format is Turing-complete. 
 
-\para{Solidity~\cite{solidity}} Solidity is an object-oriented, high-level Turing-complete language for implementing Ethereum smart contracts and the most widely-used smart contract language. Solidity supports all the standard data types and data structures such as arrays and mappings. The functions in Solidity contracts can call other functions from the same contract or external public functions  by specifying the function signatures and contract addresses. 
+\para{Solidity~\cite{foundation2014misc}} Solidity is an object-oriented, high-level Turing-complete language for implementing Ethereum smart contracts and the most widely-used smart contract language. Solidity supports all the standard data types and data structures such as arrays and mappings. The functions in Solidity contracts can call other functions from the same contract or external public functions  by specifying the function signatures and contract addresses. 
 
 % \para{Other Contract Languages} TODO: Briefly mention other EVM languages (e.g., Vyper/Yul) and compilation to bytecode.
 
@@ -156,7 +156,7 @@ The state of an account consists of the following fields:
 
 \para{Deposits and Out-of-gas Behavior} The user who initiates a transaction (function call to a smart contract) can specify the maximum amount of gas that the transaction is allowed to spend, as well as the price that the user is willing to pay per unit of gas\footnote{After the London upgrade in Ethereum, there is a minimum base price that the user must pay or else the transaction is invalid. However, this has no effect on our algorithms, since they all consider gas usage itself and are independent of the gas price.}. They should then provide a deposit equal to the product of the two parameters. When the transaction is added to the blockchain, every node in the network executes it, while keeping track of the amount of gas that is being used. If the function call requires more than the allocated gas, then not only the deposit is confiscated but the call itself is reverted and canceled, i.e.~all effects of this function call, be it on user's balances or the variables of the smart contracts, will be reverted as if this function call never existed. The only effect is that the initiator loses their deposit.
 
-\para{Gas Usage Formula} The Ethereum protocol fixes a specific gas cost for every one of the EVM opcodes using a complicated formula to address the different computational workloads of different opcodes. See~\cite[Page 14]{beigepaper} for a complete table of gas costs. We follow these costs in our implementation but their specific values have no bearing on the theory. In summary:
+\para{Gas Usage Formula} The Ethereum protocol fixes a specific gas cost for every one of the EVM opcodes using a complicated formula to address the different computational workloads of different opcodes. See~\cite[Page 14]{dameron2019beige} for a complete table of gas costs. We follow these costs in our implementation but their specific values have no bearing on the theory. In summary:
 \begin{itemize}
     \item Most opcodes have fixed constant gas costs. For example, stack operation opcodes \texttt{PUSHx}, \texttt{POPx} and \texttt{SWAPx} have a gas cost of 3 units each. 
 	\item Some opcodes have a few different gas costs given different conditions. The \texttt{SSTORE} opcode is an example, which saves a word to storage. The gas cost is 20,000 if it is overwriting a zero with a non-zero value, and 5,000 otherwise. Moreover, if the operation clears a non-zero to a zero, then 15,000 units of gas are refunded, but this refund is made only if the current transaction uses more than 15,000 units of gas. Since these conditions are unnecessarily complicated and depend on the dynamic world state, and since they are not specified by the smart contract itself, we always replace them with their highest possible value to preserve soundness, e.g.~we always assume that an \texttt{SSTORE} takes 20,000 units of gas.

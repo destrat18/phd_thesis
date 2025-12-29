@@ -20,7 +20,7 @@ In this section, we fill in the mathematical details of our algorithm using Fark
 
 We start by stating Farkas' Lemma, which is a well-known result in polyhedral geometry and linear algebra.
 
-\begin{theorem}[{Farkas' Lemma} \cite{farkas1902theorie}]\label{thm:farkas}
+\begin{theorem}[{Farkas' Lemma} \cite{farkas1902theory}]\label{thm:farkas}
 Let $f_1, \ldots f_r$ and $g$ be any linear polynomials over the set of variables $\mathbb{V}.$ The boolean implication $$f_1 \ge 0 \land f_2  \ge 0 \ldots \land f_r \ge 0 \implies g \ge 0$$ holds for every valuation of $\mathbb V$ \textbf{if and only if} there exist $\lambda_0, \lambda_1, \ldots, \lambda_r,$ such that $$ g \equiv \lambda_0 + \sum_{i=1}^r \lambda_i \cdot f_i$$
 where all $\lambda_i$'s are non-negative reals. Moreover, $f_1 \ge 0 \land f_2  \ge 0 \ldots \land f_r \ge 0$ is unsatisfiable \textbf{if and only if} $ -1 \equiv \lambda_0 + \sum_{i=1}^r \lambda_if_i$ for some non-negative real $\lambda_i$'s.
 \end{theorem}

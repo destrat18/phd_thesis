@@ -1,0 +1,198 @@
+\begin{figure}
+	\centering
+
+	\begin{subfigure}[b]{\textwidth}
+	\centering
+	\resizebox{!}{8.4cm}{ % adjust the height here
+	\begin{tikzpicture}
+	\label{fig:voting-rbr}
+	\fontfamily{ptm}
+	\node (Block161) {%
+		\begin{tabular}{|l|l|}
+			\hline
+			 \multicolumn{2}{|l|}{\textbf{Block161}}\\
+			 \hline\hline
+			\multicolumn{2}{|l|}{$s_0$, proposals.length, 
+			$l_0$, $l_1$, $l_3$, 
+			callvalue}\\
+			
+			\hline
+			&JUMPDEST\\
+			$s_1 = $ callvalue & CALLVALUE\\
+			$s_2 = s_1$	& DUP1\\
+			& ISZERO\\
+			&PUSH2\\
+			&JUMPI\\
+			\hline
+			\multicolumn{2}{|l|}{Jump}\\
+			\hline
+			condition & next block \\
+			\hline
+			$s_2\neq 0$ & $\Rightarrow$ Block169 \\
+			$s_2=0$ & $\Rightarrow$ Block173\\
+			\hline
+		\end{tabular}
+	};
+	
+	\node [below=of Block161] (Block169) {%
+		\begin{tabular}{|l|l|}
+			\hline
+			\multicolumn{2}{|l|}{\textbf{Block169}}\\
+			\hline\hline
+			\multicolumn{2}{|l|}{$s_0$, $s_1$}\\
+			
+			\hline
+			% $s_2 = 0$ &PUSH1\\
+			% $s_3 = s_2$ & DUP1\\
+			% & REVER\\
+			... & ...\\
+			\hline
+			\multicolumn{2}{|l|}{Ending}\\
+			\hline
+		\end{tabular}
+	};
+
+	\node [right=of Block161] (Block173) {%
+	\begin{tabular}{|l|l|}
+		\hline
+		\multicolumn{2}{|l|}{\textbf{Block173}}\\
+		\hline\hline
+		\multicolumn{2}{|l|}{$s_0$, $s_1$, proposals.length, $l_0$, $l_1$, $l_3$}\\
+		\hline
+		&JUMPDEST\\
+		&POP\\
+		$s_1 = 182$ &PUSH2\\
+		$s_2 = 255$ & PUSH2\\
+		& JUMP\\
+		\hline
+		\multicolumn{2}{|l|}{Jump}\\
+		\hline
+		\multicolumn{2}{|l|}{$\Rightarrow$ Block255}\\
+		\hline
+	\end{tabular}
+	};
+
+	\node [below=of Block173] (Block255) {%
+	\begin{tabular}{|l|l|}
+		\hline
+		\multicolumn{2}{|l|}{\textbf{Block255}}\\
+		\hline\hline
+		\multicolumn{2}{|l|}{$s_0$, $s_1$, proposals.length, $l_0$, $l_1$, $l_3$}\\
+		\hline
+		% &JUMPDEST\\
+		% $s_2 = 0$&PUSH1\\
+		% $\dots$&$\dots$\\
+		... & ...\\
+		\hline
+		\multicolumn{2}{|l|}{Next}\\
+		\hline
+		\multicolumn{2}{|l|}{$\Rightarrow$ Block268}\\
+		\hline
+	\end{tabular}
+	};
+
+	\draw[->]
+	(Block161) to (Block169);
+	\draw[->]
+    (Block161) to (Block173);
+	\draw[->]
+    (Block173) to (Block255);
+	\end{tikzpicture}
+}
+% (Block161) .. controls (-6, -2) and  (-4, -4) .. (Block169);
+\end{subfigure}
+\par\medskip
+	\begin{subfigure}[b]{\textwidth}
+	\centering
+\resizebox{!}{9cm}{ % adjust the height here
+\hspace{0.8cm}
+\begin{tikzpicture}
+	\label{fig:nestedloop-rbr}
+	\fontfamily{ptm}
+	\node (Block167) {%
+		\begin{tabular}{|l|l|}
+			\hline
+			\multicolumn{2}{|l|}{\textbf{Block167}}\\
+			\hline\hline
+			\multicolumn{2}{|l|}{$s_0, s_1, \dots, s_7$, $l_0$, $l_1$}\\
+			\hline
+			&JUMPDEST\\
+			$s_8 = s_3$  & DUP5\\
+			$s_9 = s_7$	& DUP2\\
+			& LT\\
+			& ISZERO\\
+			&PUSH1\\
+			&JUMPI\\
+			\hline
+			\multicolumn{2}{|l|}{Jump}\\
+			\hline
+			condition & next block \\
+			\hline
+			$s_8 > s_9$ & $\Rightarrow$ Block175 \\
+			$s_8\le s_9$ & $\Rightarrow$ Block190\\
+			\hline
+		\end{tabular}
+	};
+	
+	\node [right=of Block167] (Block175) {%
+		\begin{tabular}{|l|l|}
+			\hline
+			\multicolumn{2}{|l|}{\textbf{Block175}}\\
+			\hline\hline
+			\multicolumn{2}{|l|}{$s_0, s_1, \dots, s_7$, $l_0$, $l_1$}\\
+			\hline
+			$s_8 = s_5$ & DUP3\\
+			$s_9 = 1$ &PUSH1\\
+			$s_8 = s_8 + s_9$ & ADD\\
+			$s_9 = s_5$ & SWAP3 \\
+			$s_5 = s_8$ & $\dots$ \\
+			$s_8 = s_9$ & $\dots$ \\
+			& POP\\
+			$s_8 = 167$ & PUSH1 \\
+			& JUMP\\
+			\hline
+			\multicolumn{2}{|l|}{Jump}\\
+			\hline
+			\multicolumn{2}{|l|}{$\Rightarrow$ Block167}\\
+			\hline
+		\end{tabular}
+	};
+	
+	\node [below=of Block167] (Block190) {%
+		\begin{tabular}{|l|l|}
+			\hline
+			\multicolumn{2}{|l|}{\textbf{Block190}}\\
+			\hline\hline
+			\multicolumn{2}{|l|}{$s_0, s_1, \dots, s_7$, $l_0$, $l_1$}\\
+			\hline
+			% &JUMPDEST\\
+			% $s_8 = s_6$&DUP2\\
+			% $s_9 = 1$ &PUSH1\\
+			% $s_8 = s_8 + s_9$ & ADD\\
+			% $s_9 = s_6$ & SWAP2\\
+			% $s_6 = s_8$ & $\dots$ \\
+			% $s_8 = s_9$ & $\dots$ \\
+			% & POP\\
+			... & ... \\
+			% $s_8 = 155$ & PUSH1\\
+			% & JUMP\\
+			\hline
+			\multicolumn{2}{|l|}{Jump}\\
+			\hline
+			\multicolumn{2}{|l|}{$\Rightarrow$ Block155}\\
+			\hline
+		\end{tabular}
+	};
+	
+	\draw[->]
+	(Block167) to [bend left=10] (Block175);
+	\draw[->]
+	(Block175) to [bend left=10] (Block167);
+	\draw[->]
+	(Block167) to (Block190);
+\end{tikzpicture}
+}
+\end{subfigure}
+	\caption{Part of the Rule-based Representations (RBR) of \linearexample (top) and \nonlinearexample (bottom)}
+	\label{fig:asparagus-rbrrbr}
+\end{figure}

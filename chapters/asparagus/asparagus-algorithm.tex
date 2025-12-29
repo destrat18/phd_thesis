@@ -1,2 +1,143 @@
 \section{Our Algorithm}\label{sec:asparagus-algorithm} 
 
+
+
+\para{GASTAP~\cite{DBLP:journals/jss/AlbertCGRR21}} GASTAP is a tool to process EVM bytecode into an intermediate rule-based representation (RBR) and estimate gas bounds of function calls. The part of the GASTAP project which obtains the RBR is called EthIR and is publicly available~\cite{DBLP:conf/atva/AlbertGLRS18}. Our algorithm works on a polynomial transition system (PTS, defined further below). However, the translation from RBR to PTS is much simpler than a direct translation from EVM bytecode. So, in practice, we first use~\cite{DBLP:conf/atva/AlbertGLRS18} to translate EVM to RBR and then convert the RBR to PTS.
+
+\para{EVM to CFG} GASTAP firstly converts an EVM bytecode to a control flow graph (CFG). The EVM language uses a local stack, a volatile memory, and a persistent storage that is part of the blockchain state.  Given the compiled smart contract, GASTAP groups the code into EVM basic blocks, which are maximal sequences of straight-line code. Each EVM block ends with either a \texttt{JUMP}/\texttt{JUMPI} operation where program execution jumps to a specified location, or an ending instruction like \texttt{RETURN} or \texttt{REVERT}. Each EVM block has an address according to the location where it appears in the bytecode. When a block jumps, static analysis is applied to parse the jump destination and form an edge to the destination block. As a result, a stack-sensitive control flow graph is created. This CFG is then used to translate the program into RBR and PTS formats below. See~\cite{DBLP:conf/atva/AlbertGLRS18} for detailed syntax and semantics of RBR.
+
+\begin{example}
+	Figure~\ref{fig:asparagus-runex} shows two Ethereum smart contracts, written in Solidity, which will serve as our running examples. Figure~\ref{fig:asparagus-rbrrbr} shows part of the RBR representation of these contracts, as well as the edges in their CFGs.
+\end{example}
+
+\begin{figure}
+\begin{subfigure}[t]{0.6\textwidth}
+	\begin{lstlisting}[language=Solidity, numbers=none]
+contract VotingContract {
+	
+	struct Proposal {bytes32 name; 	uint voteCount;}
+	Proposal[] public proposals;
+	
+	function winningProposal() public returns (uint winningProposal){
+		uint winningVoteCount = 0;
+		for (uint p=0;p<proposals.length;p++){
+			if (proposals[p].voteCount>winningVoteCount) {
+				winningVoteCount = proposals[p].voteCount;
+				winningProposal = p;
+			}}}}    
+	\end{lstlisting}
+\end{subfigure}\textcolor{white}{...}
+\begin{subfigure}[t]{0.35\textwidth}
+\begin{lstlisting}[language=Solidity, numbers=none]
+
+contract NestedLoop{
+		
+function main(uint a,uint b) public returns(uint)
+	{
+		uint count = 0;
+		for (uint i=0;i<a;++i)
+			for (uint j=0;j<b;++j)
+				++count;
+		return count;
+	}   
+}
+\end{lstlisting}
+\end{subfigure}
+\caption{Two Example Contracts}
+\label{fig:asparagus-runex}
+\end{figure}
+
+\input{chapters/asparagus/asparagus-pictures/rbr-figures-tikz.tex}
+
+
+
+\para{Polynomial Update Functions, Assertions and Transitions}
+Let $\mathbb{V} = \{v_1, \ldots, v_k\}$ denote a finite set of variables. We denote the set of all polynomial expressions with real coefficients over the variables $\mathbb{V}$ by $\mathbb{R}[\mathbb{V}]$.
+A polynomial \emph{update function} $U :\mathbb{V} \to \mathbb{R}[\mathbb{V}]$ maps each variable in $\mathbb{V}$ to a polynomial over $\mathbb{V}$. A \emph{polynomial assertion} $G$ is a logical formula formed by a boolean combination of the assertions of the form $f \ge 0$ and $f > 0$, where $f \in \mathbb{R}[\mathbb{V}].$ 
+A \emph{polynomial transition} $\tau = (U,G)$ is a pair of an update function and a guard. With a slight misuse of notation, we sometimes write $\tau_U$ instead of $U$ and $\tau_G$ to denote $G$.
+
+
+\para{Valuations and Notation}
+A \emph{valuation} $\sigma: \mathbb{V} \to \mathbb{R}$ assigns a real value to each variable in $\mathbb{V}$. 
+A polynomial $f$ can be evaluated at any valuation $\sigma$ naturally by substituting the value of each variable in $f$ and computing it. We will denote this value by $f(\sigma)$. 
+Let $U$ be an update function, then $U(\sigma)$ denotes a valuation in which $U(\sigma)(v) = U(v)(\sigma)$ for each $v$. If $F$ is a polynomial or polynomial assertion, we define $U(F)$ as the result of substituting each occurrence of a variable $v$ in $F$ by the polynomial $U(v)$. 
+
+\para{Composition of Transitions}
+Given two polynomial transitions $\tau_1 = (U_1, G_1)$ and $\tau_2 = (U_2, G_2),$ we denote their composition by $\tau_1 \circ \tau_2$ and define it as $(U,G)$  where $U(v) = U_1(U_2(v))$, and $G = G_1 \land U_1(G_2)$. 
+
+
+\para{PTS} A \emph{Polynomial Transition System} (PTS) $T$ is a tuple $(\mathbb{V}, \mathbb{L}, l_0,l_f, \delta)$ where $\mathbb{V}$ is a set of variables, $\mathbb{L}$ is a set of locations, $l_0$ and $l_f$ are the initial and final locations, respectively, and $\delta$ is a partial function that maps each pair of locations $(l,l')$ to a polynomial transition $(U,G)$.
+
+\begin{example}
+	Figure~\ref{fig:asparagus-simple} provides a simplified PTS representation for each of our example contracts of Figure~\ref{fig:asparagus-runex}. In practice, our tool automatically converts the CFG provided by~\cite{DBLP:conf/atva/AlbertGLRS18} to an RBR. See Section~\ref{sec:asparagus-algorithm} for details. However, the resulting PTSs are usually not human-readable, so Figure~\ref{fig:asparagus-simple} is not a direct output of our tool, but a simplified version.  
+\end{example}
+
+
+\begin{figure}
+	\centering
+	\subfloat{
+		\includegraphics[width=0.7\textwidth]{chapters/asparagus/asparagus-pictures/simple1.pdf}
+		\label{fig:asparagus-voting-pts3}
+	}
+	\hfill
+	\subfloat{
+		\includegraphics[width=0.7\textwidth]{chapters/asparagus/asparagus-pictures/simple2.pdf}
+		\label{fig:asparagus-nestedloop-pts3}
+	}
+	\caption{Simplified PTS Representations $T_1$ (top) and $T_2$ (bottom) of Running Examples. The numbers in red denote the cost of each transition. In these examples, the costs are constant, but our approach supports arbitrary polynomial costs. Cutpoints are shown in yellow.}
+	\label{fig:asparagus-simple}
+\end{figure}
+
+
+\para{Runs} Given an initial valuation $\sigma: \mathbb{V} \to \mathbb{R}$, a \emph{run} $R$ of the PTS $T$ is an alternating sequence of locations and valuations $R := \sigma_0, l_0, \sigma_1, l_1, \sigma_2, l_2, \sigma_3 \ldots$ satisfying the following constraints:
+\begin{enumerate}
+    \item $\sigma_i = \tau_U(\sigma_{i-1})$ for every $i\ge1,$ where $\tau := \delta(l_{i-1}, l_i).$
+    \item $\sigma_i \models \tau_G$ for every $i\ge1.$ Here, we again have $\tau := \delta(l_{i-1}, l_i).$
+\end{enumerate}
+
+\begin{example}
+	Consider the initial valuation $\sigma_0 = \{\texttt{a} \mapsto 0, \texttt{b} \mapsto 0, \texttt{count} \mapsto -1, \texttt{i} \mapsto 10, \texttt{j} \mapsto 0\}$ in the PTS of Figure~\ref{fig:asparagus-simple} (bottom). An example run starting from this valuation is:
+	$$
+	\begin{matrix}
+	 \{\texttt{a} \mapsto 0, \texttt{b} \mapsto 0, \texttt{count} \mapsto -1, \texttt{i} \mapsto 10, \texttt{j} \mapsto 0\}, l_0\\
+	 \{\texttt{a} \mapsto 0, \texttt{b} \mapsto 0, \texttt{count} \mapsto 0, \texttt{i} \mapsto 0, \texttt{j} \mapsto 0\}, l_1\\
+	\{\texttt{a} \mapsto 0, \texttt{b} \mapsto 0, \texttt{count} \mapsto 0, \texttt{i} \mapsto 0, \texttt{j} \mapsto 0\}, l_f.
+	\end{matrix}
+	$$
+\end{example}
+
+\para{Cutsets} Given a PTS $T$, a \emph{cutset} of $T$ is a set of locations $C$ such that (i)~$C$ contains $l_0$ and $l_f$, and (ii)~every cycle in the underlying graph of $T$ passes through some location in the set $C$. In other words, removing $C$ from $T$ will reduce it to a directed acyclic graph. Each location in $C$ is called a \emph{cutpoint}.
+
+\begin{example}
+	In Figure~\ref{fig:asparagus-simple} (top), the set $\{l_0, l_1, l_f\}$ is a cutset. Similarly, in Figure~\ref{fig:asparagus-simple} (bottom), $\{l_0, l_2, l_f\}$ is a cutset. It is easy to verify that removing these cutsets would eliminate all cycles. Note that the edge labeled $\textcolor{red}{\textbf{5}}$ is a cycle on its own, thus $l_2$ has to be included in every cutset.
+\end{example}
+
+
+\para{Basic Paths} Given a cutset $C$, a path $\Pi: = l_1, \tau_1, \ldots, l_{m-1}, \tau_{m-1},l_m$ in the underlying graph of $T$ is said to be \emph{basic} if it starts and ends at cutpoints and does not pass through any cutpoints in between. It is straightforward to observe that the number of all possible basic paths in a PTS is finite as there could be only a finite number of basic paths between each pair of cutpoints. We extend our transition functions to paths and define $\tau(\Pi) := \bigcirc_{i = 0}^{m}(\tau_i)$. 
+
+\begin{example}
+	Using the cutsets from the previous example, the path $l_1, \textcolor{red}{\textbf{1}}, l_2, \textcolor{red}{\textbf{2}}, l_1$ is a basic path of the left PTS and $l_2, \textcolor{red}{\textbf{5}}, l_2$ and $l_0, \textcolor{red}{\textbf{4}}, l_1, \textcolor{red}{\textbf{3}}, l_2$ are examples of basic paths in the right PTS.
+\end{example}
+
+% % Given a PTS $T$ and a cutset $C$, we can \textit{compress} it to get a PTS $T' = 
+
+\para{Invariant Maps}
+Given a cutset $C$ of the PTS $T$, we call a map $\mathbb{I}$ that maps each cutpoint to a polynomial assertion an \emph{invariant map} if for any run $R = \sigma_0, l_1, \sigma_1, l_2, \sigma_2, \ldots $ of $T$ that starts from some cutpoint $l_1$ and initial valuation $\sigma_0 \models \mathbb{I}(l_1)$, we have $\sigma_i \models \mathbb{I}(l_{i})$ whenever $l_i \in C$. In other words, if the initial valuation satisfies the invariant at the start cutpoint, then whenever the run $R$ reaches a cutpoint $l_i$, the valuation of the variables satisfies the invariant at $l_i$. 
+
+\para{Inductive Invariants} An invariant map $\mathbb{I}$ over cutset $C$ is said to be an \emph{inductive invariant map} if for every pair of locations $l,l' \in C$ and every basic path $\Pi := l, \tau_0, l_1 \ldots l_{m-1}, \tau_m, l'$ from $l$ to $l'$ we have 
+$
+    \mathbb{I}(l) \land \tau_G \implies \tau_U(\mathbb{I}(l'))
+$
+, where $\tau = \bigcirc_{i = 0}^{m}(\tau_i)$. In other words, if a valuation satisfies the invariant at the cutpoint $l$ and also satisfies the transition conditions $\tau_G$, then the updated valuation obtained using $\tau_U$ satisfies the invariant at the cutpoint $l'$. 
+
+\para{Invariant Generation} Invariant generation and more specifically, the automated synthesis of linear/polynomial inductive invariants, is an orthogonal and well-studied problem with practically efficient tools such as~\cite{DBLP:conf/cav/ColonSS03,DBLP:conf/pldi/Chatterjee0GG20}. As such, in the sequel, we assume that every PTS comes with invariants generated using one of these tools. 
+
+\para{Abstractions in the Translation from RBR to PTS} We translate a smart contract from the RBR format to a PTS in the standard manner, i.e.~creating one location for every line or every basic block of code and following the operations and guards as in the control flow graph. See the next section for an example. However, this process necessarily leads to some imprecision:
+\begin{compactitem}
+	\item All variables in a PTS are real-valued. Hence, integer variables are converted to real.
+	\item Some operations are inherently not applicable to real variables. We handle these by relying on non-determinism. For example, if we have \texttt{c := a\%b.} In the PTS, the variable \texttt{c} will get a non-deterministic value and the invariant $0 \leq \texttt{c} \leq \texttt{b}-1$ is added. We handle integer division similarly.
+	\item The real variables in a PTS are unbounded, whereas the variable types available in real-world smart contracts are bounded. We add these bounds, e.g.~$-2^{31} \leq \texttt{x} \leq 2^{31}-1$ for a 32-bit integer \texttt{x}, to the invariants.
+	\item There is no support for arrays, stacks or strings in a PTS. Thus, we replace each array with a variable that keeps track of its size. We handle stacks and strings similarly.
+	\item Some contracts have calls to external functions that were not available to us. The results of these calls are also handled by non-determinism. Moreover, for each such external function, we define a new variable that models its total gas cost and use it in our parametric bounds.
+\end{compactitem}
+Note that the points above do not affect the soundness of our approach and hence all of our obtained bounds are correct. Moreover, the gas cost we assign to every PTS transition is the actual gas cost of the same transition in the original contract and is not at all affected by the translation to PTS. Our experimental results in Section~\ref{sec:asparagus-experiments} demonstrate the applicability of our approach to real-world smart contracts. Hence, while it is theoretically possible to write adversarial smart contracts to which our approach is not applicable, the vast majority of real-world smart contracts can be modeled as polynomial transition systems. 

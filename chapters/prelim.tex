@@ -24,7 +24,7 @@ Bitcoin supports a limited scripting language for specifying conditions to spend
 We next briefly review Bitcoin, Cardano, and Ethereum, emphasizing aspects relevant to this thesis.
 
 
-\section{Bitcoin}
+\section{Bitcoin Architecture}
 \label{sec:prelim-bitcoin}
 
 \paragraph{Bitcoin} Bitcoin~\cite{nakamoto2008bitcoin} was the first working protocol for a decentralized cryptocurrency and currently holds the largest market cap among all such currencies, 
@@ -62,7 +62,7 @@ Since mining is an expensive activity, due to both hardware and electricity cost
 Suppose $\alice$ is selling an item to $\bob$ and $\bob$ is paying the price by a Bitcoin transaction $Tx_1$ that transfers part of his money to $\alice$. In this case, it is not enough for $\alice$ to see $Tx_1,$ since $\bob$ might have created a conflicting transaction $Tx_2$ that double-spends the same coin. Thus, $\alice$ should wait for $Tx_1$ to be added to the consensus chain. However, even this does not guarantee that the payment is finalized, since it is possible that the miner eventually creates a longer chain that contains $Tx_2$ and thus consensus switches from $Tx_1$ to $Tx_2.$ In such cases, we would say that $Tx_1$ is \emph{reverted}. In practice, this is unlikely to happen if $Tx_1$ is already in a block $B_i$ and there are many blocks added after $B_i.$ Such blocks are called \emph{confirmation} blocks. The conventional wisdom and industrial standard practice is to wait for 6 confirmations before considering the transaction as irreversible, although some users take the risk of waiting for fewer confirmations~\cite{hou2020study}.
 % TODO add a short sentence about majority attack
 
-\section{Cardano}
+\section{Cardano Architecture}
 \label{sec:prelim-cardano}
 
 \para{Cardano~\cite{hoskinson2017why}} Cardano is an open and decentralized blockchain platform that supports many cryptocurrencies and tokens. Its main currency, Ada, is currently one of the top 10 cryptocurrencies in terms of market cap and has a value of more than 16 billion USD~\cite{coinmarketcap2024cryptocurrency1}. Similar to Bitcoin, Cardano follows the (extended) UTXO model~\cite{foundation2017eutxo}, in which every transaction has a set of inputs and outputs. Each input to a transaction should be an output of a previous transaction and no output may be spent (used as input) twice. It has two major advantages over Bitcoin: (i)~support for arbitrarily complex smart contracts, i.e.~transactions can invoke executions of programs in an expressive programming language, and (ii)~a proof-of-stake consensus protocol, namely Ouroboros Praos~\cite{david2018ouroboros}, which avoids the costly mining process of Bitcoin's proof-of-work. In this section, we consider a simplified model of a Cardano transaction that precisely captures those aspects which are important to this thesis. For a more thorough treatment, see~\cite{hoskinson2017why} or~\cite{brunjes2020utxo}.
@@ -112,7 +112,7 @@ Cardano imposes a block size limit, i.e.~the total size of all transactions incl
 
 
 
-\section{Ethereum}
+\section{Ethereum Architecture}
 \label{sec:prelim-ethereum}
 
 This section provides a quick introduction to Ethereum and its gas model, following~\cite{wood2014ethereum,beigepaper}.

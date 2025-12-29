@@ -1,6 +1,9 @@
 \section{Our Algorithm}\label{sec:asparagus-algorithm} 
 
+In this section, we first describe the translation pipeline from smart-contract bytecode to a polynomial transition system (PTS). We then present our synthesis procedure for deriving parametric gas bounds by constructing remaining-gas polynomials over the resulting PTS.
 
+\subsection{Intermediate Representations and Polynomial Transition Systems}
+\label{sec:asparagus-algorithm-pts}
 
 \para{GASTAP~\cite{DBLP:journals/jss/AlbertCGRR21}} GASTAP is a tool to process EVM bytecode into an intermediate rule-based representation (RBR) and estimate gas bounds of function calls. The part of the GASTAP project which obtains the RBR is called EthIR and is publicly available~\cite{DBLP:conf/atva/AlbertGLRS18}. Our algorithm works on a polynomial transition system (PTS, defined further below). However, the translation from RBR to PTS is much simpler than a direct translation from EVM bytecode. So, in practice, we first use~\cite{DBLP:conf/atva/AlbertGLRS18} to translate EVM to RBR and then convert the RBR to PTS.
 
@@ -69,19 +72,19 @@ Given two polynomial transitions $\tau_1 = (U_1, G_1)$ and $\tau_2 = (U_2, G_2),
 \para{PTS} A \emph{Polynomial Transition System} (PTS) $T$ is a tuple $(\mathbb{V}, \mathbb{L}, l_0,l_f, \delta)$ where $\mathbb{V}$ is a set of variables, $\mathbb{L}$ is a set of locations, $l_0$ and $l_f$ are the initial and final locations, respectively, and $\delta$ is a partial function that maps each pair of locations $(l,l')$ to a polynomial transition $(U,G)$.
 
 \begin{example}
-	Figure~\ref{fig:asparagus-simple} provides a simplified PTS representation for each of our example contracts of Figure~\ref{fig:asparagus-runex}. In practice, our tool automatically converts the CFG provided by~\cite{DBLP:conf/atva/AlbertGLRS18} to an RBR. See Section~\ref{sec:asparagus-algorithm} for details. However, the resulting PTSs are usually not human-readable, so Figure~\ref{fig:asparagus-simple} is not a direct output of our tool, but a simplified version.  
+	Figure~\ref{fig:asparagus-simple} provides a simplified PTS representation for each of our example contracts of Figure~\ref{fig:asparagus-runex}. In practice, our tool automatically converts the CFG provided by~\cite{DBLP:conf/atva/AlbertGLRS18} to an RBR. See Section~\ref{sec:asparagus-algorithm-synthesis} for details. However, the resulting PTSs are usually not human-readable, so Figure~\ref{fig:asparagus-simple} is not a direct output of our tool, but a simplified version.  
 \end{example}
 
 
 \begin{figure}
 	\centering
 	\subfloat{
-		\includegraphics[width=0.7\textwidth]{chapters/asparagus/asparagus-pictures/simple1.pdf}
+		\includegraphics[width=0.6\textwidth]{chapters/asparagus/asparagus-pictures/simple1.pdf}
 		\label{fig:asparagus-voting-pts3}
 	}
 	\hfill
 	\subfloat{
-		\includegraphics[width=0.7\textwidth]{chapters/asparagus/asparagus-pictures/simple2.pdf}
+		\includegraphics[width=0.6\textwidth]{chapters/asparagus/asparagus-pictures/simple2.pdf}
 		\label{fig:asparagus-nestedloop-pts3}
 	}
 	\caption{Simplified PTS Representations $T_1$ (top) and $T_2$ (bottom) of Running Examples. The numbers in red denote the cost of each transition. In these examples, the costs are constant, but our approach supports arbitrary polynomial costs. Cutpoints are shown in yellow.}
@@ -116,10 +119,9 @@ Given two polynomial transitions $\tau_1 = (U_1, G_1)$ and $\tau_2 = (U_2, G_2),
 \para{Basic Paths} Given a cutset $C$, a path $\Pi: = l_1, \tau_1, \ldots, l_{m-1}, \tau_{m-1},l_m$ in the underlying graph of $T$ is said to be \emph{basic} if it starts and ends at cutpoints and does not pass through any cutpoints in between. It is straightforward to observe that the number of all possible basic paths in a PTS is finite as there could be only a finite number of basic paths between each pair of cutpoints. We extend our transition functions to paths and define $\tau(\Pi) := \bigcirc_{i = 0}^{m}(\tau_i)$. 
 
 \begin{example}
-	Using the cutsets from the previous example, the path $l_1, \textcolor{red}{\textbf{1}}, l_2, \textcolor{red}{\textbf{2}}, l_1$ is a basic path of the left PTS and $l_2, \textcolor{red}{\textbf{5}}, l_2$ and $l_0, \textcolor{red}{\textbf{4}}, l_1, \textcolor{red}{\textbf{3}}, l_2$ are examples of basic paths in the right PTS.
+	Using the cutsets from the previous example, the path $l_1, \textcolor{red}{\textbf{1}}, l_2, \textcolor{red}{\textbf{2}}, l_1$ is a basic path of the top PTS and $l_2, \textcolor{red}{\textbf{5}}, l_2$ and $l_0, \textcolor{red}{\textbf{4}}, l_1, \textcolor{red}{\textbf{3}}, l_2$ are examples of basic paths in the bottom PTS.
 \end{example}
 
-% % Given a PTS $T$ and a cutset $C$, we can \textit{compress} it to get a PTS $T' = 
 
 \para{Invariant Maps}
 Given a cutset $C$ of the PTS $T$, we call a map $\mathbb{I}$ that maps each cutpoint to a polynomial assertion an \emph{invariant map} if for any run $R = \sigma_0, l_1, \sigma_1, l_2, \sigma_2, \ldots $ of $T$ that starts from some cutpoint $l_1$ and initial valuation $\sigma_0 \models \mathbb{I}(l_1)$, we have $\sigma_i \models \mathbb{I}(l_{i})$ whenever $l_i \in C$. In other words, if the initial valuation satisfies the invariant at the start cutpoint, then whenever the run $R$ reaches a cutpoint $l_i$, the valuation of the variables satisfies the invariant at $l_i$. 
@@ -141,3 +143,336 @@ $
 	\item Some contracts have calls to external functions that were not available to us. The results of these calls are also handled by non-determinism. Moreover, for each such external function, we define a new variable that models its total gas cost and use it in our parametric bounds.
 \end{compactitem}
 Note that the points above do not affect the soundness of our approach and hence all of our obtained bounds are correct. Moreover, the gas cost we assign to every PTS transition is the actual gas cost of the same transition in the original contract and is not at all affected by the translation to PTS. Our experimental results in Section~\ref{sec:asparagus-experiments} demonstrate the applicability of our approach to real-world smart contracts. Hence, while it is theoretically possible to write adversarial smart contracts to which our approach is not applicable, the vast majority of real-world smart contracts can be modeled as polynomial transition systems. 
+
+\subsection{Synthesizing Parametric Gas Bounds}
+\label{sec:asparagus-algorithm-synthesis}
+
+
+Now, we provide an overview of our approach and illustrate it on the two running examples of Figure~\ref{fig:asparagus-runex}.
+To increase readability, we leave out some of the mathematical details which was presented in Section~\ref{sec:prelim-positivity}.
+The central idea behind our algorithm is to synthesize a \emph{remaining gas polynomial} at every line of a cutset which models an upper-bound on the possible gas usage if the program starts executing from that line. This is a straightforward extension of the classical concept of ranking functions. We then write a set of entailments between polynomial inequalities which model the requirements of our remaining gas polynomial. Finally, we use tools from polyhedral and real algebraic geometry to translate these entailments into quadratic constraints which are in turn passed to an external solver.
+
+
+Our algorithm starts with a smart contract and translates it into a set of quadratic constraints using the steps shown in Figure~\ref{fig:asparagus-steps}. Our central theoretical contribution is the preservation of both soundness and completeness from the PTS all the way to the final solution. In other words, imprecisions can only be introduced in the translations from the smart contract to RBR or from RBR to PTS.
+
+\begin{figure}[h]
+    \centering
+	\includegraphics[keepaspectratio,width=.8\linewidth]{chapters/asparagus/asparagus-pictures/flow.pdf}
+	\caption{The Steps of Our Algorithm. Sound and Semi-complete steps are shown in blue, whereas sound steps which might break completeness are in red. See Theorem~\ref{thm:mainours} for a more detailed treatment of soundness and completeness.}
+	\label{fig:asparagus-steps}
+\end{figure}
+
+
+
+\para{Our Algorithm} Our algorithm consists of the following six steps:
+\begin{enumerate}
+    \item\label{step:parse-rbr}\textbf{Converting the Smart Contract to RBR.} To enable the static analysis of the smart contract, we use the intermediate representation of \cite{DBLP:journals/jss/AlbertCGRR21}. We compile the smart contract using the standard \texttt{solc} compiler to EVM bytecode, then we construct the control-flow graph of the bytecode and convert it to the RBR format, which explicitly represents the local and state variables, the operand stack, and blockchain data. This increases the number of variables that we use in RBR but is essential to facilitate further static analyses. For this step, we rely entirely on the standard compiler and~\cite{DBLP:journals/jss/AlbertCGRR21}.
+    
+    \begin{example} Figure~\ref{fig:asparagus-rbrrbr} shows parts of the RBRs and CFGs of the two running examples as a graph wherein each vertex is a basic block and each edge is a transition. This is the output of the first step of our algorithm. \medskip
+    \end{example}
+
+
+
+     \item \label{step:PTS} \textbf{Transforming the RBR to Polynomial Transition System.}
+    We parse the RBR file and create a corresponding polynomial transition system (PTS) $T = (\mathbb{V}, \mathbb{L}, l_0,l_f, \delta)$ as follows:
+
+    \begin{enumerate}
+        \item \textbf{Soundness-preserving Over-approximations.} Since the PTS can only have polynomial operations like addition, subtraction, and multiplication, we must perform a few modifications which preserve the soundness of our approach. As an example, if we encounter a non-polynomial expression such as \texttt{x := a\%b} in the RBR, we replace it with \texttt{x := y} where \texttt{y} is a fresh variable with the invariant $0 \leq \texttt{y} \leq b-1.$ In other words, we are over-approximating non-polynomial operations by non-determinism. The soundness directly follows because our subsequent analysis is then guaranteed to work for all values of \texttt{y}, and hence it will also work for the actual value of \texttt{x}.
+        
+        %Whenever the code makes an \textit{external call} in its own context, i.e.~calls an unavailable library function that can change the stored values in the current contract, we cannot predict how the memory will be modified. Generally, we do not have the code for the external function. Therefore, we have to introduce new variables and forget all the information that we had about the memory and storage variables. 
+
+        
+        \item \textbf{Establishing a Gas Consumption Polynomial.} We associate a \emph{gas consumption polynomial} $\mathcal{C}(\tau) \in \mathbb{R}[\mathbb{V}]$ to each transition $\tau$ in the PTS $T$. The polynomial $\mathcal{C}(\tau)$, when evaluated at a valuation $\sigma$, provides the amount of gas that will be consumed on taking the transition $\tau$ starting from the valuation $\sigma$. In practice, this is a direct encoding of the Ethereum gas table and does not add any imprecision. This is because the gas costs of all EVM opcodes are polynomial expressions. We note that the gas usage assigned to each transition is not necessarily constant and can be any polynomial. Handling polynomial costs is necessary for a faithful modeling of operations such as \texttt{SSTORE} which have a quadratic gas usage.
+    
+        \item \textbf{Gas Consumption Polynomial of a Path.} Let $\Pi := l_1, \tau_1, l_2, \tau_2, l_3$ be a path in $T$.
+        The total gas consumed on taking the path $\Pi$ can be obtained by adding the consumption polynomial of the first transition to the consumption polynomial of the second transition, in which the values of all variables are updated according to the first transition. 
+        Formally, we define the consumption $\mathcal{C}(\Pi) = \mathcal{C}(\tau_1) + \tau_{1U}(\mathcal{C}(\tau_2))$. It is straightforward to extend this definition to paths of arbitrary length.
+    \end{enumerate}
+
+
+    \begin{example} Figure~\ref{fig:asparagus-voting-pts1} shows part of the transition system obtained for \linearexample. This contains not only a renamed version of every variable in the original contract, but also new operations which are not readily apparent in the Solidity code, such as keeping track of the function call stacks and their sizes. As another example, an array in Solidity is compiled to a hash-based map in EVM bytecode. Thus, accessing an element of the array requires a call to a hash function. Since this hash function is not a polynomial, we abstract it away and replace it with non-determinism in our PTS, thus over-approximating the behavior of the original contract. Also note that at this point every transition $\tau$ has a well-defined cost $\mathcal{C}(\tau)$.
+        
+    
+    As shown in Figure~\ref{fig:asparagus-voting-pts1}, the polynomial transition system corresponding to a contract can become quite complicated due to the internal implementation details of Solidity. Thus, to make our illustration human-readable, we consider a simplified PTS for each of our contracts, as shown in Figure~\ref{fig:asparagus-simple}. Note that this is only for illustration and our algorithm works on the original PTS above. In the PTS for \linearexample, we have a variable $\vert \texttt{proposals} \vert$ which keeps track of the length of the array. $l_1$ corresponds to the \texttt{for} loops and $l_2$ to the \texttt{if}. Note that $l_2$ has two outgoing edges, which are chosen non-deterministically. This is because the branching in the original contract depends on the values saved in the array. However, these values are abstracted away and only the array's length is saved in the PTS. Thus, the transition becomes non-deterministic. Similarly, the assignment to \texttt{winningVoteCount} is based on a value in the array and is hence replaced by non-determinism. \medskip
+    \end{example}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=1.1\textwidth]{chapters/asparagus/asparagus-pictures/voting-pts2.pdf}%
+        \caption{Part of the PTS for \linearexample}
+        \label{fig:asparagus-voting-pts1}
+        
+    \end{figure}
+
+
+    \item\label{step:adding-gas-left} \textbf{Adding Symbolic Invariants and Remaining Gas Polynomials.}
+    Let $C$ be a cutset of $T$ and $\mathbb{I}$ be an invariant map for $C$. Note that $\mathbb{I}$ can have both concrete and symbolic polynomials, i.e.~polynomial templates with unknown coefficients, as invariants. Our tool can use invariants generated by~\cite{DBLP:conf/cav/ColonSS03,DBLP:conf/pldi/Chatterjee0GG20} or generate its own if the given invariants are not strong enough.  
+    \begin{enumerate}
+        \item \textbf{Remaining Gas Polynomial.} We associate a so-called \emph{Remaining Gas Polynomial} $B_l$ to each cutpoint $l \in C$. The idea is that we want to ensure that for every basic path $\Pi$ starting and ending at the cutpoints $l$ and $l',$ respectively, if we start with an amount of gas that is at least $B_l,$ then the total gas \textit{left} after running through the path is at least $B_{l'}$. The mapping $B$ is said to be a remaining gas polynomial map over cutset $C$. Note that we do not know the $B_l$'s. Thus, our algorithm simply creates a symbolic template for each of them, i.e.~a symbolic polynomial in which the coefficients are unknown real values that have to be synthesized in the future. Our algorithm can create similar templates for the invariants, if they are not provided, and synthesize them similarly\footnote{To generate the templates, the algorithm needs to know the maximum degree $d$ that might be used for the polynomials. In practice, we simply try different values of $d,$ starting from 1 and going up, until the algorithm succeeds.}.
+
+        Recall that whenever we reach the location $l$, the invariant $\mathbb{I}(l)$ must hold. Therefore, we can formalize our requirements on $B_l$ and $B_{l'}$ by taking any basic path $\Pi$ from $l$ to $l'$ and requiring:
+        \begin{equation} \textstyle \mathbb{I}(l) \land \tau_G \implies B_l - \mathcal{C}(\Pi) \ge \tau_U(B_{l'}) \label{eq:b}
+        	\end{equation}
+
+        where $\tau := \tau(\Pi)$ is the composition of all transitions of $\Pi$.
+
+        % Note that the gas left polynomial are symbolic polynomial in $\mathbb{V}$ of sufficient degree.
+
+        \item \textbf{Remaining Gas at the Final Location.} The remaining gas polynomial of the final location $l_f$ is always set to $0$. In other words, we ensure that if we reach the final location $l_f$, no matter what path we took to reach there from the initial location $l_0$, if we start with gas at least $B_{l_0}$ evaluated at initial valuation, then we will always be left with non-negative gas on termination. 
+    \end{enumerate}
+
+
+    \begin{example} For the first example, we are looking for a linear bound. Thus, at every location $l_i \neq l_f$ of the PTS $T_1,$ our algorithm computes the following remaining gas polynomial:
+    $$\textstyle B_{l_i} := t_{i, 0} + t_{i, 1} \cdot \texttt{winningVoteCount} + t_{i, 2} \cdot \texttt{p} + t_{i, 3} \cdot |\texttt{proposals}| + t_{i, 4} \cdot \texttt{winningProposal}.$$
+    At $l_f$ we have $B_{l_f} = 0.$ Here, the $t_{i, j}$'s are new unknowns, which are called \emph{template variables}. Our goal is to find concrete values for the template variables such that the $B_{l_i}$'s satisfy the requirements of the remaining gas polynomials as in~\eqref{eq:b}.
+
+    For the PTS $T_2,$ our goal is to obtain a quadratic bound, thus our algorithm symbolically computes the following template expression at every location $l_i \neq l_f:$
+        
+    \begin{small}
+        \vspace{-1em}
+    $$\textstyle B_{l_i} := t_{i, 0} + t_{i, 1} \cdot \texttt{count} + t_{i, 2} \cdot \texttt{a} + t_{i, 3} \cdot \texttt{b} + t_{i, 4} \cdot \texttt{i} + t_{i, 5} \cdot \texttt{j} +$$
+    $$\textstyle  t_{i, 6} \cdot \texttt{count}^2 + t_{i, 7} \cdot \texttt{count} \cdot \texttt{a} + t_{i, 8} \cdot \texttt{count} \cdot \texttt{b} + t_{i, 9} \cdot \texttt{count} \cdot \texttt{i} + t_{i, 10} \cdot \texttt{count} \cdot \texttt{j} + $$
+    $$\textstyle 
+    t_{i, 11} \cdot \texttt{a}^2 + t_{i, 12} \cdot \texttt{a} \cdot \texttt{b} + t_{i, 13} \cdot \texttt{a} \cdot \texttt{i} + t_{i, 14} \cdot \texttt{a} \cdot \texttt{j}+$$ 
+    $$\textstyle t_{i, 15} \cdot \texttt{b}^2 + t_{i, 16} \cdot \texttt{b} \cdot \texttt{i} + t_{i, 17} \cdot \texttt{b} \cdot \texttt{j} + 
+    $$
+    $$\textstyle 
+    t_{i, 18} \cdot \texttt{i}^2 + t_{i, 19} \cdot \texttt{i} \cdot \texttt{j} + t_{i, 20} \cdot \texttt{j}^2
+    $$
+    \end{small}
+
+    In other words, the template for the remaining gas polynomial at every location includes all the possible monomials of degree at most $2$ over the variables. Moreover, each monomial appears with an unknown coefficient $t_{i, j}$ that should be synthesized.
+
+    \end{example}
+
+
+    \item\label{step-get-constraint}\textbf{Reduction to Entailment Constraints.} In this step, we reduce our main problem of synthesizing the remaining gas polynomial for each cutpoint to solving polynomial entailment constraints of the following standard form:
+    $$\textstyle f_1 \bowtie_1 0 \land f_2 \bowtie_2 0 \land \ldots \land f_r \bowtie_r 0 \implies g \bowtie_0 0,$$
+    in which $g$ and every $f_i$ are polynomials over the PTS variables, whose \emph{coefficients} might be symbolic and contain template variables. Moreover, we have $\bowtie_i \in \{\ge, >\}$.
+
+    Recall that $\mathbb{I}$ is a symbolic inductive invariant map and $B$ a symbolic remaining gas polynomial map over the cutset $C$. The polynomials in both $\mathbb{I}$ and $B$ are over the PTS variables. However, their coefficients are not concrete real numbers, but rather symbolic expressions over the template variables. This is why we call them symbolic polynomials.
+
+    Let $P$ be the set of all basic paths in the PTS $T$. Let $\Phi$ be the set of constraints generated until this point of the algorithm. For each basic path $\Pi \in P$ going from $l$ to $l'$, and having transition effect $\tau,$ we add the following constraint to $\Phi:$
+    $$\textstyle \mathbb{I}(l) \land \tau_G \implies \tau_U(\mathbb{I}(l')) \land B_l - \tau_U(B_{l'}) \ge \mathcal{C}(\Pi).$$
+
+    The first conjunct $\tau_U(\mathbb{I}(l'))$ of the conclusion makes sure that the $\mathbb{I}$ is an inductive invariant map, and the second conjunct $B_l - \tau_U(B_{l'}) \ge \mathcal{C}(\Pi)$ of the conclusion ensures that $B$ is a valid remaining gas polynomial map.
+
+
+    \begin{example}
+        We give the constraints for one basic path. Other basic paths are handled similarly. In $T_1,$ consider the basic path that starts at $l_1,$ goes to $l_2$ with a cost of $1$ and then back to $l_1$ with a cost of $2.$ This basic path can only be taken if $\texttt{p} < \vert \texttt{proposals} \vert.$ Moreover, it increases the value of $\texttt{p}$ by $1.$ Thus, our algorithm computes the following constraint:
+        $$\textstyle 
+        \begin{small}
+        \mathbb{I}(l_1)~\wedge~ \texttt{p} < \vert \texttt{proposals} \vert \implies \mathbb{I}(l_1)[\texttt{p} \leftarrow \texttt{p} + 1] ~\wedge~ B_{l_1} - B_{l_1}[\texttt{p} \leftarrow \texttt{p} + 1] \geq 3. \end{small}
+        $$  
+        Suppose that the invariant at $l_1$ is  $\mathbb{I}(l_1) := \texttt{p} \geq 0 ~\wedge~ \texttt{p} \leq  \vert \texttt{proposals} \vert + 1.$ The algorithm expands the constraint above and obtains:
+        
+        \begin{small}
+            \vspace{-1em}
+        $$\textstyle 
+        \texttt{p} \geq 0 ~\wedge~ \texttt{p} \leq  \vert \texttt{proposals} \vert + 1 ~\wedge~ \texttt{p} <  \vert \texttt{proposals} \vert \implies
+        $$
+        $$\textstyle 
+        \textbf{\texttt{p} + 1} \geq 0 ~\wedge~ \textbf{\texttt{p}+1} \leq  \vert \texttt{proposals} \vert + 1 ~\wedge~
+        $$
+        $$\textstyle 
+        t_{1, 0} + t_{1, 1} \cdot \texttt{winningVoteCount} + t_{1, 2} \cdot \texttt{p} + t_{1, 3} \cdot |\texttt{proposals}| + t_{1, 4} \cdot \texttt{winningProposal} -
+        $$
+        $$
+        t_{1, 0} - t_{1, 1} \cdot \texttt{winningVoteCount} - t_{1, 2} \cdot \textbf{(\texttt{p} + 1)} - t_{1, 3} \cdot |\texttt{proposals}| - t_{1, 4} \cdot \texttt{winningProposal} \geq 3
+        $$
+        \end{small}
+        
+        The algorithm simplifies the constraint using standard algebraic operations and obtains:
+        
+        \begin{small}
+            \vspace{-1em}
+        $$\textstyle 
+        \texttt{p} \geq 0 ~\wedge~ \texttt{p} <  \vert \texttt{proposals} \vert \implies
+        $$
+        $$\textstyle 
+        {\texttt{p} + 1} \geq 0 ~\wedge~ {\texttt{p}+1} \leq  \vert \texttt{proposals} \vert + 1 ~\wedge~
+        -t_{1, 2} \geq 3.
+        $$
+        \end{small}
+    \end{example}
+
+    \item\label{step:reducing-to-QP}\textbf{Reducing Entailment Constraints to Quadratic Constraints.}
+    In the last step, the problem was reduced to solving a system of entailment constraints of the following form:
+    $$\textstyle \bigwedge_i f_i \ge 0 \implies g \ge 0.$$ 
+    
+    Note that our approach can also handle strict inequalities. However, we focus on non-strict inequalities in the presentation. In the constraint above $g$ and each $f_i$ are symbolic polynomials over the variables $\mathbb{V}$ whose coefficients are symbolic expressions over the set $\mathbb{T}$ of template variables. Our goal is to find concrete values for each template variable $t \in \mathbb T,$ such that the constraints above hold for every valuation over $\mathbb{V}.$ So, this is a formula in the first-order theory of the reals and hence decidable.
+
+    Unfortunately, if we pass our constraints directly to a Non-linear Real Arithmetic (NRA) solver, or an SMT solver, it will have to deal with the notoriously difficult problem of quantifier elimination, since our formula has a quantifier alternation. Solvers for the first-order theory of the reals are famously inefficient and cannot handle even toy examples.
+
+    Our main algorithmic breakthrough in this step is to employ certain theorems from polyhedral and real algebraic geometry (Detailed in Section \ref{sec:prelim-positivity}) to eliminate this quantifier alternation and reduce the problem to a set of quadratic constraints. This reduced instance does not involve any quantifier alternation and is usually much easier to solve using NRA solvers. Moreover, we will obtain a set of quadratic constraints over the variables in $\mathbb T$ only and all variables in $\mathbb V$ will be eliminated from the formula.
+
+    We now show the reduction for a single entailment constraint. Since our constraints are composed conjunctively, our algorithm applies the same reduction to every one of them and then conjunctively combines the quadratic constraints corresponding to each entailment constraint. We consider several cases:
+
+    \begin{enumerate}
+        \item \label{step:farkas}\textbf{Linear.}  If both the premise and the conclusion of an entailment constraint consist only of linear inequalities over the variables, then we employ Farkas' Lemma to reduce the problem to quadratic constraints (Theorem \ref{thm:farkas}).
+
+        \begin{example}
+            We illustrate how we use Farkas' Lemma to handle the following constraint:
+            $$\textstyle t_0 \cdot x + y - 2 \ge 0 \land 2 \cdot x - t_1 \cdot y + 1 \ge 0 \implies 4 \cdot x - y - 3 \ge 0$$ 
+            where $t_0, t_1 \in \mathbb{T}$ are unknown template variables. Suppose we can somehow achieve $$\textstyle 4 \cdot x - y - 3 \equiv \lambda_0 + \lambda_1 \cdot (t_0 \cdot x + y - 2 ) + \lambda_2 \cdot (2 \cdot x - t_1 \cdot y + 1)$$ with $\lambda_0, \lambda_1, \lambda_2$ being non-negative real numbers. This equality essentially guarantees that whenever $t_0 \cdot x + y - 2$ and $2 \cdot x - t_1 \cdot y + 1$ are non-negative, $ 4 \cdot x - y - 3$ will also be non-negative, since we are writing the conclusion as a linear combination of the premises and only using non-negative multipliers $\lambda_i$. We can simplify the RHS:  
+            $$\textstyle 4 \cdot x - y - 3 \equiv(\lambda_1 \cdot t_0 + 2 \cdot \lambda_2) \cdot x + (\lambda_1 - \lambda_2 \cdot t_1) \cdot y + (\lambda_0 - 2 \cdot \lambda_1 + \lambda_2).$$ 
+            
+            However, this equality should hold for all values of $x$ and $y.$ Hence, this equivalence will be true iff the corresponding coefficients on both sides are equal, i.e., $\lambda_1 \cdot t_0 + 2 \cdot \lambda_2 = 4$, $\lambda_1 - \lambda_2 \cdot t_1 = -1$, and $\lambda_0 - 2 \cdot \lambda_1 + \lambda_2 = -3$. These are precisely our quadratic constraints. Note that these constraints do not involve any of the PTS variables $x$ and $y$, and there is also no quantifier alternation. Any solution to this set of quadratic constraints will give us a model for $t_0$ and $t_1$ that satisfies the original entailment.
+
+            Passing this system of quadratic constraints to an external solver, one possible solution could be $t_0 = 1, t_1 = 3, \lambda_0 = 0, \lambda_1 = 2, \lambda_2 = 1.$ 
+            Plugging these values back, we obtain the following valid constraint which holds for all values of $x$ and $y$:
+            $$\textstyle \Hole{1} \cdot x + y - 2 \ge 0 \land 2 \cdot x - \Hole{3} \cdot y + 1 \ge 0 \implies 4 \cdot x - y - 3 \ge 0$$ 
+       \end{example}
+
+       \item \label{step:handelman} \textbf{Linear Premise and Non-linear Conclusion.} If the premise is linear but the conclusion is non-linear, then we use Handelman's Theorem (Theorem \ref{thm:handelman}) to reduce the entailment constraint to quadratic constraints.
+       
+       \begin{example}
+            Consider the following constraint:
+            $\textstyle t_0 \cdot x - 2 \ge 0 \land x - t_1 \cdot y \ge 0 \implies x^2 - 8 \cdot y + 4 \ge 0$, 
+            where $t_0, t_1 \in \mathbb{T}$ are unknown constants. 
+            
+            We cannot apply the same idea as in Farkas' Lemma since no linear combination of $t_0\cdot x-2$ and $x - t_1 \cdot y$ can generate a non-linear polynomial like $x^2 - 8 \cdot y + 4$. The intuition behind applying Handelman's Theorem is that as we know $t_0 \cdot x - 2$ is non-negative, then we can also assume that every power of this polynomial is also non-negative. More specifically, we can assume that $t_0^2 \cdot x^2 - 4 \cdot t_0 \cdot x + 4$ is also non-negative. We can also multiply non-negative powers of our assumed-to-be-non-negative premises together.
+            Suppose we can write $x^2 - 8 \cdot y + 4 \equiv \lambda_0 + \lambda_1 \cdot (t_0\cdot x-2) + \lambda_2 \cdot (x - t_1 \cdot y) + \lambda_3 \cdot (t_0^2 \cdot x^2 - 4 \cdot t_0 \cdot x + 4)$ with each $\lambda_i$ being a non-negative real as in the previous case. Using a similar argument as before, this will guarantee the validity of the constraint. In practice, our algorithm generates all possible products of the LHS inequalities up to a user-defined degree $d.$ However, for brevity, we only included some of these products in this example.
+            
+            Simplifying and equating the coefficients on both sides, we get $\lambda_3 \cdot t_0^2  = 1$ (coefficients of $x^2$), $\lambda_1\cdot t_0 + \lambda_2 - 4 \cdot \lambda_3 \cdot t_0 = 0$ (coefficients of $x$), $-\lambda_2 \cdot t_1 = -8$ (coefficients of $y$), and $\lambda_0 - 2 \cdot \lambda_1 + 4 \cdot \lambda_3 = 4$ (constant terms).  One possible solution to this system of quadratic constraints is $t_0 = 1, t_1 = 2$ and $\lambda_0 = 0, \lambda_1 = 0, \lambda_2 = 4, \lambda_3 = 1$. This leads to the following valid entailment, which holds for all values of $x$ and $y$:
+            $$\textstyle \Hole{1} \cdot x - 2 \ge 0 \land x - \Hole{2} \cdot y \ge 0 \implies x^2 - 8 \cdot y + 4 \ge 0$$
+       \end{example}
+       
+        \item \label{step:putinar} \textbf{Non-linear Premise.} Finally, in the most general case, if both the premise and the conclusion might be non-linear, we use Putinar's Positivstellensatz (Theorem~\ref{thm:putinar}) to reduce the entailment to quadratic constraints.
+       
+	    \begin{example}
+            Consider the following constraint:        
+            $$\textstyle t_0 \cdot x^3 \ge 0 \implies x^9 + y^2 \ge 0$$ 
+            We can not apply Farkas' Lemma for the same reason as the previous example, nor we can apply Handleman's Theorem because no power of $t_0 \cdot x^3$ will generate a polynomial containing $y.$       
+            Intuitively, it is easy to observe that setting $t_0 = 1$ gives us a valid concrete entailment
+            $$\textstyle \Hole{1} \cdot x^3 \ge 0 \implies x^9 + y^2 \ge 0$$ because we can write $x^9 + y^2 \equiv x^3\cdot (x^3)^2+ y^2$. Note that $(x^3)^2$ and $y^2$ are both sums of squares, therefore they are always non-negative. As $x^3$ is also assumed to be non-negative in the premise, the conclusion should also be non-negative whenever the premise is non-negative.
+
+            When we apply Putinar's Positivstellensatz, we simply multiply each polynomial in the premise with a symbolic sum of squares of sufficiently high degree and sum them together. In other words, the multipliers $\lambda_i$ are no longer non-negative scalar variables, but instead polynomials that are guaranteed to be sum-of-squares. We can write this guarantee as a system of quadratic constraints, too. Then we equate the coefficients of both sides, just as in the previous cases, to obtain a system of quadratic constraints. Solving this system gives a valid concrete constraint.
+        \end{example}
+    \end{enumerate}
+
+    \item \label{step:solve} \textbf{Solving the Quadratic Constraints.}
+    The previous step has already reduced the problem to a system quadratic constraints over template variables $\mathbb T$ and newly-introduced multipliers $\lambda_i$. We pass this system to an external NRA solver. If the NRA solver can find a solution to the system, then we substitute the value of the template variables in $\mathbb{T}$ in our symbolic remaining gas polynomial map $B$ to obtain a concrete parametric bound on the gas usage. Finally, we return the concrete gas polynomial at the start location as the answer.
+
+    \begin{example} 
+        Table~\ref{tab:asparagus-res1} shows one solution of the quadratic system for each of $T_1$ and $T_2.$ Thus, our approach is able to prove that the total gas cost is at most $101 \cdot |\texttt{proposals}| + 106$ for $T_1$ and $5 \cdot \texttt{a} \cdot \texttt{b} + 11 \cdot \texttt{a} + 5 \cdot \texttt{b} + 16$ for $T_2.$ Note that the solutions are not unique, but any solution of the system leads to a valid bound on the gas usage of the PTS.
+    \end{example}
+
+\end{enumerate}
+
+
+\begin{table}[H]
+    \centering
+    {\footnotesize
+    \setlength{\tabcolsep}{1.5pt}
+    \renewcommand{\arraystretch}{1.12}
+
+    \begin{minipage}[t]{0.49\linewidth}
+        \centering
+        \begin{tabular}{| c c |}
+            \hline
+            Node & Remaining Gas Polynomial \\ [0.5ex]
+            \hline
+            $l_0$ & $101 \cdot |\texttt{proposals}| + 106$\\
+            $l_1$ & $101 \cdot |\texttt{proposals}| - 101 \cdot \texttt{p} + 102$\\
+            $l_2$ & $101 \cdot |\texttt{proposals}| - 101 \cdot \texttt{p} + 101$\\
+            $l_f$ & $0$\\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.49\linewidth}
+        \centering
+        \begin{tabular}{| c c |}
+            \hline
+            Node & Remaining Gas Polynomial \\ [0.5ex]
+            \hline
+            $l_0$ & $5 \cdot \texttt{a} \cdot \texttt{b} + 11 \cdot \texttt{a} + 5 \cdot \texttt{b} + 16$ \\
+            $l_1$ & $5 \cdot \texttt{a} \cdot \texttt{b} + 11 \cdot \texttt{a} - 5 \cdot \texttt{b} \cdot \texttt{i} + 5 \cdot \texttt{b} - 11 \cdot \texttt{i} + 12$ \\
+            $l_2$ & $5 \cdot \texttt{a} \cdot \texttt{b} + 11 \cdot \texttt{a} - 5 \cdot \texttt{b} \cdot \texttt{i} + 5 \cdot \texttt{b} - 5 \cdot \texttt{j} - 11 \cdot \texttt{i} + 9$ \\
+            $l_f$ & $0$\\
+            \hline
+        \end{tabular}
+    \end{minipage}
+    }
+
+    \caption{Synthesized solution for $T_1$ (left) and $T_2$ (right)}
+    \label{tab:asparagus-res1}
+    \vspace{-1em}
+\end{table}
+
+
+
+\para{Objective Function} Our algorithm encodes all the requirements on the template variables $t_{i,j}$ first as entailment constraints and then as a system of quadratic constraints. Thus, every solution of this system, when plugged back into the template for $B_{l_0}$ leads to a valid bound on the gas usage of the PTS. In our experiments, we do not use an objective function, but one can generally specify any objective function based on the unknown template variables $t_{i,j}.$ This would lead to a Quadratically-Constained Quadratic Programming (QCQP) instance.
+
+
+\para{Pseudocode} Algorithm~\ref{alg:asparagus-main-algo} provides a pseudocode of our approach.
+
+\begin{algorithm}[H]
+    \footnotesize
+    \setstretch{0.8}
+    \caption{Asparagus}\label{alg:asparagus-main-algo}
+    % \KwData{
+    \KwIn{A smart contract $A$}
+    \KwIn{Start block $S$, degree bound $d$ for the polynomials}
+    \KwResult{Remaining Gas Polynomial $B_{l_0}$ at the initial location corresponding to $S$}
+    $T \gets \mathrm{parsePTS}(A)$ \Comment{Generate the PTS $T$ for $A$ (Steps~\ref{step:parse-rbr} and~\ref{step:PTS}) -- Not guaranteed to preserve completeness.}\;
+    $C \gets \mathrm{getCutset}(T)$\;
+    $I \gets \mathrm{TemplateInvariantMap}(C, T, d)$ \Comment{Step~\ref{step:adding-gas-left}}\;
+    $B \gets \mathrm{TemplateRemainingGasMap}(C, T, d)$\;
+    $QS \gets \textbf{true}$\;
+    \ForEach(){Basic Path $\Pi$ in $T$ w.r.t. $C$}
+    {
+        $(\phi \Rightarrow \psi) \gets \mathrm{GetConstraintPair}(\Pi, T)$ \Comment{Step \ref{step-get-constraint}}\;
+        \If(){$\phi,\psi$ are both linear}{
+            $QS_{c} \gets \mathrm{ReduceWithFarkas}(\phi,\psi)$ \Comment{Step~\ref{step:farkas}} \;
+        }
+        \ElseIf(){$\phi$ is linear}{
+            $QS_{c}  \gets \mathrm{ReduceWithHandelman}(\phi,\psi, d)$ \Comment{Step~\ref{step:handelman}}\;
+        }
+        \Else(){
+            $QS_{c} \gets \mathrm{ReduceWithPutinar}(\phi,\psi, d)$ \Comment{Step~\ref{step:putinar}}\;
+        }
+        
+        $QS \gets QS \wedge QS_{c}$
+    }
+
+    $\mathrm{Model} \gets \mathrm{NRA\_Solver}(QS)$ \Comment{Step~\ref{step:solve}}\;
+    \If(){$\mathrm{Model}\text{ is UNSAT}$}{
+       \Return{$\mathrm{Failed}$}
+    }
+    \Return{$\mathrm{ConcretePolynomial}(B_S, \mathrm{Model})$} \Comment{The concrete remaining gas polynomial}\;
+\end{algorithm}
+
+
+
+\subsection{Soundness, Completeness and Complexity}
+We end this section by stating that our algorithm is both sound and semi-complete.
+
+\begin{theorem} \label{thm:mainours}
+	
+	Given a PTS $T$ over variables with bounded values, a cutset $C$ of $T,$ a polynomial inductive invariant $\mathbb I,$ and a template for a remaining gas polynomial $B_l$ at each cutpoint $l \in C,$ the algorithm of Section~\ref{sec:asparagus-algorithm-synthesis} has the following desired properties:
+	\begin{itemize}
+		\item \emph{Soundness}: Every solution to the system of quadratic constraints in Step~\ref{step:solve} leads to valid remaining gas polynomials when plugged back into the template $\{B_l\}_{l \in \mathbb L}.$ We say that a set of remaining gas polynomials are valid if they satisfy Equation~\eqref{eq:b}.
+		\item \emph{Semi-completeness}: For every valid set $\{B^*_l\}_{l \in \mathbb L}$ of remaining gas polynomials, if the degree $d$ chosen by the user is large enough, i.e.~if polynomials of large enough degree are used in the templates, then there exists a solution of the system of quadratic constraints in Step~\ref{step:solve} that when plugged into the templates $\{B_l\}_{l \in \mathbb L}$ leads to $\{B^*_l\}_{l \in \mathbb L}.$
+	\end{itemize}
+\end{theorem}
+\begin{proof}
+	
+	The entailment constraints generated in Step~\ref{step-get-constraint} precisely model the requirements of Equation~\eqref{eq:b}. Thus, this step is sound. In Step~\ref{step:reducing-to-QP}, each of the three possible reductions are sound. In case~\ref{step:farkas}, the RHS is written as a linear combination of the LHS polynomials with non-negative coefficients $\lambda_i.$ If this is successful, then it is trivial that the entailment holds, since a linear combination of non-negative inequalities with non-negative coefficients is guaranteed to be non-negative. In case~\ref{step:handelman}, we are first considering products of the non-negative inequalities on the LHS. Such products are of course non-negative. We then write the RHS as a linear combination of these products with non-negative coefficients. Thus, the same argument as in the previous case applies. Finally, case~\ref{step:putinar} is also similar to case~\ref{step:farkas}, except that the coefficients which were non-negative real constants are now replaced by sum-of-square polynomials. However, the same argument stands since sum-of-square polynomials are always non-negative. One can essentially repeat the same argument for corner cases involving strict inequalities. See~\cite[Chapter 7]{goharshady2020parameterized} for details.
+	
+	For completeness, note that Step~\ref{step-get-constraint} is a precise encoding of Equation~\eqref{eq:b} and thus complete. Step~\ref{step:farkas} is complete due to Farkas' lemma (Theorem~\ref{thm:farkas}) which guarantees that whenever the entailment constraint holds, the RHS can be written as a linear combination of the LHS with non-negative coefficients $\lambda_i.$ Similarly, Step~\ref{step:handelman} is complete due to Theorem~\ref{thm:handelman} guaranteeing that if the entailment holds, then the RHS can be written as a combination of products of the LHS. Finally, the completeness of Step~\ref{step:putinar} is due to Theorem~\ref{thm:putinar} in which the validity of the entailment $f_1 \ge 0 \land f_2  \ge 0 \ldots \land f_r \ge 0 \implies g > 0$ guarantees $g \equiv h_0 +  \sum_{i=1}^r h_i \cdot f_i,$ where each $h_i$ is a sum-of-squares. Of course, the products generated in Step~\ref{step:handelman} and the sums-of-squares in Step~\ref{step:putinar} should have a high enough degree, since the theorems do not have a degree bound. This is why we call this semi-completeness, i.e.~completeness as long as the degree $d$ chosen for the templates is large enough. Finally, we note that both Theorem~\ref{thm:handelman} and Theorem~\ref{thm:putinar} have a compactness requirement. This holds naturally in our case since the variables in a smart contract are always bounded. Assuming that the largest possible value for a variable $x$ is $m,$ we can add the invariant $-m \leq x \leq m$ to every line of the program. This puts our valuations inside a bounded hypercube. Finally, by the Heine-Borel theorem, a subset of $\mathbb R^n$ is compact if and only if it is closed and bounded. Thus, the hypercube is compact.
+\end{proof}
+
+\begin{theorem}
+	Given the same inputs as in the previous theorem, the runtime of our reduction to a system of quadratic constraints (Steps~\ref{step-get-constraint} and~\ref{step:reducing-to-QP}) is polynomial in the size $n$ of the PTS and depends exponentially on the number of variables and the degree bound $d.$ 
+\end{theorem}
+\begin{proof}
+	Step~\ref{step-get-constraint} generates one entailment constaint for each transition in the PTS. Thus, its runtime is $O(n).$ For each entailment constraint, we have the following analysis:
+	\begin{compactitem}
+		\item Step~\ref{step:farkas} (Farkas' lemma) generates at most $\vert \mathbb V \vert$ fresh variables $\lambda_i$ and the same number of quadratic equalities.
+		\item Step~\ref{step:handelman} creates all monomials of degree up to $d$ as in Equation~\eqref{eq:monoid}. The number of such monomials is $\binom{d+|\mathbb V|}{d}.$ There is at most one quadratic equality generated per monomial.
+		\item Step~\ref{step:putinar} creates a constant number of sum-of-square polynomials $h_i$ as in Equation~\eqref{eq:putin}. To generate a template for each such polynomial, we need to first generate all monomials of degree at most $d/2$ as in Theorem~\ref{thm:blekherman} and then form the $L$ matrix of Theorem~\ref{thm:cholesky} which has  $O(\binom{d/2+|\mathbb V|}{d/2}^2)$ entries. We will have at most one quadratic equality for each monomial.
+	\end{compactitem}
+The time spent in generating each quadratic equality is bounded by a polynomial in its size. Thus, the total runtime is polynomial in the size $n$ of the PTS but depends exponentially on the number of variables in $\mathbb V$ and the degree bound $d.$
+\end{proof}

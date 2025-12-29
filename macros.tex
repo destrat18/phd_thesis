@@ -51,8 +51,11 @@
 % \usepackage{pgfplots}
 % \usepackage{thmtools}
 
-\usepackage{algorithm}
-\usepackage[noend]{algpseudocode}
+% NOTE: This thesis uses the `algorithm2e` pseudocode style (\KwIn/\KwResult/\ForEach/...)
+% which conflicts with the `algorithm` + `algpseudocode` combination.
+% Keep only one family enabled.
+%\usepackage{algorithm}
+%\usepackage[noend]{algpseudocode}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -105,8 +108,12 @@
 
 \usepackage{svg}
 
-% \usepackage{algpseudocode}
-% \usepackage[ruled,linesnumbered]{algorithm2e}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+% Compatibility: some pseudocode uses \Comment{...} (algpseudocode-style) while
+% the thesis otherwise uses algorithm2e keywords (\KwIn/\KwResult/\ForEach).
+% Map \Comment to an algorithm2e end-of-line comment.
+\providecommand{\Comment}[1]{\tcp*[f]{#1}}
 
 \definecolor{gray}{rgb}{0.3, 0.3, 0.3}
 

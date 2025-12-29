@@ -1,0 +1,212 @@
+
+\section{Algebraic-Geometry Theorems}
+\label{sec:prelim-positivity}
+
+In this section, we fill in the mathematical details of our algorithm using Farkas' Lemma, Handelman's Theorem and Putinar's Positivstellensatz. The previous section has already illustrated how we use these theorems in our algorithm.
+
+\para{Notation} We first set down some basic notation:
+\begin{compactenum}
+    \item Given a boolean formula $\phi := \bigwedge_i (f_i \ge 0)$ over the variables $\mathbb{V}$, we define $$\sat(\phi) := \{\sigma: \mathbb{V} \to \mathbb{R} \mid \bigwedge_i \sigma \models f_i \ge 0\}$$
+    \item A polynomial $h \in \mathbb{R}[\mathbb{V}]$ is said to be a \emph{sum of squares} (SOS) iff it can be written as a finite sum $h \equiv \sum_i g_i^2$ where $g_i \in  \mathbb{R}[\mathbb{V}]$ are arbitrary polynomials. 
+\end{compactenum}
+
+
+
+% Let $\phi := \bigwedge_i f_i \ge 0 \implies g \ge 0$ be a boolean implication where $f_i$s and $g$ are real symbolic polynomial over $\mathbb{V}$ with set $S$ as the set of symbolic coefficients. Our goal is to find the real number for all the symbolic coefficients in set $S$ such that on the boolean implication $\phi'$ obtained by substituting 
+
+% The results and theorems in this section help us reduce a constraint of the form $\phi := \bigwedge_i f_i \ge 0 \implies g \ge 0$ to quadratic programming. 
+% The results that we state and illustrate in the following subsections also hold 
+\subsection{Farkas Lemma}
+
+We start by stating Farkas' Lemma, which is a well-known result in polyhedral geometry and linear algebra.
+
+\begin{theorem}[{Farkas' Lemma} \cite{farkas1902theorie}]\label{thm:farkas}
+Let $f_1, \ldots f_r$ and $g$ be any linear polynomials over the set of variables $\mathbb{V}.$ The boolean implication $$f_1 \ge 0 \land f_2  \ge 0 \ldots \land f_r \ge 0 \implies g \ge 0$$ holds for every valuation of $\mathbb V$ \textbf{if and only if} there exist $\lambda_0, \lambda_1, \ldots, \lambda_r,$ such that $$ g \equiv \lambda_0 + \sum_{i=1}^r \lambda_i \cdot f_i$$
+where all $\lambda_i$'s are non-negative reals. Moreover, $f_1 \ge 0 \land f_2  \ge 0 \ldots \land f_r \ge 0$ is unsatisfiable \textbf{if and only if} $ -1 \equiv \lambda_0 + \sum_{i=1}^r \lambda_if_i$ for some non-negative real $\lambda_i$'s.
+\end{theorem}
+
+\begin{example}
+Let $f_1 := -x  - 2 \cdot y + z - 5, f_2 := x   + 3 \cdot y - 2 \cdot z -10,  f_3 := 2 \cdot  x   + 4 \cdot y + 5\cdot z + 5 $ and $g := 3\cdot y  + 5\cdot z - 15$.
+% \begin{align*}
+%     f_1 := -x  - 2y + z - 5 &\ge 0\\
+%     f_2 := x   + 3y - 2z -10 &\ge 0\\
+%     f_3 := 2x   + 4y + 5z + 5 &\ge 0\\
+% \end{align*}
+We can readily see that $g \equiv 2 \cdot f_1 + f_2 + f3$. Therefore, the implication $\phi := f_1 \ge 0 \land f_2 \ge 0 \implies g \ge 0$ holds. Note that Farkas' lemma is, in a sense, both sound and complete. If the entailment holds, then it guarantees that suitable $\lambda_i$'s exist.
+\end{example}
+
+\para{Pseudocode} Algorithm~\ref{alg:farkas} provides a more formal presentation of how Farkas' lemma is used to reduce entailments to a system of quadratic constraints.
+
+\begin{algorithm}[H]
+	\footnotesize
+	\setstretch{0.8}
+	\caption{ReduceWithFarkas}\label{alg:farkas}
+	% \KwData{
+		\KwIn{An entailment constraint $f_1 \ge 0 \land f_2  \ge 0 \ldots \land f_r \ge 0 \implies g \ge 0$ over the set $\mathbb V$ of PTS variables}
+		\KwResult{A system $QS$ of quadratic constraints}
+		Create fresh symbolic variables $\lambda_0, \lambda_1, \ldots, \lambda_r$\;
+		$QS \gets \lambda_0 \geq 0 \land \lambda_1 \geq 0 \land \ldots \land \lambda_r \geq 0$\;
+		
+		$eq \gets \lambda_0 + \sum_{i=1}^r \lambda_i \cdot f_i - g$\Comment{Computed symbolically}\;
+		\ForEach(){monomial $m \in \mathbb{V} \cup \{1\}$}
+		{
+				$\texttt{coeff}_m \gets$ {the coefficient of } $m$ in $eq$\;
+				$QS \gets QS \land \texttt{coeff}_m = 0$\;
+		}
+		\Return{$QS$};
+	\end{algorithm}
+
+\subsection{Handelman's Theorem}
+
+For our next theorem, we first need the concept of a monoid.
+
+\para{Monoid} Let $F := \{f_1, f_2, \ldots, f_r\}$ be a set of polynomials over $\mathbb{V}$. We define the monoid of $F$ as the set:
+\begin{equation}\monoid(F) := \{f_1^{k_1} \cdot f_2^{k_2} \cdots f_r^{k_r} \mid k_1, \ldots, k_r \in \mathbb{N}\}. \label{eq:monoid}
+	\end{equation}
+In other words, the monoid includes all polynomials that can be obtained as a multiplication of polynomials in $F.$
+We also define $$\monoid_d(F) := \{f \mid f \in \monoid(F) \land \deg(f) \le d\}.$$
+
+
+\begin{theorem}[Handelman's Theorem \cite{handelman1988representing}]\label{thm:handelman}
+    Let $f_1, \ldots f_r$ be any linear polynomials and $g$ be an arbitrary polynomial over $\mathbb{V}$ such that  $\sat{(f_1 \ge 0 \land f_2  \ge 0 \land \ldots \land f_r \ge 0 )}$ is a non-empty compact set. The boolean implication $$f_1 \ge 0 \land f_2  \ge 0 \land \ldots \land f_r \ge 0 \implies g \ge 0$$ holds over real numbers \textbf{if and only if} there exist $\lambda_i, m_i$ such that $ \textstyle g \equiv \sum_{i=1}^r \lambda_i \cdot m_i$,
+ in which each $\lambda_i$ is a non-negative real number and each $m_i \in \monoid(\{f_1, \ldots, f_r\})$. 
+\end{theorem}
+
+\begin{example}
+Let $ f_1 := -x  - 2 \cdot y - 5$, $f_2 := 2 \cdot x   + 3 \cdot y  -2 $, and $g := 2 \cdot y - 2 \cdot x \cdot y - 3 \cdot y^2$. We only use the monoid of degree $2$ in this example: 
+$\monoid_2(\{f_1, f_2\})
+    = \{1, f_1, f_2, f_1^2, f_2^2, f_1 \cdot f_2\} 
+$. It can be verified that $g \equiv 2 \cdot f_1 \cdot f_2 + f_2^2 + 12 \cdot f_2$. Therefore, by Handelman's Theorem, the implication $\phi := f_1 \ge 0 \land f_2 \ge 0 \implies g \ge 0$ holds for every possible real valuation of $x$ and $y$.
+\end{example}
+
+\para{Pseudocode} Algorithm~\ref{alg:handelman} shows how Handelman's theorem reduces entailments to a system of quadratic constraints.
+
+\begin{algorithm}[H]
+	\footnotesize
+	\setstretch{0.8}
+	\caption{ReduceWithHandelman}\label{alg:handelman}
+	% \KwData{
+		\KwIn{An entailment constraint $f_1 \ge 0 \land f_2  \ge 0 \ldots \land f_r \ge 0 \implies g \ge 0$ over the set $\mathbb V$ of PTS variables}
+		\KwIn{A degree bound $d$}
+		\KwResult{A set of quadratic inequalities}
+		$M_d \gets monoid_d(f_1, \ldots, f_r)$\;
+		$r \gets |M_d|$\;
+		Create fresh symbolic variables $\lambda_0, \lambda_1, \ldots, \lambda_r$\;
+		$QS \gets \lambda_0 \geq 0 \land \lambda_1 \geq 0 \land \ldots \land \lambda_r \geq 0$\;
+		
+		$eq \gets \lambda_0 + \sum_{i=1}^r \lambda_i \cdot M_d[i] - g$\Comment{Computed symbolically}\;
+		\ForEach(){monomial $m$ of $~\mathbb R[\mathbb V]$}
+		{
+			$\texttt{coeff}_m \gets$ {the coefficient of } $m$ in $eq$\;
+			$QS \gets QS \land \texttt{coeff}_m = 0$\;
+		}
+		\Return{$QS$};
+	\end{algorithm}
+
+\subsection{Putinar's Positivstellensatz}
+
+Finally, our strongest hammer is Putinar's Positivstellensatz. Positivstellensatz is German for ``positive locus theorem'' and denotes a theorem that characterizes positive polynomials over semi-algebraic sets. 
+
+\begin{theorem}[Putinar's Positivstellensatz \cite{putinar1993positive}]\label{thm:putinar}
+    Let $f_1, \ldots f_r$ and $g$ be polynomials of any degree over $\mathbb{V}$ such that $SAT(f_i)$ is compact for at least one $f_i$. The boolean implication $$f_1 \ge 0 \land f_2  \ge 0 \ldots \land f_r \ge 0 \implies g > 0$$ holds over real numbers \textbf{if and only if} $g$ can be written as \begin{equation} g \equiv h_0 +  \sum_{i=1}^r h_i \cdot f_i \label{eq:putin}\end{equation}
+    in which each $h_i$ is a sum of squares.
+\end{theorem}
+
+\begin{example}
+     As an example, let
+	\begin{align*}
+        f_1 &:= x + y - 1 &\quad &
+        f_2 := -x^2 - y^2 + 10 \\
+        f_3 &:= -2 \cdot x^3 - 4\cdot x\cdot y^2 + 10 &\quad &
+        g   := 2\cdot x^2 \cdot y - 4 \cdot x \cdot y^2 + 10
+    \end{align*} 
+    We can choose the sum of squares $h_0 = 2 \cdot x^2, h_1 = 2  \cdot x^2, h_2 = 0$ and $h_3 = 1$, and write $g \equiv h_0 + h_1  \cdot  f_1 + h_2  \cdot f_2 + h_3  \cdot f_3$.
+    Therefore, the boolean implication $\phi := f_1 \ge 0 \land f_2 \ge 0 \land f_3 \ge 0 \implies g \ge 0$ holds.
+\end{example}
+
+
+\para{SOS Templates} Recall that, in order to apply Putinar's Positivstellensatz, we needed to multiply each polynomial $f_i$ with a sum of squares $h_i$. In our algorithm, we used a template for $h_i.$ We now discuss how such a template can be generated automatically. Given a degree bound $2 \cdot m$, we can use Theorems~\ref{thm:blekherman} and~\ref{thm:cholesky} below to generate a general symbolic polynomial template for a SOS of degree $2 \cdot m$.
+
+\begin{theorem}[\cite{blekherman2012semidefinite}]\label{thm:blekherman} 
+    Let $V_m$ be the vector of all monomials of degree at most $m$ over the variables $\mathbb{V} = \{x_1, \ldots, x_n\}$. A polynomial $h \in \mathbb{R}[\mathbb{V}]$ of degree $2 \cdot m$ is a sum of squares \textbf{if and only if} there exists a symmetric positive semi-definite matrix $Q$ such that $h = V_m^T\cdot Q\cdot V_m$.
+\end{theorem}
+
+\begin{theorem}[Cholesky Decomposition, \cite{watkins2004fundamentals}]\label{thm:cholesky}
+A square symmetric matrix $Q$ is positive semi-definite \textbf{if and only if} there exists a lower-triangular matrix $L$ with non-negative diagonal entries such that $Q = L \cdot L^T$.
+\end{theorem}
+
+Hence, it suffices to generate a template for the lower-triangular matrix $L,$ introducing new template variables for each of the entries. We can then simply compute a template for $h$ by setting
+$$
+h := V_m^T \cdot L \cdot L^T \cdot V_m.
+$$
+
+\para{Pseudocode} Based on the theorems above, Algorithm~\ref{alg:putinar} provides a more formal presentation of how Putinar's Positivstellensatz reduces entailments to a system of quadratic constraints.
+
+\begin{algorithm}[H]
+	\footnotesize
+	\setstretch{0.8}
+	\caption{ReduceWithPutinar}\label{alg:putinar}
+	% \KwData{
+		\KwIn{An entailment constraint $f_1 \ge 0 \land f_2  \ge 0 \ldots \land f_r \ge 0 \implies g > 0$ over the set $\mathbb V$ of PTS variables}
+		\KwIn{An even degree bound $d$}
+		\KwResult{A system $QS$ of quadratic constraints}
+		$V_{d/2} \gets monoid_d(\mathbb V)$ \Comment{All monomials of degree at most $d/2$ over $\mathbb V$}\;
+		$w \gets |V_{d/2}|$\;
+		$QS \gets \texttt{true}$\;
+		\ForEach(){$0 \leq i \leq r$}
+		{
+			$L \gets $ a $w \times w$ lower-triangular matrix whose every non-zero entry at position $(j, k)$ is a fresh symbolic variable $\lambda_{i,j,k}$\;
+			\ForEach(){$1 \leq j \leq w$}
+			{
+				$QS \gets QS \land \lambda_{i,j,j} \geq 0$ \Comment{Non-negative diagonal entries}\;
+			}
+			$h_i \gets V_{d/2}^T \cdot L \cdot L^T \cdot V_{d/2}$ \Comment{Computed symbolically}\;
+		}
+		$eq \gets h_0 + \sum_{i=1}^r h_i \cdot f_i - g$\Comment{Computed symbolically}\;
+		\ForEach(){monomial $m$ of $~\mathbb R[\mathbb V]$}
+		{
+			$\texttt{coeff}_m \gets$ {the coefficient of } $m$ in $eq$\;
+			$QS \gets QS \land \texttt{coeff}_m = 0$\;
+		}
+		\Return{$QS$};
+	\end{algorithm}
+
+\subsection{Summary of the Mathematical Tools}
+The following table summarizes how our algorithm applies the three theorems above in order to reduce a constraint of the form $f_1 \ge 0 \ldots \land f_r \ge 0 \implies g \ge 0$ to a system of quadratic constraints.
+
+
+\begin{table}[H]
+    \centering
+    \begin{footnotesize}
+\begin{tabular}{|c |c |c |c|}
+    \hline
+    Theorem & $F := f_1,\ldots, f_r$ & $g$ & Equality Used \\[0.5ex]
+    \hline\hline
+    Farkas' Lemma & Linear & Linear &
+    \begin{tabular}{c}
+        $g \equiv \lambda_0 + \sum_{i=1}^r \lambda_i \cdot f_i$ \\
+        where each $\lambda_i$ is a non-negative real
+   \end{tabular}
+    \\
+    \hline
+    Handelman's Theorem & Linear & Non-linear & 
+    \begin{tabular}{c}
+         $g \equiv \sum_{i} \lambda_i \cdot m_i$  \\
+         where $m_i \in \monoid_d(F)$ 
+    \end{tabular} \\
+    \hline
+    Putinar's Positivstellensatz & Non-linear & Arbitrary &
+    \begin{tabular}{c}
+    	
+        $g \equiv h_0 + \sum_{i} h_i \cdot f_i$ \\
+        where each $h_i$ is an SOS
+        
+   \end{tabular} \\
+   \hline
+\end{tabular}
+    \end{footnotesize}
+    \caption{Summary of the theorems used to reduce an entailment to quadratic constraints}\label{tab:summary-maths}
+\end{table}
+We remark that Putinar’s Positivstellensatz is more general than Farkas' Lemma and Handelman's theorem. Putinar can handle antecedents and consequents that are both polynomial, whereas Handelman requires linear antecedents and Farkas additionally requires linear consequents. In cases where more than one theorem is applicable, the quality of the bounds will not be affected and they can synthesize the exact same set of bounds. In other words, no theorem is tighter. This is because they are all complete. In practice, we prefer to first use Farkas if possible, and switch to Handelman only if Farkas fails, and then to Putinar if Handelman fails. Our tool makes heuristic choices to decide which entailments should be kept in Handelman and which escalated to Putinar. The preference for Farkas over Handelman over Putinar is because there is a tradeoff between generality and the number of new variables introduced by each approach. Farkas introduces the fewest number of extra variables, namely the $\lambda_i$’s in Theorem~\ref{thm:farkas}, whereas Handelman has to generate a coefficient for each monoid element, i.e.~$\lambda_i$’s in Theorem~\ref{thm:handelman}, and Putinar needs to set up a template in which we have a new variable for each non-zero entry of the lower-triangular matrix $L$ of Theorem~\ref{thm:cholesky}.
+
+

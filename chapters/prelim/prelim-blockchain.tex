@@ -1,5 +1,3 @@
-\chapter{Preliminaries}
-\label{chp:prelim}
 
 \section{Blockchain and Smart Contracts} \label{sec:prelim-blockchain}
 \paragraph{Blockchain} As pioneered by Bitcoin~\cite{nakamoto2008bitcoin}, most modern cryptocurrencies use a blockchain protocol. There are three fundamental objects: transactions, blocks, and the blockchain. Transactions are the basic units of record keeping, defining the cryptocurrency's history and order. In Bitcoin, transactions transfer money in the underlying cryptocurrency. Anyone can create and broadcast transactions, which must be validated, e.g.~by checking digital signatures to prove ownership. Valid transactions are spread across the network using a peer-to-peer gossip protocol. Valid transactions are grouped into blocks of fixed maximum size, and each block contains a hash pointer to the previous block, forming a singly-linked list called the blockchain. Each node maintains a local copy of the blockchain, so its history consists of all transactions in its chain, which also provides their ordering.

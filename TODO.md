@@ -25,3 +25,4 @@
 - [ ] Fix para and paragraph
 - [X] Replace \fee with cfee in cardano paper
 - [ ] Remove in our work
+- [ ] Make the math equations in the examples look better

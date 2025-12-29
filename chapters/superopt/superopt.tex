@@ -1,0 +1,20 @@
+\chapter{Gas Optimization for Smart Contract Compilers}
+\label{chp:superopt}
+This chapter originally appeard in the following publication:
+
+\begin{itemize}
+    \item T. Barakbayeva, S. Farokhnia, A.K. Goharshady, P. Li, and Z. Lin, Improved Gas Optimization of Smart Contracts, International Conference on Fundamentals of Software Engineering, FSEN 2025
+\end{itemize}
+
+
+\newpage
+
+\section{Introduction}
+
+\para{Background} Smart contracts are often written in high-level programming languages such as Solidity and then compiled to bytecode before being deployed on the blockchain. Thus, a natural compiler optimization problem arising in this context is to produce efficient bytecode that minimizes the total gas usage. A leading approach in this direction is superoptimization, which considers every basic block of the smart contract separately and tries to rewrite it as an equivalent block that uses as little gas as possible. The current state-of-the-art tool is \texttt{syrup 2.0}, which encodes gas superoptimization as \texttt{Max-SMT} and then relies on SMT-solvers to synthesize an equivalent contract with optimized gas usage. 
+
+\para{Our Contributions} In this chapter, we make two observations: First, the performance of \texttt{Max-SMT} declines significantly as block sizes increase. Thus, although \texttt{syrup} is able to find an optimal rewriting for a small block with a dozen bytecode operations, its output on blocks with hundreds or thousands of operations, when given any realistic timeout, is far from optimal. Second, optimizations that can be applied to basic blocks are often local and compositional, i.e.~they rewrite several small and disjoint parts of the block. Such locality is lost to \texttt{Max-SMT} solvers, mainly because it is unpredictable and there are no clear ways on how one should cut blocks of bytecode into smaller sub-blocks. To ameliorate these issues, we present a simple dynamic programming algorithm that tries every possible division of a block into sub-blocks, recursively calling \texttt{syrup} as a black box on each sub-block. Surprisingly, this simple idea leads to highly significant improvements in the gas usage, more than doubling the savings obtained by \texttt{syrup}, and reducing the gas usage of real-world smart contracts by \todo{11.23} percent.
+
+
+\input{chapters/superopt/superopt-problem.tex}
+

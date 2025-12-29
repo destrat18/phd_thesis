@@ -37,7 +37,7 @@ We can readily see that $g \equiv 2 \cdot f_1 + f_2 + f3$. Therefore, the implic
 
 \para{Pseudocode} Algorithm~\ref{alg:farkas} provides a more formal presentation of how Farkas' lemma is used to reduce entailments to a system of quadratic constraints.
 
-\begin{algorithm}[H]
+\begin{algorithm2e}[H]
 	\footnotesize
 	\setstretch{0.8}
 	\caption{ReduceWithFarkas}\label{alg:farkas}
@@ -54,7 +54,7 @@ We can readily see that $g \equiv 2 \cdot f_1 + f_2 + f3$. Therefore, the implic
 				$QS \gets QS \land \texttt{coeff}_m = 0$\;
 		}
 		\Return{$QS$};
-	\end{algorithm}
+	\end{algorithm2e}
 
 \subsection{Handelman's Theorem}
 
@@ -81,7 +81,7 @@ $. It can be verified that $g \equiv 2 \cdot f_1 \cdot f_2 + f_2^2 + 12 \cdot f_
 
 \para{Pseudocode} Algorithm~\ref{alg:handelman} shows how Handelman's theorem reduces entailments to a system of quadratic constraints.
 
-\begin{algorithm}[H]
+\begin{algorithm2e}[H]
 	\footnotesize
 	\setstretch{0.8}
 	\caption{ReduceWithHandelman}\label{alg:handelman}
@@ -101,7 +101,7 @@ $. It can be verified that $g \equiv 2 \cdot f_1 \cdot f_2 + f_2^2 + 12 \cdot f_
 			$QS \gets QS \land \texttt{coeff}_m = 0$\;
 		}
 		\Return{$QS$};
-	\end{algorithm}
+	\end{algorithm2e}
 
 \subsection{Putinar's Positivstellensatz}
 
@@ -142,7 +142,7 @@ $$
 
 \para{Pseudocode} Based on the theorems above, Algorithm~\ref{alg:putinar} provides a more formal presentation of how Putinar's Positivstellensatz reduces entailments to a system of quadratic constraints.
 
-\begin{algorithm}[H]
+\begin{algorithm2e}[H]
 	\footnotesize
 	\setstretch{0.8}
 	\caption{ReduceWithPutinar}\label{alg:putinar}
@@ -169,7 +169,7 @@ $$
 			$QS \gets QS \land \texttt{coeff}_m = 0$\;
 		}
 		\Return{$QS$};
-	\end{algorithm}
+	\end{algorithm2e}
 
 \subsection{Summary of the Mathematical Tools}
 The following table summarizes how our algorithm applies the three theorems above in order to reduce a constraint of the form $f_1 \ge 0 \ldots \land f_r \ge 0 \implies g \ge 0$ to a system of quadratic constraints.

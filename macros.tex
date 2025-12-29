@@ -54,8 +54,10 @@
 % NOTE: This thesis uses the `algorithm2e` pseudocode style (\KwIn/\KwResult/\ForEach/...)
 % which conflicts with the `algorithm` + `algpseudocode` combination.
 % Keep only one family enabled.
-%\usepackage{algorithm}
-%\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{upgreek}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -108,7 +110,7 @@
 
 \usepackage{svg}
 
-\usepackage[ruled,linesnumbered]{algorithm2e}
+\usepackage[ruled,linesnumbered,algo2e]{algorithm2e}
 
 % Compatibility: some pseudocode uses \Comment{...} (algpseudocode-style) while
 % the thesis otherwise uses algorithm2e keywords (\KwIn/\KwResult/\ForEach).
@@ -208,7 +210,7 @@
 % mining-ethereum-macros.tex version:
 % \renewcommand{\paragraph}[1]{\smallskip\noindent\textbf{\textsc{#1.}}}
 % Using mining version (bold+smallcaps) as default - CHECK THIS:
-\renewcommand{\paragraph}[1]{\smallskip\noindent\textbf{\textsc{#1.}}}
+\renewcommand{\paragraph}[1]{\medskip\noindent\textbf{\emph{#1.}}}
 
 \lstset
 { %Formatting for code in appendix
@@ -218,6 +220,16 @@
     tabsize=1,
     breaklines=true,
     breakatwhitespace=false,
+}
+
+\lstset{
+	language=C,
+	basicstyle=\ttfamily,
+}
+
+\lstset{
+	morekeywords={PUSH1, SLOAD, XOR, DUP2, SWAP1, SWAP2, POP},
+	keywordstyle=\color{Blue},
 }
 
 
@@ -421,14 +433,16 @@ basicstyle=\ttfamily,columns=flexible,frame=single,framerule=0pt,%
 \newcommand{\ifthenblock}[2]{\textcolor{blue}{\texttt{if}} \; (\textcolor{red}{#1}) \; \textcolor{blue}{\texttt{then}} \; \textcolor{green!50!black}{#2}}
 
 
-% CONFLICT: \todo has different definitions in options-macros.tex and mining-ethereum-macros.tex
-% options-macros.tex version:
-% \newcommand{\todo}{\textcolor{red}{\textbf{TODO }}}
-% \renewcommand{\todo}[1]{\textcolor{red}{TODO: #1}}
-% mining-ethereum-macros.tex has it commented out
-% Using options-macros.tex version - CHECK THIS:
-\newcommand{\todo}{\textcolor{red}{\textbf{TODO }}}
-% \renewcommand{\todo}[1]{\textcolor{red}{TODO: #1}}
+\usepackage{todonotes}
+\renewcommand{\todo}[1]{{{#1}}}
+
+\newcommand{\bb}{\textsf{B}}
+\newcommand{\op}{\textsf{op}}
+\newcommand{\opt}{\textsf{Optimized}}
+\newcommand{\syr}{\textsf{syr}}
+\newcommand{\leastgas}{\textsf{leastGas}}
+\newcommand{\bestblock}{\textsf{bestBlock}}
+\newcommand{\XOR}{^\wedge}
 
 \newcommand{\Rstep}{\underset{R}{\rightarrow}}
 \newcommand{\Rstepstar}{\underset{R}{\overset{*}{\rightarrow}}} 

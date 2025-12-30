@@ -1,2 +1,31 @@
 \section{Experimental Results}\label{sec:superopt-experiments} 
 
+
+In this section, we provide an experimental comparison between our algorithm and \texttt{syrup} over real-world Ethereum smart contracts. We implemented our algorithm in Python and integrated it with \texttt{syrup 2.0}~\cite{albert2022super}. All results were obtained on an Intel Xeon Gold 5317 machine (3.0 GHz, 12 cores, 18M cache) with 128 GB of RAM running Ubuntu 20.04.6 LTS. We performed gas optimization experiments on the benchmark smart contracts from~\cite{albert2022super}, which contain some of the most widely-used real-world contracts on the Ethereum blockchain.
+
+\paragraph{Standard Benchmarks} In our first experiment, we considered the \todo{148} smart contracts of the benchmark suite of~\cite{albert2022super}. According to~\cite{albert2022super}, this suite contains a random sampling of the most commonly-called smart contracts on the Ethereum blockchain. 128 of these contracts are provided in the EVM bytecode format and match the exact versions deployed on the blockchain. These deployed bytecodes were most likely obtained by the developers compiling high-level Solidity code using a version of \texttt{solc} that was available at the time of their deployment. The other 20 are provided as Solidity source code. We compiled them to bytecode using \texttt{solc}. Overall, this benchmark set consists of \todo{22,136} basic blocks. 
+
+
+\paragraph{Gas Optimization Results} The total gas usage of unoptimized contracts over all basic blocks was \todo{1,972,141} units of gas. This was reduced to \todo{1,889,918} units of gas when applying \texttt{syrup 2.0}. It was further reduced to \todo{1,750,576} units by our dynamic programming algorithm. Thus, \texttt{syrup} provides an overall gas saving of \todo{4.17} percent over the baseline, whereas our approach obtains a saving of \todo{11.23} percent (\todo{7.37} percent over \texttt{syrup}). More specifically, \texttt{syrup} succeeded in improving the gas usage in \todo{4,678} basic blocks, with an average improvement of \todo{21.40} percent over these \todo{4,678} blocks. Our approach improved the gas usage in \todo{5,877} basic blocks, with an average improvement of \todo{30.52} percent over these blocks. In comparison to \texttt{syrup}, our approach improved the gas usage in \todo{4,328} basic blocks with the average improvement being \todo{24.82} percent. Figures~\ref{fig:hermes-histogram-percent-us-unopt}--\ref{fig:hermes-histogram-percent-us-syrup} visualize the data as histograms. 
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=\linewidth]{data/1-histogram-percent-us-unopt.pdf}
+	\scalebox{0.45}{
+	\input{chapters/superopt/superopt-data/1-histogram-percent-us-unopt.pgf}
+	}
+	\caption{Histogram of gas improvements obtained by our approach over the unoptimized smart contracts. The $x$ axis is the percentage of improvement (bin size = $5\%$) and the $y$ axis is number of basic blocks.}
+	\label{fig:hermes-histogram-percent-us-unopt}
+\end{figure}
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=\linewidth]{data/2-histogram-percent-us-syrup.pdf}
+	\scalebox{0.45}{
+		\input{chapters/superopt/superopt-data/2-histogram-percent-us-syrup.pgf}
+	}
+	\caption{Histogram of gas improvements obtained by our approach over \texttt{syrup 2.0}. The $x$ axis is the percentage of improvement (bin size = $5\%$) and the $y$ axis is number of basic blocks.}
+	\label{fig:hermes-histogram-percent-us-syrup}
+\end{figure}
+
+\paragraph{Real-world Blockchain Benchmarks} In a second experiment, we considered real-world Ethereum contracts that were called in blocks number 21190000 to 21200000 of the Ethereum blockchain. These blocks correspond to the timeframe from Nov-15-2024 02:06:11 UTC to Nov-16-2024 11:36:47 UTC. We considered the top 1000 most-commonly called contracts in these blocks. Of these, \texttt{syrup} could handle 656 contracts. Some contracts use a newer version of the EVM bytecode format and thus neither \texttt{syrup} nor our approach is applicable to them. Over these contracts, our approach saved a total of $124{,}163{,}227$ units of gas, corresponding to $2.29$ ETH.

@@ -19,3 +19,49 @@ $$
 g(\opt(\bb)) = g(\opt(\bb[1\ldots i])) + g(\opt(\bb[i+1\ldots n])).
 $$
 In other words, $\bb$ can be divided in two parts and each part can be (recursively) optimized separately. This is shown in Figure~\ref{fig:superopt-opt}. This intuition leads to two challenges: (i)~how to identify when this kind of compositionality is present, and (ii)~how to find the correct index $i$ for dividing $\bb$ in two parts. Our algorithm sidesteps both of these difficulties by simply brute-forcing all possibilities.
+
+
+\paragraph{Our Algorithm} We use \texttt{syrup} as a black box in our algorithm. Let  $\bb = \langle \op_1, \op_2, \ldots, \op_n \rangle$ be a basic block and $\syr(\bb)$ be the gas-optimized block obtained by applying \texttt{syrup} to $\bb.$ Instead of applying \texttt{syrup} directly to $\bb,$ we can first divide $\bb$ in two parts $\bb[1\ldots i]$ and $\bb[i+1 \ldots n]$ and then optimize each part separately. We simply try this for all possible $i,$ considering further sub-divisions recursively. Formally, let $\leastgas(\bb)$ be the minimum amount of gas usage that we can obtain by rewriting $\bb$ to an equivalent basic block. We have:
+$$
+\leastgas(\bb) = \min\left\{ g(\syr(\bb)), \min_{i=1}^{n-1} \leastgas(\bb[1\ldots i]) + \leastgas(\bb[i+1\ldots n]) \right\}.
+$$
+This formula leads itself to dynamic programming and tracing the dynamic programming steps can also help us find an equivalent block $\bb^*$ with $g(\bb^*) = \leastgas(B).$ More specifically, for every sub-block $\bb[i\ldots j],$ we can find the best optimization. This is shown in Algorithm~\ref{alg:superopt-algo}. Note that our algorithm does not guarantee that the resulting block will be globally optimal, but only that it will use no more gas than \texttt{syrup}'s output. As we will see in Section~\ref{sec:superopt-experiments}, the improvement is quite substantial in practice. Finally, we note that our algorithm can easily be parallelized at lines 5 and 9.
+
+
+
+
+\begin{algorithm2e}[H]
+\footnotesize
+\setstretch{0.8}
+\caption{Our Algorithm: Dynamic Programming using \texttt{syrup} as a Blackbox}
+\label{alg:superopt-algo}
+\KwIn{A basic block $\bb = \langle \op_1, \ldots, \op_n \rangle$ of $n$ EVM bytecode operations}
+\KwResult{A gas-optimized block $\bb^*$ which is equivalent to $\bb$}
+\textbf{int} $\leastgas[n][n]$\;
+\tcp{$\leastgas[i][j]$ holds $\leastgas(\bb[i \ldots j])$}
+\textbf{block} $\bestblock[n][n]$\;
+\tcp{$\bestblock[i][j]$ holds the best rewriting for $\bb[i \ldots j]$}
+\ForEach{$i \leq j$}{
+    $\bestblock[i][j] \gets \syr(\bb[i\ldots j])$\;
+    \tcp{Start with \texttt{syrup}'s output as the base case}
+    $\leastgas[i][j] \gets g(\bestblock[i][j])$\;
+}
+
+\For{$1 \leq l \leq n$}{
+    \tcp{$l$ is the length of our sub-block}
+    \For{$1 \leq a \leq n-l+1$}{
+        \tcp{$a$ is the starting index of our sub-block}
+        $b \gets l+a-1$\;
+        \tcp{$b$ is the end index of our sub-block}
+        \For{$a \leq i \leq b$}{
+            \tcp{Try breaking the sub-block $\bb[a \ldots b]$ at index $i$}
+            \If{$\leastgas[a][i] + \leastgas[i+1][b] < \leastgas[a][b]$}{
+                $\leastgas[a][b] = \leastgas[a][i]+\leastgas[i+1][b]$\;
+                $\bestblock[a][b] = \bestblock[a][i] \cdot \bestblock [i+1][b]$\;
+                \tcp{The operator $\cdot$ represents concatenation of basic blocks}
+            }
+        }
+    }
+}
+\Return{$B^* = \bestblock[1][n]$}\;
+\end{algorithm2e}

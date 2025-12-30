@@ -1,0 +1,21 @@
+\section{Our Algorithm}\label{sec:superopt-algorithm} 
+
+In this section, we present our simple dynamic programming algorithm. Our approach is based on the two intuitive observations below.
+
+\paragraph{Observation 1: Scalability} We observe that \texttt{syrup} works really well on small basic blocks and often finds the optimal rewriting. However, this is no longer the case when the basic block increases in size. For basic blocks with more than a hundred bytecode operations, \texttt{syrup} rarely finds the optimal rewriting and often produces extremely suboptimal results, even when given generous time limits of several hours. This is not surprising since the problem is reduced to \texttt{Max-SMT} and SMT-solvers are simply not scalable enough to handle large basic blocks.
+
+\paragraph{Observation 2: Locality and Compositionality} Our second observation is that gas-optimizing changes to basic blocks are often local and compositional. For example, a block with thousands of operations will probably be optimizable by hundreds of different local rewritings which are quite independent of each other.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics{chapters/superopt/superopt-figures/compose.pdf}
+	\caption{A basic block $\bb$ (top) in which some portions (red) can be optimized to use less gas (green). }
+	\label{fig:superopt-opt}
+\end{figure}
+
+
+More formally, let $\bb = \langle \op_1, \op_2, \ldots, \op_n \rangle$ be a basic block consisting of $n$ EVM operations, $g(\bb) = \sum_{i=1}^n g(\op_i)$ be its gas usage, and $B^* = \opt(\bb)$ be the optimal rewriting of $\bb,$ i.e.~the equivalent basic block that uses minimal gas. Additionally, let $\bb[i\ldots j]$ be the sub-block of $\bb$ from $\op_i$ to $\op_j.$ We conjecture that in almost all cases, there is an index $i$ such that
+$$
+g(\opt(\bb)) = g(\opt(\bb[1\ldots i])) + g(\opt(\bb[i+1\ldots n])).
+$$
+In other words, $\bb$ can be divided in two parts and each part can be (recursively) optimized separately. This is shown in Figure~\ref{fig:superopt-opt}. This intuition leads to two challenges: (i)~how to identify when this kind of compositionality is present, and (ii)~how to find the correct index $i$ for dividing $\bb$ in two parts. Our algorithm sidesteps both of these difficulties by simply brute-forcing all possibilities.

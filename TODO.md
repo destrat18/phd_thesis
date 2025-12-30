@@ -2,7 +2,6 @@
 - [X] Add dedication
 - [ ] Add Acknowledgment
 - [X] Complete introduction
-    - [ ] Add Algebra-Geomatics paragraph
     - [X] Add awards
     - [X] Add Outline
     - [X] Add Summary of contributions
@@ -29,6 +28,16 @@
 - [ ] Make the math equations in the examples look better
 - [ ] Fix s in publications
 - [ ] Update crypto numbers
+- [ ] Add definitions for parameterized section in the prelim
+- [ ] Add Algebra-Geomatics paragraph
+- [ ] Add Blockchain background in the first paragraph
+- [ ] Add one sentence background about the problem in outlines
+- [ ] Add more details for Chapter 7
+
 
 ## To Read
 - [ ] Read "Super-optimization of Smart Contracts" by Albert et al
+- [ ] Asparagus
+- [ ] Hermes
+- [ ] Ethereum
+- [ ] Cardano

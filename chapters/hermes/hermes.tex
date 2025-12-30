@@ -13,6 +13,11 @@ This chapter originally appeard in the following publication:
 
 \section{Introduction}
 
-\para{Background}
-	
-\para{Our Contributions} 
+\para{Background} Decentralized exchanges (DEXs) have transformed the financial landscape by enabling transparent, permissionless token trading on blockchains. These platforms rely on smart contracts called liquidity pools. Each pool allows for the trading of two tokens, with the exchange price dynamically calculated by an automated algorithm based on the available liquidity. Uniswap, the leading DEX on Ethereum, features over 400,000 pools and tokens, supporting an average daily trading volume of \$1.3~\text{billion} USD since 2024. However, fragmentation across DEXs and the rapid growth in the number of tokens significantly complicate the search for optimal exchange rates, particularly when no direct trading pair exists. As a result, it often requires a sequence of trades across multiple pools, a challenge known as \emph{routing}.~Routing is typically modeled as a shortest path problem on a given graph of tokens. Existing algorithms have significant drawbacks: scalable approaches often lack guarantees for route validity, while robust methods struggle with the scale and dynamic nature of modern decentralized exchanges.
+
+\para{Our Contributions} In this chapter, we address the problem of optimal routing on DEXs. We demonstrate that by leveraging the structural properties of this graph, in particular its \emph{treewidth}, it is possible to reconcile scalability with robustness. On the theoretical side, we adapt a parameterized algorithm utilizing treewidth to handle the dynamic setting of DEXs, where pools frequently change. We show that our approach achieves improved time complexity over existing methods and additionally provides a formal guarantee on the quality of the computed routes. We present empirical analysis on real Uniswap data to demonstrate the suitability of a parameterized online algorithm. Furthermore, we have implemented this algorithm in a free and open-source tool called Hermes and compared it with existing methods. On small instances where both tools produced results, Hermes reduced the average runtime by four orders of magnitude, from \todo{2.81} seconds to \todo{0.0002} seconds. Notably, Hermes is the only tool capable of computing routes in the presence of 100,000 tokens. It achieves an average runtime of \todo{0.19} seconds, while other approaches fail to complete within the allotted time.
+
+
+\input{chapters/hermes/hermes-problem.tex}
+\input{chapters/hermes/hermes-algorithm.tex}
+\input{chapters/hermes/hermes-experiments.tex}

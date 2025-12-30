@@ -1,0 +1,281 @@
+\section{Our Algorithm}\label{sec:hermes-algorithm} 
+
+\subsection{Formulating DEX prices as a graph problem}
+\para{Automated Market Makers}
+An \textit{Automated Market Maker} (AMM) is a protocol for decentralized trading that replaces traditional order books with deterministic pricing algorithms~\cite{DBLP:conf/uss/McLaughlinKV23}. In an AMM, prices are set by a mathematical function of the current token reserves in each liquidity pool. The most widely used class of AMMs is the \textit{Constant Function Market Maker} (CFMM), of which Uniswap is a prominent example.
+In Uniswap V2, the CFMM uses the constant product formula, which maintains a constant product of the reserves of two tokens $u$ and $v$ in a liquidity pool: $R_u \cdot R_v = k$, where $k$ is a fixed constant. Here, $R_u$ and $R_v$ represent the current quantities (reserves) of tokens $u$ and $v$ held in the pool, respectively. This means that any trade will adjust the reserves of both tokens while keeping their product constant. The spot price from token $u$ to token $v$ is determined by the ratio of their reserves, specifically $\text{price}(u \to v) = \frac{R_v}{R_u}$. Uniswap V3 allows liquidity providers to concentrate capital within custom price ranges, increasing efficiency. Uniswap V4 introduces \textit{hooks} for customizable trading strategies and fee structures~\cite{adams2023uniswap}. All three versions are active on Ethereum.
+
+For the scope of this paper, these versions share two pricing notions. The first is the \textit{spot price}, which depends on the current reserves and indicates the current market price. The second is the \textit{trade price}, which also accounts for the size of the trade. The applications of both concepts have been thoroughly studied in the literature~\cite{DBLP:journals/csur/XuPCF23}. In this chapter, we focus on spot prices.
+
+
+\para{Modeling the DEX Ecosystem as a Graph}
+To analyze and optimize trade routing across a decentralized exchange ecosystem, we employ the abstraction of a weighted directed graph $G=(V, E, w)$. In this model, the set of vertices $V$ represents the universe of available tokens. A directed edge $(u, v) \in E$ exists if there is a liquidity pool capable of direct trading from token $u$ to token $v$. A path in this graph, which is a sequence of connected vertices, therefore corresponds to a multi-hop trade that converts a source token into a destination token through one or more intermediaries. 
+
+
+\para{Shortest Path Formulation}
+The objective in trade routing is to find a path that maximizes the product of exchange rates\footnote{We assume rates are adjusted for all transaction fees.}. Since standard shortest path algorithms are designed to minimize a sum of weights, we align our problem by defining the weight of an edge $(u, v)$ as the negative logarithm of the exchange rate: $w(u, v) = -\log(\text{price}(u \to v))$. In the case of multiple liquidity pools between two tokens, we choose one pool maximizing the exchange rate $\max \text{price}(u \to v)$, thus avoiding the necessity of considering the multi-edge graphs. This weight assignment converts the maximization of a product into the minimization of a sum, thereby reformulating the optimal routing task as a Single-Source Shortest Path (SSSP) problem. A critical consideration in this model is the presence of negative-weight cycles, which correspond to arbitrage opportunities: trading paths that start and end with the same token and yield a profit. Such cycles can lead to infinitely cheap paths, a complication that must be handled by the chosen algorithm.
+
+
+\para{Graph Notation and Terminology}
+To develop an algorithm that leverages the specific topology of the DEX graph, we must first establish a formal language for discussing its local properties. We define the \textit{neighborhood} of a vertex $v$, denoted $N(v)$, as the set of all vertices directly accessible from it $N(v) := \{u \mid (v, u) \in E\}$. Furthermore, for any subset of vertices $S \subseteq V$, the \textit{subgraph induced by S}, denoted $G[S]$, consists of the vertices in $S$ and all edges from the original graph that connect any two vertices in $S$: $G[S] := (S, E \cap (S \times S))$. 
+
+\para{Tree Decompositions and Treewidth}
+The efficiency of our algorithm hinges on a structural parameter known as \textit{treewidth}, which quantifies how ``tree-like'' a graph is. Formally, the treewidth of a graph $G=(V, E)$ is defined via a \textit{tree decomposition}. A tree decomposition is a pair $(\mathcal{T}, \{X_i \mid i \in I\})$, where $\mathcal{T}=(I, F)$ is a tree and each $X_i$ (called a bag) is a subset of $V$, satisfying:
+\begin{enumerate}
+    \item The union of all bags equals $V$; i.e., $\bigcup_{i \in I} X_i = V$.
+    \item For every edge $(u,v) \in E$, there is at least one bag $X_i$ containing both $u$ and $v$.
+    \item For any vertex $v \in V$, the set of bags containing $v$ forms a connected subtree in $\mathcal{T}$.
+\end{enumerate}
+The \textit{width} of a tree decomposition is $\max_{i \in I} |X_i| - 1$. The \textit{treewidth} of a graph $G$, denoted $tw(G)$, is the minimum width over all possible tree decompositions of $G$. A low treewidth indicates a structure amenable to efficient dynamic programming, a property we exploit extensively.
+
+
+\para{Chordal Graphs and Chordal Completion}
+Our algorithm operates not on the original graph $G$, but on a \textit{chordal supergraph} of it. A graph is chordal if every cycle of four or more vertices has an edge connecting two non-consecutive vertices (a chord). While most graphs are not chordal, any graph $G$ can be transformed into one by adding a set of ``fill-in'' edges to create a \textit{chordal completion}, $\widehat{G}$. A key result in graph theory states that the treewidth of a graph is intrinsically linked to its best chordal completion: $tw(G) = \min_{\widehat{G}} \omega(\widehat{G}) - 1$, where the minimum is taken over all chordal completions of $G$ and $\omega(\widehat{G})$ is the size of the largest clique in $\widehat{G}$. This relationship is fundamental to our approach.
+
+\para{All-Pairs Shortest Paths via Directed Path Consistency}
+The core of our algorithm is an efficient method for solving the All-Pairs Shortest Paths (APSP) problem on graphs with low treewidth. The method relies on enforcing \textit{Directed Path Consistency} (DPC) using a PEO. A weighted graph is DPC with respect to an ordering $\pi = (v_1, \dots, v_n)$ if for every triple of vertices $v_i, v_j, v_k$ with $i<j<k$, the path cost from $v_i$ to $v_k$ is no greater than the cost of the path through $v_j$; i.e., $w(v_i, v_k) \le w(v_i, v_j) + w(v_j, v_k)$.
+
+Enforcing this property on an arbitrary graph with an arbitrary ordering takes $O(n^3)$ time. However, by using the PEO of a chordal completion $\widehat{G}$, the process can be dramatically accelerated. The algorithm iterates backward through the PEO (from $v_n$ to $v_1$), and at each step $v_k$, it only needs to check for path updates between pairs of neighbors of $v_k$ that appear earlier in the ordering. Because a PEO ensures these neighbors form a clique of size at most $\omega(\widehat{G})$, the complexity of enforcing DPC is reduced to $O(n \cdot \omega(\widehat{G})^2)$, which is equivalent to $O(n \cdot tw(G)^2)$. 
+
+The advantage of the DPC property is that all shortest paths become bitonic: any shortest path from $u$ to $v$ consists of a segment where vertices decrease in the PEO order, followed by a segment where they increase. This structure allows SSSP queries to be answered efficiently in two passes over the PEO array, see Algorithm~\ref{alg:query-sssp} for details.
+
+\subsection{The Algorithm Overview}
+
+Our proposed algorithm transforms a general graph into a structure where shortest path queries can be answered with remarkable efficiency. This transformation is achieved through a multi-phase process, illustrated in Figure~\ref{fig:dpc-process-illustration}. The first three phases constitute an offline preprocessing stage, which is performed only once. The final phase is the online query stage, designed for rapid, repeated execution.
+
+The main idea is to construct a chordal supergraph leveraging graph's tree decomposition. The chordal graph admits a Perfect Elimination Ordering (PEO). This ordering is then used to enforce Directed Path Consistency (DPC). The DPC property is used to answer the Single-Source Shortest Path (SSSP) queries efficiently. The algorithm is designed to handle graphs with negative-weight cycles, ensuring that the results are correct even in the presence of such cycles. The entire process is summarized in Algorithm~\ref{alg:hermes-framework}.
+
+\begin{algorithm2e}[H]
+\footnotesize
+\setstretch{0.8}
+\caption{Unified Algorithm for Treewidth-Based Batch SSSP Queries}
+\label{alg:hermes-framework}
+\KwIn{A weighted graph $G=(V, E, d)$, a set of source vertices $Q = \{s_1, \dots, s_q\}$}
+\KwResult{A list of SSSP distance arrays $(D[s_1], \dots, D[s_q])$, where each $D[s_i]$ contains the distances from source $s_i$ to every vertex in $V$}
+
+\tcp{Structural Preprocessing}
+$T \gets \text{ComputeTreeDecomposition}(G)$\;\label{alg:hermes-line:decomp}
+$(\widehat{G}, \pi) \gets \text{ComputeCompletionAndPEO}(T)$\;\label{alg:hermes-line:peo}
+
+\tcp{Weights Preprocessing}
+$d^* \gets \text{EnforceDPC}(\widehat{G}, \pi, d)$\;\label{alg:hermes-line:dpc}
+
+\tcp{Process each SSSP query}
+\For{$i \gets 1$ \KwTo $q$}{ \label{alg:hermes-line:loop}
+    $D[s_i] \gets \textup{QuerySSSP}(\widehat{G}, d^*, s_i)$\;\label{alg:hermes-line:query}
+}
+\end{algorithm2e}
+
+
+The correctness and efficiency of this framework are formalized in Theorem~\ref{thm:hermes-main}. 
+
+
+\begin{theorem}[Complexity and Correctness]
+\label{thm:hermes-main}
+Let $G=(V,E,d)$ be a weighted graph with $n = |V|$ vertices and treewidth $tw(G)$. The algorithm described in Algorithm~\ref{alg:hermes-framework} has an overall preprocessing time of $O(n \cdot tw(G)^2)$ and answers each SSSP query in $O(n \cdot tw(G)^2)$ time.
+
+For each source vertex $s_i \in Q$, the resulting distance array $D_i$ has the following properties for any target vertex $t \in V$:
+\begin{itemize}
+    \item If there are no negative-weight cycles on any path from $s_i$ to $t$, then $D[s_i][t]$ stores the correct shortest path distance from $s_i$ to $t$ in the original graph $G$.
+    \item If there is a negative-weight cycle on a path from $s_i$ to $t$, the corresponding distance $D[s_i][t]$ will be less or equal to the shortest simple path (a path with no repeated vertices) distance from $s_i$ to $t$ in $G$.
+\end{itemize}
+\end{theorem}
+
+
+
+\begin{figure}[]
+    \centering
+    
+    \begin{subfigure}[t]{0.47\columnwidth}
+        \centering
+        \includegraphics[width=0.7\linewidth]{chapters/hermes/hermes-figures/input-G.pdf}
+        \caption{The input graph $G$.}
+        \label{fig:hermes-input-G}
+    \end{subfigure}
+    \hfill 
+    \begin{subfigure}[t]{0.51\columnwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{chapters/hermes/hermes-figures/tree-decomp.pdf}
+        \caption{A tree decomposition of $G$.}
+        \label{fig:hermes-tree-decomp}
+    \end{subfigure}
+
+    \vspace{1em}
+
+    \begin{subfigure}[t]{0.8\columnwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{chapters/hermes/hermes-figures/fillin-g.pdf}
+        \caption{The chordal completion $\widehat{G}$ with fill-in edges (\textcolor{purple}{$\widehat{E}$}) added.}
+        \label{fig:hermes-fillin-g}
+    \end{subfigure}
+
+    \caption{An illustration of the preprocessing pipeline for the treewidth-based routing algorithm.}
+    \label{fig:hermes-dpc-process-illustration}
+\end{figure}
+
+\begin{example}[Input Graph]
+    We illustrate the entire pipeline using the graph from Figure~\ref{fig:hermes-dpc-process-illustration}. The process begins with the graph $G$ in Figure~\ref{fig:hermes-dpc-process-illustration}(a). We chose the weights to be symmetric $d(u, v) = d(v, u)$ for simplicity of presentation, generally the algorithm does not require this. The graph has $7$ vertices $\{v_1, \dots, v_7\}$, the $v$s are omitted in the figure for clarity. The edges has the following weights: $d(v_1, v_2)=5$, $d(v_2, v_3)=1$, $d(v_2, v_6)=12$, $d(v_3, v_4)=2$, $d(v_4, v_5)=7$, $d(v_4, v_7)=3$, and $d(v_6, v_7)=4$.
+\end{example}
+
+\para{Phase 1: Tree Decomposition} This initial phase (line~\ref{alg:hermes-line:decomp} of Algorithm~\ref{alg:hermes-framework}) computes a tree decomposition for the input graph $G$. The goal is to find a low-width decomposition, as its width, the treewidth $tw(G)$, is the primary parameter governing the complexity of the entire preprocessing stage.
+
+A landmark result in parameterized complexity theory by Bodlaender proves that it is Fixed-Parameter Tractable (FPT).
+
+\begin{lemma}[Complexity of Tree Decomposition]
+\label{lem:hermes-phase1}
+For any fixed parameter $k$, there exists a linear-time algorithm that can determine if a graph $G$ has treewidth at most $k$ and, if so, produce a corresponding tree decomposition in $O(f(k) \cdot |V(G)|)$ time. \cite{Bodlaender:1993:LTA:167088.167161}.
+\end{lemma}
+
+Additionally, many heuristic approaches have been developed. These heuristics have been refined and implemented in highly optimized solvers. Modern, competitive solvers can often find low-width decompositions for very large graphs arising in practice \cite{pace2017}.
+
+\begin{example} [Tree Decomposition]
+    Figure~\ref{fig:hermes-dpc-process-illustration}(b) shows a valid tree decomposition $\mathcal{T}$ of $G$. The largest bag is of size 3 (e.g., $X_1 = \{2,4,6\}$), so the treewidth is $tw(G) = 3 - 1 = 2$. It is straightforward to verify that (i) for each edge $(v_i, v_j)$ in $G$, there exists a bag in $\mathcal{T}$ containing both $v_i$ and $v_j$, and (ii) for each vertex $v_i$, the bags containing $v_i$ form a connected subtree in $\mathcal{T}$.
+\end{example}
+
+
+\para{Phase 2: Fill-in and PEO} In this phase (line~\ref{alg:hermes-line:peo} of Algorithm~\ref{alg:hermes-framework}), we construct a minimal chordal completion $\widehat{G}$ and a corresponding Perfect Elimination Ordering (PEO) $\pi$ from the tree decomposition. The process, detailed in Algorithm~\ref{alg:hermes-peo-from-td-while}, iterates through the tree bags from leaves to the root. In each step, it turns the current leaf bag into a clique and prepends its unique vertices (those not in its parent bag and have not been seen before) to the PEO.
+
+\begin{algorithm2e}[H]
+\footnotesize
+\setstretch{0.8}
+\caption{ComputeCompletionAndPEO($G=(V,E), \mathcal{T}$)}
+\label{alg:hermes-peo-from-td-while}
+$\widehat{G} \gets G$, $\pi \gets ()$\;
+\While{$\mathcal{T}$ is not empty}{
+    $X \gets \text{leaf}(\mathcal{T})$\;
+    $Y \gets \text{parent}(\mathcal{T}, X) \text{ or } \emptyset \text{ if } X \text{ is the root}$\;
+    $\widehat{E} \gets \widehat{E} \cup \{(u,v) \mid u, v \in X, u \neq v\}$\;\label{alg:hermes-line:clique-creation}
+    
+    $\pi \gets [(X \setminus Y)\setminus \pi] + \pi$\;\label{alg:line:hermes-peo-update}
+    $\mathcal{T} \gets \mathcal{T} \setminus \{X\}$\;\label{alg:line:hermes-tree-prune}
+}
+\Return{$(\widehat{G}, \pi)$}\;
+\end{algorithm2e}
+We summarize the key results about the correctness and complexity below.
+
+\begin{lemma}[Properties of the Completion and PEO]
+\label{lem:hermes-completion-properties}
+Let $\widehat{G}$ and $\pi$ be the outputs of Algorithm~\ref{alg:hermes-peo-from-td-while}. The following properties hold:
+\begin{enumerate}[label=(\alph*)]
+    \item The graph $\widehat{G}$ is a chordal supergraph of $G$.
+    \item The clique number of the completion satisfies $\omega(\widehat{G}) = tw(G) + 1$.
+    \item The sequence $\pi$ is a valid Perfect Elimination Ordering for $\widehat{G}$.
+    \item The algorithm runs in $O(n \cdot (tw(G)+1)^2)$ time.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}[Proof (sketch)]
+For \textit{(a)-(c)}, we refer to the standard properties relating tree decompositions to chordal graphs \cite{heggernes2005treewidth}. For (d), we analyze the algorithm as follows: we can assume the given tree decomposition has $O(n)$ nodes. The algorithm iterates through each node, where the dominant operation is making the bag a clique (line~\ref{alg:hermes-line:clique-creation}). This step takes $O((tw(G)+1)^2) = O(tw(G)^2)$ time. The total complexity is therefore $O(n \cdot (tw(G)+1)^2)$.
+\end{proof}
+
+\begin{example}[Fill-in and PEO] 
+    We apply Algorithm~\ref{alg:hermes-peo-from-td-while} to $\mathcal{T}$ to get the chordal completion $\widehat{G}$ and a PEO $\pi$. Processing the bags from the leaves of $\mathcal{T}$ inwards yields the chordal graph in Figure~\ref{fig:hermes-dpc-process-illustration}(c). The required fill-in edges (shown in purple) are $(v_2,v_4)$ and $(v_4,v_6)$ as the pairs of vertices are present in the bags $X_1$ and $X_3$. A valid PEO $\pi= (v_2, v_6, v_4, v_7, v_3, v_1, v_5)$ that can be generated from this process by trimming the bags in the following order: $X_4 \to X_5 \to X_3 \to X_2 \to X_1$. 
+\end{example}
+
+
+
+\paragraph{Phase 3: Enforcing the DPC} This phase executes the `EnforceDPC` function (Algorithm~\ref{alg:hermes-enforce-dpc}), which corresponds to line~\ref{alg:hermes-line:dpc} of the main algorithm. It takes the chordal graph $\widehat{G}$, its PEO $\pi$, and the original distances $d$ to produce a new distance matrix $d^*$.
+
+This procedure does not compute the final all-pairs shortest paths. Instead, it modifies the edge weights to satisfy the Directed Path Consistency (DPC) property relative to the PEO $\pi$. Specifically, after `EnforceDPC` terminates, for any path $v_i \to v_k \to v_j$ where $v_k$ is a common neighbor of $v_i$ and $v_j$ that appears later in the PEO (i.e., $i,j < k$), the triangle inequality $d^*(v_i, v_j) \leq d^*(v_i, v_k) + d^*(v_k, v_j)$ is guaranteed to hold. 
+
+\begin{algorithm2e}[H]
+\footnotesize
+\setstretch{0.8}
+\caption{EnforceDPC($\widehat{G}=(V, \widehat{E}), \pi, d$)}
+\label{alg:hermes-enforce-dpc}
+$d^*(u, v) \gets d(u, v)$ for all $(u, v) \in E$ and $d^*(u, v) \gets \infty$ for all $(u, v) \in \widehat{E} \setminus E$\;
+$\pi = (v_1, v_2, \dots, v_n)$ is the PEO of $\widehat{G}$\;
+\For{$k \gets n$ down to $1$}{
+    \ForEach{pair of neighbors $v_i, v_j$ of $v_k$ in $\widehat{G}$ with $i < k$ and $j < k$}{
+        $d^*(v_i, v_j) \gets \min(d^*(v_i, v_j), d^*(v_i, v_k) + d^*(v_k, v_j))$\;
+    }
+}
+\Return{$d^*$}\;
+\end{algorithm2e}
+
+\begin{lemma}[Complexity of Enforcing DPC]
+\label{lem:phase3}
+The `EnforceDPC` procedure (Algorithm~\ref{alg:hermes-enforce-dpc}), which applies Directed Path Consistency on the chordal graph $\widehat{G}$ using its PEO, has a time complexity of $O(n \cdot tw(G)^2)$.
+\end{lemma}
+
+\begin{example}[Enforcing DPC]
+    This is the core computational step (Algorithm~\ref{alg:hermes-enforce-dpc}). We initialize $d^*$ with the weights from $G$, setting $d^*(2,4)=\infty$ and $d^*(4,6)=\infty$. The algorithm iterates backward through the PEO. The only updates that change a distance value occur for the following vertices:
+    \begin{align*}
+        \text{For } v_3: \quad d^*(v_2, v_4) & \gets \min(\infty, d^*(v_2, v_3) + d^*(v_3, v_4)) \\&= \min(\infty, 1+2) = 3 \\
+        \text{For } v_7: \quad d^*(v_4, v_6) & \gets \min(\infty, d^*(v_4, v_7) + d^*(v_7, v_6)) \\&= \min(\infty, 3+4) = 7 \\
+        \text{For } v_4: \quad d^*(v_2, v_6) & \gets \min(12, d^*(v_2, v_4) + d^*(v_4, v_6)) \\&= \min(12, 3+7) = 10
+\end{align*}
+    
+\end{example}
+
+
+
+\paragraph{Phase 4: SSSP Queries} The final query phase (lines~\ref{alg:hermes-line:loop}--\ref{alg:hermes-line:query}) processes the batch of SSSP queries. For each source $s_i$ in the query set $Q$, the algorithm calls the \textup{QuerySSSP} procedure (Algorithm~\ref{alg:hermes-query-sssp}). The algorithm is an adaptation of the \texttt{Min-path} procedure \cite{Planken2012,Chleq1995}.
+
+\begin{algorithm2e}[H]
+\footnotesize
+\setstretch{0.8}
+\caption{QuerySSSP($\widehat{G}=(V, \widehat{E}), \pi, d^*, s$)}
+\label{alg:hermes-query-sssp}
+Initialize distance array $D[v] \gets \infty$ for all $v \in V \setminus \{s\}$, $D[s] \gets 0$\;
+$D[s] \gets 0$\;
+Let $\pi = (v_1, \dots, v_n)$ be the PEO. Let $s = v_{idx}$\;
+
+\For{$k \gets idx$ down to $1$}{
+    \ForEach{neighbor $v_j$ of $v_k$ in $\widehat{G}$ such that $j < k$}{
+        $D[v_j] \gets \min(D[v_j], D[v_k] + d^*(v_k, v_j))$\;
+    }
+}
+
+\For{$k \gets 1$ to $n$}{
+    \ForEach{neighbor $v_j$ of $v_k$ in $\widehat{G}$ such that $j > k$}{
+        $D[v_j] \gets \min(D[v_j], D[v_k] + d^*(v_k, v_j))$\;
+    }
+}
+
+\Return{$D$}\;
+\end{algorithm2e}
+
+\begin{lemma}[Complexity of SSSP Query]
+\label{lem:hermes-phase4}
+The \textup{QuerySSSP} procedure has a complexity of $O(|\widehat{E}|)$, which in a chordal graph is bounded by $O(n \cdot tw(G)^2)$.
+\end{lemma}
+
+
+\begin{example}[SSSP Query]
+    Suppose we are given the query $s = v_4$. We execute Algorithm~\ref{alg:hermes-query-sssp}. The distance array $D$, ordered by the PEO $\pi=(v_2, v_6, v_4, v_7, v_3, v_1, v_5)$, is initialized to $[\infty, \infty, 0, \infty, \infty, \infty, \infty]$. The updates proceed as follows:
+    
+    \begin{minipage}{0.45\columnwidth}
+        \noindent\textit{Pass 1 (Backward Pass):}
+        \begin{align*}
+            v_6: &  [3, 7, 0, \infty, \infty, \infty, \infty] \\
+            v_4: &  [3, 7, 0, \infty, \infty, \infty, \infty] \\
+            v_2: &  [3, 7, 0, \infty, \infty, \infty, \infty]
+        \end{align*}
+    \end{minipage}%
+    \begin{minipage}{0.45\columnwidth}
+        \noindent\textit{Pass 2 (Forward Pass):}
+        \begin{align*}
+            v_2: &  [3, 7, 0, \infty, 4, 8, \infty] \\
+            v_6: &  [3, 7, 0, 11, 4, 8, \infty] \\
+            v_4: &  [3, 7, 0, 3, 2, 8, 7]
+        \end{align*}
+    \end{minipage}
+
+    The remaining vertices in the PEO do not produce further updates. The final distance array from source $v_4$, ordered by the PEO, is $[3, 7, 0, 3, 2, 8, 7]$.
+\end{example}
+
+
+
+
+\subsection{Handling Dynamic Edge Additions}\label{sec:hermes-online-edges}
+Real-world graphs are often dynamic. In our context, new liquidity pools can be added, creating new edges in the graph. A key advantage of our framework is its ability to handle many such updates efficiently. If a new edge $(u,v)$ already exists within the pre-computed chordal completion $\widehat{G}$, the underlying structure remains valid. In this scenario, we can bypass the expensive structural preprocessing steps (lines~\ref{alg:hermes-line:decomp}-\ref{alg:hermes-line:peo} of Algorithm~\ref{alg:hermes-framework}). Instead, we only need to update the edge weights and re-run the weights preprocessing (line~\ref{alg:hermes-line:dpc}). If the new edge is not in $\widehat{G}$, the full pipeline must be re-executed.
+
+
+
+
+
+
+
+
+

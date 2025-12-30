@@ -382,8 +382,18 @@ basicstyle=\ttfamily,columns=flexible,frame=single,framerule=0pt,%
 \newcommand{\para}[1]{\smallskip\noindent\textbf{\mdseries\textsc{#1.}}}
 \newcommand{\dom}{\textup{\textbf{dom}}}
 
-% Additional shared macros (kept if already defined elsewhere)
-\providecommand*{\serg}[1]{\textcolor{blue}{#1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hermes paper macros (from the original Hermes paper source)
+% Policy: do NOT redefine existing thesis-wide macros.
+% If a Hermes-paper macro would conflict, keep the paper version commented
+% out with a note so you can decide.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Hermes paper had:
+
+% Hermes paper:
+%   \newcommand*{\enhance}[1]{\textcolor{black}{#1}}
+\providecommand*{\enhance}[1]{\textcolor{black}{#1}}
 
 \providecommand{\mask}{\text{m}}
 \providecommand{\maxcap}{C_{\text{max}}}
@@ -403,6 +413,11 @@ basicstyle=\ttfamily,columns=flexible,frame=single,framerule=0pt,%
 \providecommand{\txs}{\textsf{TX}}
 \providecommand{\sz}{\sigma}
 \newcommand{\cfee}{\phi}
+
+% Hermes paper had: \newcommand{\fee}{\phi}
+% CONFLICT: this thesis uses \fee for fee-related notation elsewhere.
+% Use \cfee for the Hermes-paper meaning instead.
+% \newcommand{\fee}{\phi}
 
 
 % special letters for reals, rationals, integrals 
@@ -689,7 +704,9 @@ edge label={node[pos=.5, above=0.1, right] {n}},
 % \newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
 % \newtheorem{lemma}[theorem]{Lemma}
 
-\theoremstyle{thmstyletwo}%
+% NOTE: `thmstyletwo` was referenced here but never defined, which breaks
+% compilation with amsthm. Use a standard theoremstyle instead.
+	% heoremstyle{definition}%
 % \newtheorem{example}{Example}%
 % \newtheorem{remark}{Remark}%
 

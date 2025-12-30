@@ -2,7 +2,7 @@
 \section{Algebraic-Geometry Theorems}
 \label{sec:prelim-positivity}
 
-In this section, we fill in the mathematical details of our algorithm using Farkas' Lemma, Handelman's Theorem and Putinar's Positivstellensatz. The previous section has already illustrated how we use these theorems in our algorithm.
+In this section, we outline Farkas' Lemma, Handelman's Theorem and Putinar's Positivstellensatz.
 
 \para{Notation} We first set down some basic notation:
 \begin{compactenum}
@@ -207,6 +207,7 @@ The following table summarizes how our algorithm applies the three theorems abov
     \end{footnotesize}
     \caption{Summary of the theorems used to reduce an entailment to quadratic constraints}\label{tab:summary-maths}
 \end{table}
+
 We remark that Putinar’s Positivstellensatz is more general than Farkas' Lemma and Handelman's theorem. Putinar can handle antecedents and consequents that are both polynomial, whereas Handelman requires linear antecedents and Farkas additionally requires linear consequents. In cases where more than one theorem is applicable, the quality of the bounds will not be affected and they can synthesize the exact same set of bounds. In other words, no theorem is tighter. This is because they are all complete. In practice, we prefer to first use Farkas if possible, and switch to Handelman only if Farkas fails, and then to Putinar if Handelman fails. Our tool makes heuristic choices to decide which entailments should be kept in Handelman and which escalated to Putinar. The preference for Farkas over Handelman over Putinar is because there is a tradeoff between generality and the number of new variables introduced by each approach. Farkas introduces the fewest number of extra variables, namely the $\lambda_i$’s in Theorem~\ref{thm:farkas}, whereas Handelman has to generate a coefficient for each monoid element, i.e.~$\lambda_i$’s in Theorem~\ref{thm:handelman}, and Putinar needs to set up a template in which we have a new variable for each non-zero entry of the lower-triangular matrix $L$ of Theorem~\ref{thm:cholesky}.
 
 

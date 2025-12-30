@@ -1,17 +1,18 @@
 ## Content:
 - [X] Add dedication
 - [ ] Add Acknowledgment
-- [ ] Complete introduction
+- [X] Complete introduction
     - [ ] Add Algebra-Geomatics paragraph
-    - [ ] Add awards
-    - [ ] Add Outline
-    - [ ] Add Summary of contributions
-- [x] Add options
-- [X] Add mining section
+    - [X] Add awards
+    - [X] Add Outline
+    - [X] Add Summary of contributions
+- [x] Add Options
+- [X] Add Mining section
     - [X] Add Ethereum
     - [X] Add Cardano
-- [ ] Add the compiler paper
-- [ ] Add Asparagus
+- [X] Add the compiler paper
+- [X] Add Asparagus
+- [X] Add Hermes
 
 
 ## Finalizing:
@@ -27,6 +28,7 @@
 - [ ] Remove in our work
 - [ ] Make the math equations in the examples look better
 - [ ] Fix s in publications
+- [ ] Update crypto numbers
 
 ## To Read
 - [ ] Read "Super-optimization of Smart Contracts" by Albert et al

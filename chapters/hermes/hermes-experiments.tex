@@ -25,22 +25,38 @@
 \end{figure}
 
 
-\para{Robustness} We measured the success rate of Hermes in finding valid routes, compared to MMBF and BF, by running \todo{$2{,}000{,}000$} queries for each of the four token set sizes. Hermes successfully solved \todo{\textbf{100\%}} of queries, while MMBF and BF solved only \todo{\textbf{25\%}} and \todo{\textbf{1.4\%}}, respectively. The primary limitation for MMBF was frequent timeouts when the token count exceeded $100$. For BF, failures on smaller token sets $100$, $1{,}000$ were mainly due to negative cycles, while timeouts dominated for larger sets $10{,}000$ and $100{,}000$. Table~\ref{table:hermes-solvedComp} summarizes the success rates and coverage for all three algorithms.
+\para{Robustness} We measured the success rate of Hermes in finding valid routes, compared to MMBF and BF, by running \todo{$2{,}000{,}000$} queries for each of the four token set sizes. Hermes successfully solved \todo{\textbf{100\%}} of queries, while MMBF and BF solved only \todo{\textbf{25\%}} and \todo{\textbf{1.4\%}}, respectively. The primary limitation for MMBF was frequent timeouts when the token count exceeded $100$. For BF, failures on smaller token sets $100$, $1{,}000$ were mainly due to negative cycles, while timeouts dominated for larger sets $10{,}000$ and $100{,}000$. Tables~\ref{table:hermes-solvedComp-hermes}, ~\ref{table:hermes-solvedComp-mmbf}, and~\ref{table:hermes-solvedComp-bf} summarize the success rates and coverage for all three algorithms.
 
 \para{Scalability} We evaluated the runtime performance of all algorithms. MMBF completed within the time limit only for the smallest token set of $100$, which precludes direct runtime comparison on larger sizes. On this benchmark, Hermes achieved an average query time of \todo{\textbf{0.0002}} seconds, while MMBF required \todo{$2.8191$} seconds, representing an improvement of four orders of magnitude. BF completed within the time limit for token sets of size $100$ and $1{,}000$ mainly. For queries solved by both Hermes and BF, Hermes averaged \todo{$0.054$} seconds per query, compared to \todo{$0.5947$} seconds for BF. It is important to note that BF frequently failed to return valid routes on \todo{97.8\%} of queries owing to the presence of negative cycles, which rendered the majority of its results unusable. Hermes was the only method able to process the largest token sets, with average query times of \todo{\textbf{0.0197}} seconds and \todo{\textbf{0.1942}} seconds for $10{,}000$ and $100{,}000$ tokens, respectively. Detailed results are presented in Table~\ref{table:hermes-runtime}.
 
-
-\begin{table}
+\begin{table}[]
     \centering
-    \huge{\input{chapters/hermes/hermes-tables/solvedComp.tex}}
-    \caption{Success rates for Hermes (ours), MMBF, and BF on routing queries for four token set sizes. ``Failed'' indicates cases where the tool did not work due to negative cycles.}
-    \label{table:hermes-solvedComp}
+    \input{chapters/hermes/hermes-tables/solvedComp-hermes.tex}
+    \caption{Success rates for Hermes (ours) on routing queries for four token set sizes.}
+    \label{table:hermes-solvedComp-hermes}
+\end{table}
+
+\begin{table}[]
+    \centering
+    \input{chapters/hermes/hermes-tables/solvedComp-mmbf.tex}
+    \caption{Success rates for MMBF on routing queries for four token set sizes.}
+    \label{table:hermes-solvedComp-mmbf}
+\end{table}
+
+\begin{table}[]
+    \centering
+    \input{chapters/hermes/hermes-tables/solvedComp-bf.tex}
+    \caption{Success rates for BF on routing queries for four token set sizes. ``Failed'' indicates cases where the tool did not work due to negative cycles.}
+    \label{table:hermes-solvedComp-bf}
 \end{table}
 
 
-\begin{table}
+\begin{table}[]
     \centering
-    \huge{\input{chapters/hermes/hermes-tables/runtimeResult.tex}}
+    \input{chapters/hermes/hermes-tables/runtimeResult.tex}
     \caption{Average runtimes (in seconds) for Hermes (ours), MMBF, and BF across different token set sizes. The ``Completed'' column indicates the number of queries finished within the timeout; ``TIMEOUT'' denotes that all queries exceeded the time limit.}
     \label{table:hermes-runtime}
 \end{table}
+
+\para{Limitations} We conclude this section by outlining practical limitations and considerations for deploying Hermes. Slippage arises when the execution price of a trade differs from the spot price, often as a result of market volatility or limited liquidity, and previous studies indicate that slippage can influence trading outcomes, particularly for large trades~\cite{DBLP:journals/csur/XuPCF23}. Since our algorithm relies on spot prices, similar to prior research, it encounters comparable limitations for high-volume trades; thus, this approach can benefit from preprocessing steps such as imposing additional restrictions on liquidity for a given set of pools. Executing trades also incurs transaction fees, which increase as the route includes more steps; to adjust for this, one can increase the edge prices by an upper bound estimate that reflects the cost of a single trade. Previous works have estimated such upper bounds for smart contract functions, and incorporating these estimates can prevent infeasible routes~\cite{DBLP:journals/jss/AlbertCGRR21}.
+

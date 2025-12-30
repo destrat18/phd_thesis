@@ -1,0 +1,25 @@
+\section{Discussion}
+\label{sec:discussion}
+
+Blockchain technology stands to gain significantly from established computer science techniques, but the reverse is also true: the methods we have developed for blockchain problems offer valuable applications beyond just smart contract analysis. While the core of this thesis focuses on analyzing smart contracts and their interactions, this section outlines other related problems the author investigated during his PhD. Because these works address issues not directly tied to smart contracts, they are excluded from the main body of this thesis.
+
+\subsection{Weighted Model Integration}
+
+This section is based on the following publication:
+\begin{itemize}
+    \item S. Akshay, S. Chakraborty, S. Farokhnia, A.K. Goharshady, H.J. Motwani, D. Zikelic, LP-Based Weighted Model Integration over Non-Linear Real Arithmetic, International Joint Conference on Artificial Intelligence, IJCAI 2025
+\end{itemize}
+
+Weighted model integration (WMI) is a relatively recent formalism that has received significant interest as a technique for solving probabilistic inference tasks with complicated weight functions. Existing methods and tools are mostly focused on linear and polynomial functions and provide limited support for WMI of rational or radical functions, which naturally arise in several applications.
+
+In this work, we present a novel method for approximate WMI, which provides more effective support for the wide class of semi-algebraic functions that includes rational and radical functions, with literals defined over non-linear real arithmetic. Our algorithm leverages Farkas’ lemma and Handelman's theorem from real algebraic geometry to reduce WMI to solving a number of linear programming (LP) instances. The algorithm provides formal guarantees on the error bound of the obtained approximation and can reduce it to any user-defined value $\epsilon$. Furthermore, our approach is perfectly parallelizable. Finally, we present extensive experimental results, demonstrating the superior performance of our method on a range of WMI tasks for rational and radical functions when compared to state-of-the-art tools for WMI, in terms of both applicability and tightness.
+
+\para{Our Contributions} The main contributions of this work are:
+\begin{enumerate}
+    \item We develop a novel algorithm for the approximate WMI problem. Our algorithm supports integration of general semi-algebraic weight functions over general semi-algebraic sets. This makes our method effectively applicable to a large new class of weight functions, such as rational functions and radical functions.
+
+    \item Our method provides formal guarantees on the tightness of the approximation error. In particular, for any error bound $\epsilon > 0$ provided by the user, our method produces an $\epsilon$-tight approximation of the WMI value.
+
+    \item We implement our algorithm and integrate our tool (WMI-LP) with the state-of-the-art WMI framework of~\cite{spallitta2024enhancing}. Our extensive experiments demonstrate that our approach outperforms state-of-the-art exact and approximate tools in handling a wider variety of polynomial, rational, and radical functions. It also provides consistently tighter error bounds, highlighting its robustness and accuracy across benchmarks.
+\end{enumerate}
+    

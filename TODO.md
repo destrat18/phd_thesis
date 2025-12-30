@@ -26,6 +26,7 @@
 - [X] Replace \fee with cfee in cardano paper
 - [ ] Remove in our work
 - [ ] Make the math equations in the examples look better
+- [ ] Fix s in publications
 
 ## To Read
 - [ ] Read "Super-optimization of Smart Contracts" by Albert et al

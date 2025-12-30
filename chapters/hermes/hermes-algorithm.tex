@@ -2,10 +2,10 @@
 
 \subsection{Formulating DEX prices as a graph problem}
 \para{Automated Market Makers}
-An \textit{Automated Market Maker} (AMM) is a protocol for decentralized trading that replaces traditional order books with deterministic pricing algorithms~\cite{DBLP:conf/uss/McLaughlinKV23}. In an AMM, prices are set by a mathematical function of the current token reserves in each liquidity pool. The most widely used class of AMMs is the \textit{Constant Function Market Maker} (CFMM), of which Uniswap is a prominent example.
+An \textit{Automated Market Maker} (AMM) is a protocol for decentralized trading that replaces traditional order books with deterministic pricing algorithms~\cite{mclaughlin2023large}. In an AMM, prices are set by a mathematical function of the current token reserves in each liquidity pool. The most widely used class of AMMs is the \textit{Constant Function Market Maker} (CFMM), of which Uniswap is a prominent example.
 In Uniswap V2, the CFMM uses the constant product formula, which maintains a constant product of the reserves of two tokens $u$ and $v$ in a liquidity pool: $R_u \cdot R_v = k$, where $k$ is a fixed constant. Here, $R_u$ and $R_v$ represent the current quantities (reserves) of tokens $u$ and $v$ held in the pool, respectively. This means that any trade will adjust the reserves of both tokens while keeping their product constant. The spot price from token $u$ to token $v$ is determined by the ratio of their reserves, specifically $\text{price}(u \to v) = \frac{R_v}{R_u}$. Uniswap V3 allows liquidity providers to concentrate capital within custom price ranges, increasing efficiency. Uniswap V4 introduces \textit{hooks} for customizable trading strategies and fee structures~\cite{adams2023uniswap}. All three versions are active on Ethereum.
 
-For the scope of this paper, these versions share two pricing notions. The first is the \textit{spot price}, which depends on the current reserves and indicates the current market price. The second is the \textit{trade price}, which also accounts for the size of the trade. The applications of both concepts have been thoroughly studied in the literature~\cite{DBLP:journals/csur/XuPCF23}. In this chapter, we focus on spot prices.
+For the scope of this paper, these versions share two pricing notions. The first is the \textit{spot price}, which depends on the current reserves and indicates the current market price. The second is the \textit{trade price}, which also accounts for the size of the trade. The applications of both concepts have been thoroughly studied in the literature~\cite{xu2023sok}. In this chapter, we focus on spot prices.
 
 
 \para{Modeling the DEX Ecosystem as a Graph}
@@ -123,10 +123,10 @@ A landmark result in parameterized complexity theory by Bodlaender proves that i
 
 \begin{lemma}[Complexity of Tree Decomposition]
 \label{lem:hermes-phase1}
-For any fixed parameter $k$, there exists a linear-time algorithm that can determine if a graph $G$ has treewidth at most $k$ and, if so, produce a corresponding tree decomposition in $O(f(k) \cdot |V(G)|)$ time. \cite{Bodlaender:1993:LTA:167088.167161}.
+For any fixed parameter $k$, there exists a linear-time algorithm that can determine if a graph $G$ has treewidth at most $k$ and, if so, produce a corresponding tree decomposition in $O(f(k) \cdot |V(G)|)$ time. \cite{bodlaender1993linear}.
 \end{lemma}
 
-Additionally, many heuristic approaches have been developed. These heuristics have been refined and implemented in highly optimized solvers. Modern, competitive solvers can often find low-width decompositions for very large graphs arising in practice \cite{pace2017}.
+Additionally, many heuristic approaches have been developed. These heuristics have been refined and implemented in highly optimized solvers. Modern, competitive solvers can often find low-width decompositions for very large graphs arising in practice \cite{delling20172nd}.
 
 \begin{example} [Tree Decomposition]
     Figure~\ref{fig:hermes-dpc-process-illustration}(b) shows a valid tree decomposition $\mathcal{T}$ of $G$. The largest bag is of size 3 (e.g., $X_1 = \{2,4,6\}$), so the treewidth is $tw(G) = 3 - 1 = 2$. It is straightforward to verify that (i) for each edge $(v_i, v_j)$ in $G$, there exists a bag in $\mathcal{T}$ containing both $v_i$ and $v_j$, and (ii) for each vertex $v_i$, the bags containing $v_i$ form a connected subtree in $\mathcal{T}$.
@@ -210,7 +210,7 @@ The `EnforceDPC` procedure (Algorithm~\ref{alg:hermes-enforce-dpc}), which appli
 
 
 
-\paragraph{Phase 4: SSSP Queries} The final query phase (lines~\ref{alg:hermes-line:loop}--\ref{alg:hermes-line:query}) processes the batch of SSSP queries. For each source $s_i$ in the query set $Q$, the algorithm calls the \textup{QuerySSSP} procedure (Algorithm~\ref{alg:hermes-query-sssp}). The algorithm is an adaptation of the \texttt{Min-path} procedure \cite{Planken2012,Chleq1995}.
+\paragraph{Phase 4: SSSP Queries} The final query phase (lines~\ref{alg:hermes-line:loop}--\ref{alg:hermes-line:query}) processes the batch of SSSP queries. For each source $s_i$ in the query set $Q$, the algorithm calls the \textup{QuerySSSP} procedure (Algorithm~\ref{alg:hermes-query-sssp}). The algorithm is an adaptation of the \texttt{Min-path} procedure \cite{planken2012computing, chleq1995efficient}.
 
 \begin{algorithm2e}[H]
 \footnotesize

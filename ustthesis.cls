@@ -840,12 +840,21 @@ scholarly research.}
   \par\textspaceundo
 }
 
+
 % BIOGRAPHY:
 %
 % dfk 10/7/89: biography is required, AFTER the references.
 % I bet that it must also be double spaced, like the others. 
 % dfk 2/4/91: nope, we're still in double-space mode from \chapters.
 % Right way might be to have an \endchapters command.
+% PUBLICATIONS (custom, similar to acknowledgments)
+% Usage: \publications ... \endpublications
+\def\publications{
+  \pchapter{List of Publications}
+}
+\def\endpublications{
+  \par\textspaceundo
+}
 \def\biography{
   \pchapter{Biography}
   \textspace

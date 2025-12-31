@@ -17,9 +17,9 @@
 
 
 ## Finalizing:
-- [ ] Add definitions for parameterized section in the prelim
-    - [ ] Add definitions for TW, PW, and TDP
-    - [ ] Add an example for them
+- [X] Add definitions for parameterized section in the prelim
+    - [X] Add definitions for TW, PW, and TDP
+    - [X] Add an example for them
 - [ ] Add Algebra-Geomatrics paragraph to the introduction
 - [ ] Fix para and paragraph
 - [ ] Read Abstraction

@@ -23,7 +23,7 @@ $$
 
 \paragraph{Our Algorithmic Contribution} In Section~\ref{sec:mining-ethereum-algorithm}, we design and present a randomized algorithm that combines testing, decision trees, localization techniques and integer linear programming (ILP) to handle the optimization problem above. We start by executing several test cases, i.e.~random permutations of the transactions in our $\pool,$ and profiling their gas usage. Then, using decision trees, for every transaction $\tx \in \pool,$ we find a set of other transactions that can affect its gas usage. We call this the neighborhood of $\tx$ and denote it as $\nbhd(\tx).$ Intuitively, we expect the neighborhood of every vertex to be small since, in real-world instances, most transactions are completely independent of each other. For example, a pair of transactions that do not access the same smart contracts cannot affect each other's gas usage, either. We provide a probabilistic argument showing that with high probability our testing covers every possible permutation of each neighborhood. Thus, we can cut, mix and glue together parts of our test cases in order to create a block that maximizes the miner's total tip revenue. This part is modeled as an integer linear programming instance and solved by an external optimization suite. All steps of our algorithm are parallelizable and, except for the ILP solver, run in polynomial time. Due to its reliance on randomized sampling and ILP-solvers, our algorithm is not guaranteed to always produce an optimal result.
 
-\paragraph{Our Practical Contribution} We implemented our algorithm and performed extensive experimental results on 50,000 Ethereum blocks. For each block, we gathered real-world transaction pool data and executed our algorithm. We then compared the tip revenues obtained by our framework and those of real-world miners. Our approach increased tip revenues by a significant margin of 73.45 percent on average per block, corresponding to roughly 24.1 USD per block and 63,357,892 USD per year at current exchange rates. We also compared our tool against the default Ethereum implementation and found that our approach increased tip revenues by 18.56 percent on average per block, corresponding to roughly 17.3 USD per block and 45,416,764 USD per year. Our tool is free, open-source and dedicated to the public domain with a perpetual copyright waiver. It is accessible at \url{https://anonymous.4open.science/r/boosting_gas_revenues_of_ethereum_miners/}.
+\paragraph{Our Practical Contribution} We implemented our algorithm and performed extensive experimental results on 50,000 Ethereum blocks. For each block, we gathered real-world transaction pool data and executed our algorithm. We then compared the tip revenues obtained by our framework and those of real-world miners. Our approach increased tip revenues by a significant margin of 73.45 percent on average per block, corresponding to roughly 24.1 USD per block and 63,357,892 USD per year at current exchange rates. We also compared our tool against the default Ethereum implementation and found that our approach increased tip revenues by 18.56 percent on average per block, corresponding to roughly 17.3 USD per block and 45,416,764 USD per year. Our tool is free, open-source and dedicated to the public domain with a perpetual copyright waiver.
 
 
 \subsection{Ethereum Architecture}
@@ -48,34 +48,53 @@ Note that $\tip_\tx \equiv t \cdot \gas_\tx.$ Similarly, since executing $\tx$ c
 
 \paragraph{Optimal Mining on UTXO Blockchains} In the UTXO model, as discussed in Section~\ref{sec:mining-cardano-problem}, transactions can have dependencies and conflicts. For example, if Alice receives money in $\tx_1$ and uses it to pay Bob in $\tx_2,$ i.e.~an input of $\tx_2$ is an output of $\tx_1,$ then $\tx_2$ can only be added to the blockchain after $\tx_1$. On the other hand, if Alice receives money in $\tx_1$ and then creates distinct transactions $\tx_2$ and $\tx_3$ that use the same coin twice then at most one of them can be added to the consensus chain.  Thus, optimizing a miner's revenues on UTXO blockchains is equal to solving a variant of the knapsack problem in which items may have pairwise dependencies and conflicts. A transaction's weight is its size and its value is the transaction fee. Crucially, the transaction fees are fixed and known apriori. Moreover, when the miner chooses the subset of transactions that are included in her block, theisr order does not matter and any topological ordering leads to the same total revenue. Despite this, the problem is shown to be strongly NP-hard and can only be solved on sparse instances~\cite{meybodi2022optimal1, barakbayeva2024pixiu1}.
 
-In contrast, our setting on Ethereum is considerably more challenging. Due to the gas model, the transaction fees are dynamic and depend on the actual resources used in runtime. The same transaction might pay vastly different fees based on the world state before its execution, which is determined by the transactions that precede it in the block. As a toy example, consider the smart contract below:
+In contrast, our setting on Ethereum is considerably more challenging. Due to the gas model, the transaction fees are dynamic and depend on the actual resources used in runtime. The same transaction might pay vastly different fees based on the world state before its execution, which is determined by the transactions that precede it in the block. As a toy example, consider the smart contract in Figure~\ref{fig:mining-ethereum-toy-gas-dependency}.
 
-\begin{center}
-\begin{lstlisting}[language=Solidity,basicstyle=\footnotesize,breaklines=true]
+\begin{figure}[]
+	\centering
+	\begin{subfigure}[t]{0.48\textwidth}
+		\begin{lstlisting}[language=Solidity, numbers=none]
+contract ToyGasDependency {
 	uint n = 0;
-	function f() public {n = 1000;}
-	function g() public { 
-		for(uint i=0;i<=n;i++) { 
-			/*write to storage*/ 
-		} 
-	}
-\end{lstlisting}
-\end{center}
-
-
-Suppose $\tx_1$ calls $\texttt{f}()$ and $\tx_2$ calls $\texttt{g}()$. 
-If the miner places $\tx_1$ before $\tx_2$ in the block, $n$ becomes $1000$, so $\texttt{g}()$ incurs a high fee. If $\tx_2$ is first, $n=0$ when $\texttt{g}()$ runs, resulting in a much lower gas usage and fee. Thus, transaction ordering directly affects fees. Unlike the UTXO model, one cannot determine if $\tx_1$'s gas usage depends on $\tx_2$ by inspecting just the pair; dependencies may only arise in the presence of other transactions. For example, consider the smart contract below:
-
-\begin{lstlisting}[language=Solidity,basicstyle=\footnotesize,breaklines=true]
-	uint n = 0, m = 0;
-	function f() public { m = 1000;}
+	function f() public { n = 1000; }
 	function g() public {
 		for (uint i = 0; i <= n; i++) {
 			/*write to storage*/
 		}
 	}
-	function h() public {n = m;}
-\end{lstlisting}
+}
+		\end{lstlisting}
+		\caption{A toy contract illustrating gas dependency.}
+		\label{fig:mining-ethereum-toy-gas-dependency}
+	\end{subfigure}%
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}
+		\begin{lstlisting}[language=Solidity, numbers=none]
+contract IndirectGasDependency {
+	uint n = 0, m = 0;
+	function f() public { m = 1000; }
+	function g() public {
+		for (uint i = 0; i <= n; i++) {
+			/*write to storage*/
+		}
+	}
+	function h() public { n = m; }
+}
+		\end{lstlisting}
+		\caption{A contract showing indirect gas dependency.}
+		\label{fig:mining-ethereum-indirect-gas-dependency}
+	\end{subfigure}
+	\caption{Two example contracts illustrating gas dependency and indirect gas dependency.}
+	\label{fig:mining-ethereum-gas-dependency-examples}
+\end{figure}
+
+
+
+Suppose $\tx_1$ calls $\texttt{f}()$ and $\tx_2$ calls $\texttt{g}()$. 
+If the miner places $\tx_1$ before $\tx_2$ in the block, $n$ becomes $1000$, so $\texttt{g}()$ incurs a high fee. If $\tx_2$ is first, $n=0$ when $\texttt{g}()$ runs, resulting in a much lower gas usage and fee. Thus, transaction ordering directly affects fees. Unlike the UTXO model, one cannot determine if $\tx_1$'s gas usage depends on $\tx_2$ by inspecting just the pair; dependencies may only arise in the presence of other transactions. For example, consider the smart contract in Figure~\ref{fig:mining-ethereum-indirect-gas-dependency}.
+
+
+
 
 Suppose that the miner observes a transaction $\tx_1$ calling $\texttt{f}()$ and another transaction $\tx_2$ calling $\texttt{g}()$ in the mempool. These two transactions are clearly independent in terms of gas usage and each transaction's inclusion or their order cannot affect the fee paid by the other transaction. However, if a new transaction $\tx_3$ calling $\texttt{h}()$ is observed, then $\tx_1$ and $\tx_2$ suddently become dependent and the miner must use the ordering $\tx_1, \tx_3, \tx_2$ to maximize her payoff. Note that $\tx_2$ and $\tx_3$ are also independent in the absence of $\tx_1.$ Thus, we cannot talk of gas dependencies between a pair of transactions without specifying all transactions available in $\pool.$
 

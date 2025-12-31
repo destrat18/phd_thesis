@@ -91,9 +91,9 @@ The main contributions of each chapter are outlined below:
 
     \item In Chapter~\ref{chp:options}, we refute several common misconceptions regarding Bitcoin's security against block-reverting attacks. In particular, we show that:
     \begin{itemize}
-        \item a successful block-reverting attack does not necessarily require (even close to) a majority of the hash power;
-        \item obtaining a majority of the hash power (or a sufficient minority for a block-reverting attack) costs roughly 6.77 billion USD or 2.90 billion USD, respectively, which is far lower than commonly assumed and about two orders of magnitude smaller than the Bitcoin market cap; and
-        \item Bitcoin derivatives (options and futures) can imperil Bitcoin's security by creating incentives for block-reverting/majority attacks.
+        \item We show that an adversary with a small percentage of the hash power can still reliably create forks that are six blocks deep, thus fracturing the public's trust in Bitcoin and most probably causing a crash in its price;
+        \item  We show that a majority attack on Bitcoin would cost only 6.77 billion USD, which is much lower than the community's expectation and only 0.48 percent of Bitcoin's market cap at the time of writing. Additionally, and more worryingly, an attack with only 30\% of the total hash power, which would cost a mere 2.9 billion USD, will succeed with a probability of more than 95\% within 34 days. Thus, such attacks are much more affordable than expected;
+        \item Finally, and most importantly, we show that it is possible for an attacker to actually benefit from the resulting crash in the value of Bitcoin, due to the vast derivatives (options and futures) market that is currently in existence. Put simply, an attacker can first short Bitcoin using widely-available derivative contracts and then intentionally perform an attack to crash the price and profit. Thus, there are real-world incentives for such attacks.
     \end{itemize}
 \end{itemize}
 

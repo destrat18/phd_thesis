@@ -1,0 +1,6 @@
+\begin{tikzpicture}[
+  grow=down, level distance=12mm, sibling distance=22mm,
+  every node/.style={draw=blue!80!black, very thick, rounded corners, font=\large, align=center, inner sep=2pt, fill=white, text=black}
+]
+  \node (b7) {\{8\}} child {node (b5) {\{6,8\}} child {node (b4) {\{2,6,8\}} child {node (b2) {\{2,3,6\}} child {node (b0) {\{1,2,3\}}} child {node (b1) {\{3,4,6\}}}} child {node (b3) {\{2,5\}}}}} child {node (b6) {\{7,8\}}};
+\end{tikzpicture}

@@ -5,7 +5,10 @@
 
 This work uses parameterized algorithms, which leverage specific structural features of problem instances to achieve faster solutions. We present the essential definitions here; see Downey and Fellows~\cite{downey2013fundamentals} (Chapter 2) for comprehensive technical discussions.
 
-\para{Parameterized Problem Definition} We consider problems with multiple inputs, formalized as languages over two components. If a pair $\langle x, k \rangle$ belongs to such a language $L$, we call $k$ the parameter. The parameter typically takes integer values, though it may represent other structures such as graphs or algebraic objects. 
+
+\para{Parameterized Problem} We consider problems with multiple inputs, formalized as languages over two components. If a pair $\langle x, k \rangle$ belongs to such a language $L$, we call $k$ the parameter. The parameter typically takes integer values, though it may represent other structures such as graphs or algebraic objects. 
+
+
 
 \para{Fixed-Parameter Tractability (FPT)~\cite{downey2013fundamentals}}
 Formally, a parameterized language $L$ is \emph{fixed-parameter tractable} (FPT) if the following hold:
@@ -17,7 +20,7 @@ Formally, a parameterized language $L$ is \emph{fixed-parameter tractable} (FPT)
 Intuitively, this means that for each fixed value of the parameter $k$, the problem can be solved in polynomial time with respect to the input size $|x|$, where the degree of the polynomial does not depend on $k$. The potentially expensive part of the computation is isolated in the function $f(k)$, which can grow quickly, but for small $k$ the overall running time remains practical. This framework allows many NP-hard problems to become efficiently solvable when the parameter is small, even if the general problem is intractable.
 
 
-\subsection{Tree Decompositions and Treewidth}
+\subsection{Treewidth}
 \label{sec:prelim-parameters-treewidth}
 
 The treewidth of a graph $G=(V, E)$ is defined via a \textit{tree decomposition}. A tree decomposition is a pair $(\mathcal{T}, \{X_i \mid i \in I\})$, where $\mathcal{T}=(I, F)$ is a tree and each $X_i$ (called a bag) is a subset of $V$, satisfying:
@@ -27,7 +30,50 @@ The treewidth of a graph $G=(V, E)$ is defined via a \textit{tree decomposition}
     \item For any vertex $v \in V$, the set of bags containing $v$ forms a connected subtree in $\mathcal{T}$.
 \end{enumerate}
 
-The \textit{width} of a tree decomposition is $\max_{i \in I} |X_i| - 1$. The \textit{treewidth} of a graph $G$, denoted $tw(G)$, is the minimum width over all possible tree decompositions of $G$. A low treewidth indicates a structure amenable to efficient dynamic programming, a property that we exploit extensively in Chapter~\ref{chp:hermes}.
+
+The \textit{width} of a tree decomposition is $\max_{i \in I} |X_i| - 1$. The \textit{treewidth} of a graph $G$, denoted $tw(G)$, is the minimum width over all possible tree decompositions of $G$. Figure~\ref{fig:prelim-tw} shows a graph and one of its tree decompositions. A low treewidth indicates a structure amenable to efficient dynamic programming, a property that we exploit extensively in Chapter~\ref{chp:hermes}.
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \input{chapters/prelim/prelim-figures/graph-input.tex}
+        \caption*{(a) Example graph}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \input{chapters/prelim/prelim-figures/tree-decomposition.tex}
+        \caption*{(b) Tree decomposition}
+    \end{minipage}
+    \caption{A graph and one of its tree decompositions~\cite{goharshady2023efficient}.}
+    \label{fig:prelim-tw}
+\end{figure}
+
+
+\subsection{Pathwidth}
+\label{sec:prelim-parameters-pathwidth}
+A \emph{path decomposition} of a graph $G = (V, E)$ is a tree decomposition $(\mathcal{T}, \{X_i \mid i \in I\})$ where the tree $\mathcal{T}$ is a path. The \emph{width} of a path decomposition is $\max_{i \in I} |X_i| - 1$, as in the case of treewidth~\cite{conrado2023bounded, robertson1983graph}. 
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.8\textwidth}
+        \centering
+        \input{chapters/prelim/prelim-figures/graph-input.tex}
+        \caption*{(a) Example graph}
+    \end{minipage}
+    
+    \vspace{1em}
+    
+    \begin{minipage}{0.8\textwidth}
+        \centering
+        \input{chapters/prelim/prelim-figures/path-decomposition.tex}
+        \caption*{(b) Path decomposition}
+    \end{minipage}
+    \caption{A graph and one of its path decompositions~\cite{goharshady2023efficient}.}
+    \label{fig:prelim-pw}
+\end{figure}
+
+Intuitively, pathwidth measures how similar a graph is to a path: a lower pathwidth means the graph can be decomposed into a sequence of overlapping vertex sets (bags) with limited size, capturing the "path-like" structure of the graph. Pathwidth is always at least as large as treewidth, since every path decomposition is also a tree decomposition.
+
 
 
 \subsection{Treedepth Decomposition}
@@ -37,6 +83,26 @@ For a graph $G= (V, E),$ a \emph{treedepth decomposition}~\cite{nevs2012bounded,
 \begin{itemize}
 	\item For every undirected edge $\{u, v\} \in E$ or directed edge $(u, v) \in E$ of the original graph, either $u$ is an ancestor of $v$ in $T$ or $v$ is an ancestor of $u$ in $T.$
 \end{itemize}
-We say that a treedepth decomposition $T$ is optimal if it has the smallest possible depth a\textbf{Definition 2.1.1 (The basic definition)} mong all decompositions of $G.$ This smallest depth is called the \emph{treedepth} of $G.$ Intuitively, treedepth is a measure of graph sparsity that captures how much a graph resembles a shallow tree.
+
+We say that a treedepth decomposition $T$ is optimal if it has the smallest possible depth among all decompositions of $G.$ This smallest depth is called the \emph{treedepth} of $G.$ Intuitively, treedepth is a measure of graph sparsity that captures how much a graph resembles a shallow tree. Figure~\ref{fig:prelim-tdp} shows a graph and one of its treedepth decompositions.
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \input{chapters/prelim/prelim-figures/graph-input.tex}
+        \caption*{(a) Example graph}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \input{chapters/prelim/prelim-figures/treedepth-decomposition.tex}
+        \caption*{(b) Treedepth decomposition}
+    \end{minipage}
+    \caption{A graph and one of its treedepth decompositions~\cite{goharshady2023efficient}.}
+    \label{fig:prelim-tdp}
+\end{figure}
 
 For any small fixed $d,$ there is an algorithm that decides whether an input graph has treedepth $d$ in linear time and if so, outputs an optimal treedepth decomposition~\cite{reidl2014faster}. There are also well-optimized tools and libraries for computing treedepth decompositions~\cite{strasser2020pace}. 
+
+
+

@@ -202,15 +202,10 @@
 % \let\example\relax
 % \declaretheorem[style=remark]{Example}
 
-% CONFLICT: Multiple definitions of \paragraph exist across files
-% macros-hkust.tex version (commented out):
-% \renewcommand{\paragraph}[1]{\smallskip\noindent\textbf{\emph{#1}}} % Redefine paragraph to be bold and italicized
-% options-macros.tex version:
-% \renewcommand{\paragraph}[1]{\smallskip\noindent\textsc{{#1.}}}
-% mining-ethereum-macros.tex version:
-% \renewcommand{\paragraph}[1]{\smallskip\noindent\textbf{\textsc{#1.}}}
-% Using mining version (bold+smallcaps) as default - CHECK THIS:
-\renewcommand{\paragraph}[1]{\medskip\noindent\textbf{\emph{#1.}}}
+
+% Unify paragraph macros: \para is the only definition, \paragraph uses \para
+\newcommand{\para}[1]{\smallskip\noindent\textbf{\mdseries\textsc{#1.}}}
+\renewcommand{\paragraph}[1]{\para{#1}}
 
 \lstset
 { %Formatting for code in appendix
@@ -379,7 +374,7 @@ basicstyle=\ttfamily,columns=flexible,frame=single,framerule=0pt,%
 \newcommand{\lrcb}[1]{\left\{ #1 \right\}}
 
 % \newcommand{\bigO}{\mathcal{O}}
-\newcommand{\para}[1]{\smallskip\noindent\textbf{\mdseries\textsc{#1.}}}
+% \newcommand{\para}[1]{\smallskip\noindent\textbf{\mdseries\textsc{#1.}}}
 \newcommand{\dom}{\textup{\textbf{dom}}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

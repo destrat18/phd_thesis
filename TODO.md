@@ -20,7 +20,7 @@
 - [X] Add definitions for parameterized section in the prelim
     - [X] Add definitions for TW, PW, and TDP
     - [X] Add an example for them
-- [ ] Add Algebra-Geomatrics paragraph to the introduction
+- [X] Add Algebra-Geomatrics paragraph to the introduction
 - [ ] Fix para and paragraph
 - [ ] Read Abstraction
 - [ ] Read introduction
@@ -31,7 +31,7 @@
 - [ ] All use example tags
 - [ ] Add more plots to the experiment section of ethereum
 - [X] Replace \fee with cfee in cardano paper
-- [ ] Remove in our work, this work, 
+- [ ] Remove in our work, this work, this paper, our paper
 - [ ] Fix s in publications
 - [ ] Update crypto numbers
 - [ ] Add Blockchain background in the first paragraph

@@ -92,11 +92,13 @@ What it covers: treedepth decompositions, computability at small depth, and ance
 What it covers: exact DP on canonical subgraphs keyed by ancestor subsets and remaining capacity; runtime in $O(n\,k\,2^d\,d^2)$.
 - Recommended: **Exact DP via Treedepth (Cardano)**
 - Alternatives: **Treedepth DP for Optimal Blocks**; **Ancestor-Set Dynamic Programming**
+- More suggestions: **Optimal Block Packing with Treedepth**; **DP on Ancestor Subsets**; **Treedepth-Constrained Block Assembly**; **Cardano Block Optimization via Treedepth**; **Dynamic Programming for Cardano Blocks**; **Treedepth-Driven Block Construction**
 
 ### Section: Runtime and Revenue Improvements on Real-World Cardano Data
 What it covers: Pixiu implementation, treedepth distribution, runtime (<1s), and quantified revenue improvements on 50 days of blocks.
 - Recommended: **Cardano Evaluation on Real Blocks**
 - Alternatives: **Empirical Gains on Cardano**; **Runtime and Revenue Study (Cardano)**
+- More suggestions: **Block-Level Revenue Analysis (Cardano)**; **Performance and Profitability on Cardano**; **Cardano Block Optimization Results**; **Real-World Cardano Block Study**; **Cardano Block Assembly: Runtime and Revenue**; **Cardano: Empirical Runtime and Revenue Gains**; **Cardano Block Evaluation: Speed and Revenue**
 
 ### Section: A Randomized Framework for Ethereum Block Construction
 What it covers: why state-dependent gas makes ordering hard; formal objective (tips under gas limit); motivates neighborhood-based sparsity and randomized sampling.

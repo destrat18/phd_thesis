@@ -1,4 +1,4 @@
-\section{Runtime and Revenue Improvements on Real-World Cardano Data}\label{sec:mining-cardano-experiments} 
+\section{Evaluation on Real Cardano Blocks}\label{sec:mining-cardano-experiments} 
 
 
 We implemented our algorithm in \texttt{C++} as a tool called Pixiu. Pixiu is free and open-source software donated to the public domain. We used FlowCutter~\cite{strasser2020pace} to find treedepth decompositions.
@@ -10,7 +10,8 @@ We implemented our algorithm in \texttt{C++} as a tool called Pixiu. Pixiu is fr
 \para{Treedepth} We observed that the vast majority of benchmark DCGs had small treedepth. Figure~\ref{ex:mining-cardano-tdp} shows a histogram of the obtained treedepths. The average treedepth was 1.45. Thus, our algorithm is applicable to real-world Cardano block production and runs in polynomial time $O(n \cdot k)$ on these instances.
 
 \begin{figure}
-	\includegraphics[width=\linewidth]{chapters/mining/mining-cardano-figures/tdp.pdf}
+	\centering
+	\includegraphics[width=0.8\linewidth]{chapters/mining/mining-cardano-figures/tdp.pdf}
 	\caption{Histogram of treedepths of DCGs in real-world Cardano benchmarks. The $y$-axis is in logarithmic scale.}
 	\label{ex:mining-cardano-tdp}
 \end{figure}
@@ -20,19 +21,22 @@ We implemented our algorithm in \texttt{C++} as a tool called Pixiu. Pixiu is fr
 
 
 \begin{figure}[H]
-	\includegraphics[width=\linewidth]{chapters/mining/mining-cardano-figures/incPer.pdf}
+	\centering
+	\includegraphics[width=0.8\linewidth]{chapters/mining/mining-cardano-figures/incPer.pdf}
 	\caption{Histogram of the transaction fee improvements obtained over each block (in percentages). The $y$-axis is in logarithmic scale.}
 	\label{ex:mining-cardano-per}
 \end{figure}
 
 \begin{figure}[H]
-	\includegraphics[width=\linewidth]{chapters/mining/mining-cardano-figures/incADA.pdf}
+	\centering
+	\includegraphics[width=0.8\linewidth]{chapters/mining/mining-cardano-figures/incADA.pdf}
 	\caption{Histogram of the transaction fee improvements obtained over each block (in Ada). The $y$-axis is in logarithmic scale.}
 	\label{ex:mining-cardano-ada}
 \end{figure}
 
 \begin{figure}[H]
-	\includegraphics[width=\linewidth]{chapters/mining/mining-cardano-figures/incUsd.pdf}
+	\centering
+	\includegraphics[width=0.8\linewidth]{chapters/mining/mining-cardano-figures/incUsd.pdf}
 	\caption{Histogram of the transaction fee improvements obtained over each block (in USD). The $y$-axis is in logarithmic scale.}
 	\label{ex:mining-cardano-usd}
 \end{figure}

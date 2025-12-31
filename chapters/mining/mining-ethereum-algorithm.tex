@@ -1,4 +1,5 @@
-\section{Our Mining Framework for Ethereum}\label{sec:mining-ethereum-algorithm} 
+\section{A Randomized Framework}\label{sec:mining-ethereum-algorithm}
+
 
 We start this section with a high-level overview of our algorithm and then provide the details of each step. The fundamental idea behind our approach is a simple observation: in real-world instances of the problem, each transaction interacts with only a few other transactions, which we call its neighborhood. Thus, when forming a block, we do not need to search over all possible permutations of transactions, but can instead find rules that encode the gas usage of each transaction based on the portion of its neighborhood that precedes it in the block.
 
@@ -21,14 +22,15 @@ We need to perform some simple housekeeping at this point. Recall that transacti
 
 We then execute every sample $\pi_i$ starting from the initial world state $s_0$ and keep track of the amount of gas used by each transaction $\tx_j$ in the execution of $\pi_i.$ We denote this by $\gas(\pi_i, \tx_j).$
 
-
-\paragraph{Example} Suppose we have 6 transactions in our pool and the tip value set by the users is $t[\tx_1, \tx_2, \tx_3,  \tx_4,  \tx_5,  \tx_6] = [24, 9, 5, 29, 24, 2],$ i.e.~$\tx_1$ pays a tip of $24$ for each consumed unit of gas, $\tx_2$ pays $9,$ etc. We generate $k=10$ random permutations $\pi_1, \ldots, \pi_{10}$ of the pool, execute them, and keep track of the gas used by each transaction in each sample.  See Figure~\ref{fig:mining-ethereum-fuzzing}.
-
+\begin{example}
+Suppose we have 6 transactions in our pool and the tip value set by the users is $t[\tx_1, \tx_2, \tx_3,  \tx_4,  \tx_5,  \tx_6] = [24, 9, 5, 29, 24, 2],$ i.e.~$\tx_1$ pays a tip of $24$ for each consumed unit of gas, $\tx_2$ pays $9,$ etc. We generate $k=10$ random permutations $\pi_1, \ldots, \pi_{10}$ of the pool, execute them, and keep track of the gas used by each transaction in each sample.  See Figure~\ref{fig:mining-ethereum-fuzzing}.
+\end{example}
 
 \paragraph{Step (2): Neighborhood Estimation} In this step, we consider each transaction $\tx_i \in \pool$ separately and our goal is to identify a neighborhood for it, i.e.~a set of transactions $\nbhd(\tx_i) \subseteq \pool$ whose inclusion before $\tx_i$ can potentially change the amount of gas consumed by $\tx_i.$ We observe that the transactions usually exhibit only a few different possible gas usage values. Thus, we can use the amount of gas used by $\tx_i$ as a label in a classification problem. We introduce one binary attribute for each $\tx_j,$ which is set to $1$ if $\tx_j$  precedes $\tx_i$ in the sample permutation. We then generate a decision tree. At each node of the tree, we choose the best possible attribute to branch on, based on the Gini impurity metric \cite[Chapter 4.6]{breiman1984classification}. After generating the decision tree, if the attribute corresponding to $\tx_j$ appears in one of the decisions, we add $\tx_j$ to the neighborhood $\nbhd(\tx_i).$
 
-\paragraph{Example} Consider the samples of the previous example (Figure~\ref{fig:mining-ethereum-fuzzing}). In this step, our algorithm finds a neighborhood for every transaction. Let us consider $\tx_3.$ We can encode each permutation $\pi_i$ as a vector $v_i$ such that $v_i[j] = 1$ if $\tx_j$ precedes $\tx_3$ in $\pi_i$ and $v_i[j]=0$ otherwise. The label associated with $v_i$ is the gas usage of $\tx_3$ in the execution of $\pi_i.$ In this case, there are only two possible labels: $2$ and $4$. See Figure~\ref{fig:mining-ethereum-dectree} (left). When we generate a decision tree, shown in Figure~\ref{fig:mining-ethereum-dectree} (right), it only looks at the attribute corresponding to $\tx_2.$ Hence, we set $\nbhd(\tx_3) = \{\tx_2\}.$ In other words, at least in our samples, the gas usage of $\tx_3$ is only dependent on whether $\tx_2$ precedes it. This is shown in Figure~\ref{fig:mining-ethereum-nei}.
-
+\begin{example}
+Consider the samples of the previous example (Figure~\ref{fig:mining-ethereum-fuzzing}). In this step, our algorithm finds a neighborhood for every transaction. Let us consider $\tx_3.$ We can encode each permutation $\pi_i$ as a vector $v_i$ such that $v_i[j] = 1$ if $\tx_j$ precedes $\tx_3$ in $\pi_i$ and $v_i[j]=0$ otherwise. The label associated with $v_i$ is the gas usage of $\tx_3$ in the execution of $\pi_i.$ In this case, there are only two possible labels: $2$ and $4$. See Figure~\ref{fig:mining-ethereum-dectree} (left). When we generate a decision tree, shown in Figure~\ref{fig:mining-ethereum-dectree} (right), it only looks at the attribute corresponding to $\tx_2.$ Hence, we set $\nbhd(\tx_3) = \{\tx_2\}.$ In other words, at least in our samples, the gas usage of $\tx_3$ is only dependent on whether $\tx_2$ precedes it. This is shown in Figure~\ref{fig:mining-ethereum-nei}.
+\end{example}
 
 \begin{figure}[!p]
 \centering
@@ -380,8 +382,9 @@ Intuitively, $\pi$ satisfies the predicate $\has \tx_i$ if it includes $\tx_i.$ 
 
 % Questions: Why do we need r? Why did we come up with this vectors?
 
-\paragraph{Example} For step 2 of the algorithm in our previous example, suppose we know that $\nbhd(\tx_1) = \{\tx_4, \tx_5\}$. Then for $\pi_1 = \langle \tx_4,\tx_5, \tx_1, \tx_2, \tx_3, \tx_6\rangle$ the induced sample is $\pi_1^* = \langle \tx_4, \tx_5, \underline{\tx_1} \rangle.$ The encoding $w[\tx_4] = 0 - 2$ as the position of $\tx_4$ is $0$ and the position of $\tx_1$ is $2.$ Similarly, $w[\tx_5] = 1 - 2 = -1$ and $w[\tx_1] = 2 - 2 = 0.$ The feature $w[r] = 2$ as the number of neighbors that precede $\tx_1$ is $2.$ The encoding of the rest of the samples is shown in Figure~\ref{fig:mining-ethereum-dectree-2}.
-
+\begin{example}
+For step 2 of the algorithm in our previous example, suppose we know that $\nbhd(\tx_1) = \{\tx_4, \tx_5\}$. Then for $\pi_1 = \langle \tx_4,\tx_5, \tx_1, \tx_2, \tx_3, \tx_6\rangle$ the induced sample is $\pi_1^* = \langle \tx_4, \tx_5, \underline{\tx_1} \rangle.$ The encoding $w[\tx_4] = 0 - 2$ as the position of $\tx_4$ is $0$ and the position of $\tx_1$ is $2.$ Similarly, $w[\tx_5] = 1 - 2 = -1$ and $w[\tx_1] = 2 - 2 = 0.$ The feature $w[r] = 2$ as the number of neighbors that precede $\tx_1$ is $2.$ The encoding of the rest of the samples is shown in Figure~\ref{fig:mining-ethereum-dectree-2}.
+\end{example}
 
 \newcommand{\fmmmm}{\mspace{1mu}} %fake minus
 \newcommand{\fmmm}{\mspace{2mu}} %fake minus
@@ -442,9 +445,11 @@ In almost all real-world cases, we have $\overline{g}_\ell = g_\ell.$ Finally, o
 \end{equation}
 We remark that for each transaction $\tx_i$ and every leaf $\ell$ of the decision tree corresponding to $\tx_i,$ our algorithm generates one instance of the gas usage rule in Equation~\eqref{eq:mining-ethereum-gur}.
 
-\paragraph{Example} Let Figure \ref{fig:mining-ethereum-dectree-final} be the decision tree generated for $\tx_1$ in our previous example. The tree has $6$ leaves $l_1$ -- $l_6$ labelled $10, 2, 10, 8, 6, 6$ respectively. Consider the leaf $l_5$, taking the negations into the account, the predicates along the path evaluate to: $w[\pi_4] < 0.0$, $w[\pi_5] \geq -1.5$, $w[\pi_4] < -1.5$, which after rounding to integers, gives us the intervals $w[\pi_4] \in (-\infty, -2] = (m_4, M_4]$, $w[\pi_5] \in [-1, \infty) = [m_5, M_5)$. Notice that $M_4 \leq 0$ which generates the clause $\tx_4 \before tx_1$, and $M_4 \leq m_5$ which generates the clause $\tx_4 \before \tx_5$. Therefore, the rule's body is $\has \tx_1 \land (\tx_4 \before \tx_1) \land (\tx_4 \before \tx_5)$. Observe that  $\{\pi_1, \pi_2, \pi_4, \pi_5, \pi_6\} \models \has \tx_1 \land (\tx_4 \before \tx_1) \land (\tx_4 \before \tx_5)$, with average gas usage of $\tx_1$ equal to $(6 + 8 + 8 + 6 + 8)/5 = 7.2$. The remaining rules are given in Figure \ref{fig:mining-ethereum-rules}. 
+\begin{example}
+Let Figure \ref{fig:mining-ethereum-dectree-final} be the decision tree generated for $\tx_1$ in our previous example. The tree has $6$ leaves $l_1$ -- $l_6$ labelled $10, 2, 10, 8, 6, 6$ respectively. Consider the leaf $l_5$, taking the negations into the account, the predicates along the path evaluate to: $w[\pi_4] < 0.0$, $w[\pi_5] \geq -1.5$, $w[\pi_4] < -1.5$, which after rounding to integers, gives us the intervals $w[\pi_4] \in (-\infty, -2] = (m_4, M_4]$, $w[\pi_5] \in [-1, \infty) = [m_5, M_5)$. Notice that $M_4 \leq 0$ which generates the clause $\tx_4 \before tx_1$, and $M_4 \leq m_5$ which generates the clause $\tx_4 \before \tx_5$. Therefore, the rule's body is $\has \tx_1 \land (\tx_4 \before \tx_1) \land (\tx_4 \before \tx_5)$. Observe that  $\{\pi_1, \pi_2, \pi_4, \pi_5, \pi_6\} \models \has \tx_1 \land (\tx_4 \before \tx_1) \land (\tx_4 \before \tx_5)$, with average gas usage of $\tx_1$ equal to $(6 + 8 + 8 + 6 + 8)/5 = 7.2$. The remaining rules are given in Figure \ref{fig:mining-ethereum-rules}. 
 
 Notice that no permutation can satisfy the rule $l_4$ and we assign the undefined $\bot$ average usage to it. We exclude such rules from consideration in the rest of the algorithm.
+\end{example}
 
 
 \begin{figure}

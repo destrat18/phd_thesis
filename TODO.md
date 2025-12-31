@@ -22,12 +22,11 @@
     - [X] Add an example for them
 - [X] Add Algebra-Geomatrics paragraph to the introduction
 - [X] Fix para and paragraph
-- [ ] Read Abstraction
 - [ ] Read introduction
 - [X] Update tool link for the Ethereum mining paper
-- [ ] Fix codes
+- [X] Fix codes
+- [X] All use example tags
 - [ ] Fix chapter titles
-- [ ] All use example tags
 - [X] Replace \fee with cfee in cardano paper
 - [ ] Remove in our work, this work, this paper, our paper
 - [ ] Fix s in publications
@@ -42,6 +41,7 @@
 - [ ] Make the math equations in the examples look better
 - [ ] Read Prelims
 - [ ] Add more plots to the experiment section of ethereum
+- [ ] Read Abstraction
 
 
 ## To Read

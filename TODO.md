@@ -28,6 +28,8 @@
 - [ ] Read Prelims
 - [ ] Add more plots to the experiment section of ethereum
 - [ ] Read Abstraction
+- [ ] Fix algorithms
+- [ ] Fix tables
 
 
 ### Done

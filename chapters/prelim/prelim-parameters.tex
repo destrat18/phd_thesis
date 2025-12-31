@@ -1,2 +1,14 @@
 \section{Graph Sparsity Parameters}
 \label{sec:prelim-parameters}
+
+\subsection{Tree Decompositions and Treewidth}
+\label{sec:prelim-parameters-treewidth}
+
+The treewidth of a graph $G=(V, E)$ is defined via a \textit{tree decomposition}. A tree decomposition is a pair $(\mathcal{T}, \{X_i \mid i \in I\})$, where $\mathcal{T}=(I, F)$ is a tree and each $X_i$ (called a bag) is a subset of $V$, satisfying:
+\begin{enumerate}
+    \item The union of all bags equals $V$; i.e., $\bigcup_{i \in I} X_i = V$.
+    \item For every edge $(u,v) \in E$, there is at least one bag $X_i$ containing both $u$ and $v$.
+    \item For any vertex $v \in V$, the set of bags containing $v$ forms a connected subtree in $\mathcal{T}$.
+\end{enumerate}
+
+The \textit{width} of a tree decomposition is $\max_{i \in I} |X_i| - 1$. The \textit{treewidth} of a graph $G$, denoted $tw(G)$, is the minimum width over all possible tree decompositions of $G$. A low treewidth indicates a structure amenable to efficient dynamic programming, a property that we exploit extensively in Chapter~\ref{chp:hermes}.

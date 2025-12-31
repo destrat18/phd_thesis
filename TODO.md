@@ -18,8 +18,12 @@
 
 ## Finalizing:
 - [ ] Add definitions for parameterized section in the prelim
-- [ ] Add Algebra-Geomatics paragraph to the introduction
+    - [ ] Add definitions for TW, PW, and TDP
+    - [ ] Add an example for them
+- [ ] Add Algebra-Geomatrics paragraph to the introduction
 - [ ] Fix para and paragraph
+- [ ] Read Abstraction
+- [ ] Read introduction
 - [ ] Update tool link for the Ethereum mining paper
 - [ ] Add intro for the prelim chapter
 - [ ] Fix codes
@@ -27,14 +31,17 @@
 - [ ] All use example tags
 - [ ] Add more plots to the experiment section of ethereum
 - [X] Replace \fee with cfee in cardano paper
-- [ ] Remove in our work
-- [ ] Make the math equations in the examples look better
+- [ ] Remove in our work, this work, 
 - [ ] Fix s in publications
 - [ ] Update crypto numbers
 - [ ] Add Blockchain background in the first paragraph
 - [ ] Add one sentence background about the problem in outlines
 - [ ] Add more details for Chapter 7 in the introduction
 - [ ] Add future work
+- [ ] Fix ??
+- [ ] Final check of references
+- [ ] Make the math equations in the examples look better
+- [ ] Read Prelims
 
 
 ## To Read

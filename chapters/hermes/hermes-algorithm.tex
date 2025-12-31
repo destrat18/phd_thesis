@@ -20,14 +20,7 @@ The objective in trade routing is to find a path that maximizes the product of e
 To develop an algorithm that leverages the specific topology of the DEX graph, we must first establish a formal language for discussing its local properties. We define the \textit{neighborhood} of a vertex $v$, denoted $N(v)$, as the set of all vertices directly accessible from it $N(v) := \{u \mid (v, u) \in E\}$. Furthermore, for any subset of vertices $S \subseteq V$, the \textit{subgraph induced by S}, denoted $G[S]$, consists of the vertices in $S$ and all edges from the original graph that connect any two vertices in $S$: $G[S] := (S, E \cap (S \times S))$. 
 
 \para{Tree Decompositions and Treewidth}
-The efficiency of our algorithm hinges on a structural parameter known as \textit{treewidth}, which quantifies how ``tree-like'' a graph is. Formally, the treewidth of a graph $G=(V, E)$ is defined via a \textit{tree decomposition}. A tree decomposition is a pair $(\mathcal{T}, \{X_i \mid i \in I\})$, where $\mathcal{T}=(I, F)$ is a tree and each $X_i$ (called a bag) is a subset of $V$, satisfying:
-\begin{enumerate}
-    \item The union of all bags equals $V$; i.e., $\bigcup_{i \in I} X_i = V$.
-    \item For every edge $(u,v) \in E$, there is at least one bag $X_i$ containing both $u$ and $v$.
-    \item For any vertex $v \in V$, the set of bags containing $v$ forms a connected subtree in $\mathcal{T}$.
-\end{enumerate}
-The \textit{width} of a tree decomposition is $\max_{i \in I} |X_i| - 1$. The \textit{treewidth} of a graph $G$, denoted $tw(G)$, is the minimum width over all possible tree decompositions of $G$. A low treewidth indicates a structure amenable to efficient dynamic programming, a property we exploit extensively.
-
+The efficiency of our algorithm hinges on a structural parameter known as \textit{treewidth}, which quantifies how ``tree-like'' a graph is. Formally, the treewidth of a graph $G=(V, E)$ is defined via a \textit{tree decomposition}; see Section~\ref{sec:prelim-parameters-treewidth} for the formal definition.
 
 \para{Chordal Graphs and Chordal Completion}
 Our algorithm operates not on the original graph $G$, but on a \textit{chordal supergraph} of it. A graph is chordal if every cycle of four or more vertices has an edge connecting two non-consecutive vertices (a chord). While most graphs are not chordal, any graph $G$ can be transformed into one by adding a set of ``fill-in'' edges to create a \textit{chordal completion}, $\widehat{G}$. A key result in graph theory states that the treewidth of a graph is intrinsically linked to its best chordal completion: $tw(G) = \min_{\widehat{G}} \omega(\widehat{G}) - 1$, where the minimum is taken over all chordal completions of $G$ and $\omega(\widehat{G})$ is the size of the largest clique in $\widehat{G}$. This relationship is fundamental to our approach.

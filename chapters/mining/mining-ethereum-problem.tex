@@ -11,7 +11,7 @@ It is also by far the largest programmable cryptocurrency, with support for arbi
 \paragraph{Formal Definition of the Problem} Suppose that the miner intends to add the $k$-th block to the blockchain. Let $\pool$ be the set of new valid transactions known to the miner which are not yet added on thse blockchain. A block is a sequence $B = \langle \tx_1, \tx_2, \ldots, \tx_n \rangle$ of transactions from $\pool$ such that for every $i < j,$ if $\tx_i$ and $\tx_j$ belong to the same user $a$, then $\tx_i$'s nonce is smaller than $\tx_j$'s nonce. Moreover, if there is a transaction from $a$ with nonce $\nu \geq 1,$ then there should be a previous transaction from the same user $a$ with nonce $\nu-1$ either in the same block or in previous blocks that are already added to the blockchain. This ensures that every transaction is added at most once and that the transactions by the same user cannot be reordered. Denote the world state at the end of the previous block ($k-1$) by $s_0 \in S.$ For all $1 \leq i \leq n,$ define 
 $$s_i = \delta_{\tx_i}(s_{i-1}) \quad\quad\quad \gamma_i = \gas_{\tx_i}(s_{i-1}) \quad\quad\quad \tau_i = \tip_{\tx_i}(s_{i-1}).$$
 Intuitively, assuming that the miner appends $B$ to the blockchain, $s_i$ is the world state after $\tx_i$ has finished running, $\gamma_i$ is the gas usage of $\tx_i$ and $\tau_i$ is the total tip paid by $\tx_i$ to the miner 
-(formal definitions and details can be found in Section~\ref{sec:prelim}).
+(formal definitions and details can be found in Section~\ref{sec:mining-ethereum-algorithm}).
 The miner aims to maximize the tips, while not exceeding the block gas limit $L$. Thus, the optimization problem is to find a valid block $B$ so as to:
 $$
 \begin{matrix}

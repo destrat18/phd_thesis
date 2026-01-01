@@ -19,11 +19,11 @@
 ## Finalizing:
 ### To Do
 - [X] Read Abstraction
-- [ ] Read Acknowledgments
+- [X] Read Acknowledgments
 - [X] Update crypto numbers
-- [ ] Add gas usage numbers
-- [ ] Read introduction
-- [ ] Add Blockchain background in the first paragraph of prelim
+- [X] Add gas usage numbers
+- [X] Read introduction
+- [X] Add Blockchain background in the first paragraph of prelim
 - [ ] Add future work
 - [ ] Fix ??
 - [ ] Final check of references

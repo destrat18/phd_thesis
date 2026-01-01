@@ -18,16 +18,17 @@
 
 ## Finalizing:
 ### To Do
-- [ ] Read introduction
+- [ ] Read Abstraction
+- [ ] Read Acknowledgement
 - [ ] Update crypto numbers
 - [ ] Add gas usage numbers
+- [ ] Read introduction
 - [ ] Add Blockchain background in the first paragraph of prelim
 - [ ] Add future work
 - [ ] Fix ??
 - [ ] Final check of references
 - [ ] Read Prelims
 - [ ] Add more plots to the experiment section of ethereum
-- [ ] Read Abstraction
 - [ ] Fix algorithms
 - [ ] Fix tables
 

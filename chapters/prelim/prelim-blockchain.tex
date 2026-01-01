@@ -17,7 +17,7 @@ Bitcoin supports a limited scripting language for specifying conditions to spend
 
 \paragraph{Design Choices in Blockchains} While blockchains share fundamental principles, their differences, such as programming language and execution environment, can influence tasks such as smart contract optimization. Blockchains typically employ either imperative or functional programming languages. Imperative languages, such as Solidity used by Ethereum, execute instructions sequentially, while functional languages, like Plutus on Cardano, rely on nested function calls. Imperative languages offer straightforward control flow and are familiar to most developers, making them easier to learn and use for a wide range of applications. In contrast, functional languages emphasize immutability and stateless computation, which can enhance security and facilitate formal verification. In terms of execution environment, Ethereum adopts an account-based model with a global state, enabling complex contract interactions, whereas Cardano uses a UTXO-based model with local state, facilitating better parallelization~\cite{wood2014ethereum,foundationnoyearplutus}.
 
-We next briefly review Bitcoin, Cardano, and Ethereum, emphasizing aspects relevant to this thesis.
+We next review Bitcoin, Cardano, and Ethereum, emphasizing aspects relevant to this thesis.
 
 
 \section{Bitcoin Architecture}
@@ -142,7 +142,6 @@ The state of an account consists of the following fields:
 
 \para{EVM} The Ethereum Virtual Machine (EVM) deterministically and unambiguously describes the rules of executing transactions on Ethereum. EVM supports a set of operations (opcodes) to interact with input call data, stack, memory, storage and the blockchain world state. 
 
-\para{Smart Contracts} A deployed smart contract has the following data fields: \textit{nonce}, \textit{balance}, \textit{codeHash} and \textit{storageRoot}. The code of the smart contract is stored on the blockchain as bytecode (a sequence of opcodes) and immutable. All participants of Ethereum can interact with smart contracts by calling the public functions in their code. The EVM bytecode format is Turing-complete. 
 
 \para{Solidity~\cite{foundation2014misc}} Solidity is an object-oriented, high-level Turing-complete language for implementing Ethereum smart contracts and the most widely-used smart contract language. Solidity supports all the standard data types and data structures such as arrays and mappings. The functions in Solidity contracts can call other functions from the same contract or external public functions  by specifying the function signatures and contract addresses. 
 

@@ -18,8 +18,8 @@
 
 ## Finalizing:
 ### To Do
-- [ ] Read Abstraction
-- [ ] Read Acknowledgement
+- [X] Read Abstraction
+- [ ] Read Acknowledgments
 - [ ] Update crypto numbers
 - [ ] Add gas usage numbers
 - [ ] Read introduction

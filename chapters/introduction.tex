@@ -12,7 +12,7 @@ The Ethereum Foundation recognizes that these high fees present a substantial ob
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{chapters/prelim/prelim-figures/gasUsage2020To2026.pdf}
+    \includegraphics[width=0.95\textwidth]{chapters/prelim/prelim-figures/gasUsage2020To2026.pdf}
     \caption{Gas usage on Ethereum from 1 January 2021 to 1 January 2026. During this period, users spent an average of $10.73$ million USD on gas fees daily.}
     \label{fig:gas-usage-2020-2026}
 \end{figure}
@@ -26,7 +26,6 @@ Given the rapid adoption of smart contracts, scalable and secure algorithms for 
 Many optimization and verification tasks can be framed as graph problems over CFGs of programs. These problems are often intractable. When dealing with intractable problems, e.g.,~NP-hard graph problems, parameterized algorithms leverage the structural and sparsity properties of the underlying graphs. Unlike traditional complexity theory, which assesses runtime based solely on input size, parameterized complexity considers both the input size and an additional property of the instance (a ``parameter''). For instance, \textit{treewidth} is a well-known parameter that measures the tree-likeness of a graph, while \textit{treedepth} formalizes the star-like structure of a graph. Many problems that are computationally intractable (e.g.,~NP-hard) on general graphs can be efficiently solved on graphs with small treewidth. The intuition is that, if a graph can be decomposed into small parts that are connected to each other in a tree-like manner, then one can treat the graph as if it were a tree and leverage tree-based algorithmic ideas such as bottom-up dynamic programming. It is well known that CFGs of structured programs are sparse and tree-like, i.e.,~they have bounded treewidth~\cite{thorup1998all}. The same has also been established for smart contracts~\cite{chatterjee2019treewidth}. See Section~\ref{sec:prelim-parameters} for more details.
 
 \para{Algebro-geometric Methods} Our second approach uses tools from polyhedral and real algebraic geometry. Many of our problems can be formulated as solving systems of constraints. If we submit these constraints directly to a Non-linear Real Arithmetic (NRA) or SMT solver, the solver must handle quantifier alternation, which is very costly. In practice, first-order theories of the reals are slow and often fail even on small examples. To address this, we eliminate quantifier alternation by converting the original formula into an equivalent system of constraints if it admits certain structures. This produces a quantifier-free instance that is much easier for solvers to process. See Section~\ref{sec:prelim-positivity} for more details.
-
     
 \section{Outline}
 This thesis is organized as follows. Chapter~\ref{chp:prelim} presents common background on blockchains and smart contracts. It then gives protocol-specific details for Bitcoin (Section~\ref{sec:prelim-bitcoin}), Cardano (Section~\ref{sec:prelim-cardano}), and Ethereum (Section~\ref{sec:prelim-ethereum}). The chapter also introduces the formal definitions and mathematical tools used throughout the thesis, covering parameterized complexity in Section~\ref{sec:prelim-parameters} and algebro-geometric methods in Section~\ref{sec:prelim-positivity}.
@@ -56,6 +55,8 @@ Concretely, the thesis contains the following chapters:
 
 
 Finally, Chapter~\ref{chp:conclusion} provides a discussion of broader impacts and summarizes the main findings and future directions of the thesis.
+
+\para{On Monetary Values and Market Data} Except in Chapters~\ref{chp:intro} and~\ref{chp:prelim}, the prices and numerical estimates presented throughout this thesis are based on data available at the time each chapter's underlying work was written. While these specific values may have changed since then, the fundamental arguments and methodologies remain sound.
 
 
 \section{Summary of Contributions}

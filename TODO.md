@@ -20,7 +20,7 @@
 ### To Do
 - [X] Read Abstraction
 - [ ] Read Acknowledgments
-- [ ] Update crypto numbers
+- [X] Update crypto numbers
 - [ ] Add gas usage numbers
 - [ ] Read introduction
 - [ ] Add Blockchain background in the first paragraph of prelim

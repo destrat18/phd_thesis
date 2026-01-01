@@ -307,3 +307,14 @@ main.pdf
 .vscode/*
 TOPLAS-2026/tables/raml-resource-usage-and-classical-algo-table.aux
 TOPLAS-2026/main.pdf
+
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv

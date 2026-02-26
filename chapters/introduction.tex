@@ -9,7 +9,7 @@
 \para{Execution Costs} Smart contracts are executed by all nodes within the network, ensuring consensus on the final state the contract. This poses a risk; a malicious user could invoke a function with an infinite loop, or one that is too resource-hungry, blocking the entire network. To mitigate this risk, blockchains employ the concept of gas, assigning each low-level operation a predefined cost based on its computational complexity and resource consumption. The total execution cost, or transaction fee, is the cumulative gas used during the execution of an interaction with the smart contract. If execution hits the gas limit, it halts and reverts all changes, but the user still pays for the consumed gas. While gas effectively mitigated the risk of denial-of-service attacks, it also resulted in high fees and limited the computational capacity of the blockchain network.
 Between 1 January 2021 and 1 January 2026, Ethereum users spent more than $19.6$ billion USD on gas fees.
 Although the price of ether affects transaction fees, Figure~\ref{fig:gas-usage-2020-2026} shows that gas usage on Ethereum remains persistently high, and thus execution fees continue to impose a substantial burden on users.
-The Ethereum Foundation recognises that these high fees present a substantial obstacle to broader adoption of the technology~\cite{farokhnia2023alleviating}.
+The Ethereum Foundation recognizes that these high fees present a substantial obstacle to broader adoption of the technology~\cite{farokhnia2023alleviating}.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{chapters/prelim/prelim-figures/gasUsage2020To2026.pdf}
